@@ -1,182 +1,123 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>X Code — Match Finder</title>
-  <style>
-    :root{
-      --gold:#d4af37;      /* dorado elegante */
-      --gold-soft:#ffcc66; /* botón */
-      --gold-soft-hover:#ffd87a;
-      --bg:#000;
-      --panel:#111;
-      --txt:#eaeaea;
-      --ok:#00d084;        /* match */
-      --no:#b0b0b0;        /* no match (gris tenue) */
-      --accent:#222;
-    }
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--gold);font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
-    .wrap{
-      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 16px;
-      background: radial-gradient(60% 40% at 50% 0%, rgba(212,175,55,0.08), rgba(0,0,0,0) 70%) var(--bg);
-    }
-    .card{
-      width:100%;max-width:420px;text-align:center;background:linear-gradient(180deg,#0a0a0a 0%, #111 100%);
-      border:1px solid rgba(212,175,55,.25);border-radius:16px;padding:26px 22px;box-shadow:0 18px 60px rgba(0,0,0,.6);
-    }
-    .logo{width:110px;height:auto;display:block;margin:2px auto 10px;filter:drop-shadow(0 0 10px rgba(212,175,55,.45));}
-    h1{margin:6px 0 16px;font-size:22px;letter-spacing:.6px;color:var(--gold);}
-    .inputs{display:flex;gap:10px;justify-content:center;margin:10px 0 8px;}
-    input[type=number]{
-      width:120px;padding:12px 10px;text-align:center;border-radius:10px;border:1px solid var(--gold);
-      background:#0f0f0f;color:var(--txt);font-size:18px;outline:none;
-    }
-    input::placeholder{color:#8a8a8a;}
-    button{
-      background:var(--gold-soft);color:#111;border:none;font-weight:700;padding:12px 18px;border-radius:10px;cursor:pointer;margin-top:10px;
-    }
-    button:hover{background:var(--gold-soft-hover);}
-    button[disabled]{opacity:.55;cursor:not-allowed;}
-    .hint{margin-top:10px;color:#a7a7a7;font-size:12px;}
-    .result{margin-top:18px;font-weight:800;font-size:20px;min-height:28px;}
-    .result.ok{color:var(--ok);}
-    .result.no{color:var(--no);}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>X Code — Perfect Match</title>
+<style>
+  body {
+    background-color: #000;
+    color: #c9a23f; /* dorado más suave */
+    font-family: "Poppins", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .container {
+    text-align: center;
+    background: #111;
+    padding: 40px 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+  }
+  img {
+    width: 120px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px rgba(201,162,63,0.4));
+  }
+  h1 {
+    font-size: 22px;
+    margin-bottom: 25px;
+  }
+  input {
+    width: 100px;
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #c9a23f;
+    border-radius: 8px;
+    text-align: center;
+    background: #000;
+    color: #fff;
+    font-size: 16px;
+  }
+  button {
+    margin-top: 15px;
+    background-color: #c9a23f;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  button:hover {
+    background-color: #e0b94d;
+  }
+  .result {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <!-- SUBE A TU REPO UN ARCHIVO llamado "logo.png" (misma carpeta que index.html) -->
-      <img src="logo.png" alt="X Code Logo" class="logo" onerror="this.style.display='none'">
-      <h1>X Code — Match Finder</h1>
-
-      <div class="inputs">
-        <input id="n1" type="number" placeholder="Ejemplo: 97" min="1" inputmode="numeric">
-        <input id="n2" type="number" placeholder="Ejemplo: 70" min="1" inputmode="numeric">
-      </div>
-
-      <button id="btn" disabled>Verificar</button>
-      <div class="hint" id="status">Cargando datos…</div>
-      <div id="res" class="result"></div>
+  <div class="container">
+    <img src="logo.png" alt="X Code Logo">
+    <h1>Perfect Match</h1>
+    <div>
+      <input id="num1" type="number" placeholder="97">
+      <input id="num2" type="number" placeholder="70">
     </div>
+    <button onclick="verificar()">Verificar</button>
+    <div id="resultado" class="result"></div>
   </div>
 
 <script>
-  /* URL pública de tu Google Sheets (CSV). Si cambias de pestaña/hoja, ajusta el gid. */
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTjnhmP38eh73oT-3DTwDmqTKBL9ErGsbOCRU62gyhZ25qneFNuugkW8FB8bKb4sg/pub?gid=819499349&single=true&output=csv";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTjnhmP38eh73oT-3DTwDmqTKBL9ErGsbOCRU62gyhZ25qneFNuugkW8FB8bKb4sg/pub?gid=819499349&single=true&output=csv";
 
-  /* Guardaremos las parejas como claves "min|max" para búsqueda rápida, y detectaremos columnas por nombre. */
-  let parejasSet = null;
+let parejas = [];
 
-  async function cargarCSV(){
-    try{
-      const resp = await fetch(CSV_URL, { cache: "no-store" });
-      const text = await resp.text();
-      const lines = text.trim().split(/\r?\n/);
-      if(lines.length <= 1) throw new Error("CSV vacío");
+async function cargarDatos() {
+  const resp = await fetch(CSV_URL);
+  const data = await resp.text();
+  const rows = data.trim().split("\n").slice(1);
+  parejas = rows.map(r => {
+    const c = r.split(",");
+    const a = parseInt(c[2]);
+    const b = parseInt(c[3]);
+    return [Math.min(a,b), Math.max(a,b)];
+  });
+}
 
-      // Parse cabecera y detectar columnas.
-      const header = parseCSVRow(lines[0]);
-      const map = {}; header.forEach((h,i)=> map[h.trim().toLowerCase()] = i);
+async function verificar() {
+  if (parejas.length === 0) await cargarDatos();
 
-      // Intentamos Min/Max primero; si no, Numero1/Numero2.
-      const idxMin = map["min"];
-      const idxMax = map["max"];
-      const idxN1 = map["numero1"];
-      const idxN2 = map["numero2"];
+  const num1 = parseInt(document.getElementById("num1").value);
+  const num2 = parseInt(document.getElementById("num2").value);
+  const resultado = document.getElementById("resultado");
 
-      if ((idxMin === undefined || idxMax === undefined) && (idxN1 === undefined || idxN2 === undefined)){
-        throw new Error("No encuentro columnas Min/Max ni Numero1/Numero2 en la cabecera: " + header.join(" | "));
-      }
-
-      const set = new Set();
-      for(let i=1;i<lines.length;i++){
-        const row = parseCSVRow(lines[i]);
-        if(!row || !row.length) continue;
-
-        let a = null, b = null;
-        if(idxMin !== undefined && idxMax !== undefined){
-          a = toInt(row[idxMin]); b = toInt(row[idxMax]);
-        } else {
-          const n1 = toInt(row[idxN1]); const n2 = toInt(row[idxN2]);
-          if (n1==null || n2==null) continue;
-          a = Math.min(n1, n2); b = Math.max(n1, n2);
-        }
-        if (a==null || b==null) continue;
-        set.add(a < b ? ${a}|${b} : ${b}|${a});
-      }
-
-      parejasSet = set;
-      document.getElementById("btn").disabled = false;
-      document.getElementById("status").textContent = "Datos listos. Introduce dos números.";
-    } catch (e){
-      console.error(e);
-      document.getElementById("status").textContent = "Error cargando datos. Revisa que la hoja esté publicada como CSV.";
-    }
+  if (isNaN(num1) || isNaN(num2)) {
+    resultado.textContent = "Introduce ambos números.";
+    resultado.style.color = "white";
+    return;
   }
 
-  /* Parser CSV sencillo que respeta comillas si las hubiera */
-  function parseCSVRow(line){
-    const out = [];
-    let cur = "", inQuotes = false;
-    for (let i=0;i<line.length;i++){
-      const ch = line[i];
-      if (ch === '"'){
-        if (inQuotes && line[i+1] === '"'){ cur += '"'; i++; }
-        else { inQuotes = !inQuotes; }
-      } else if (ch === ',' && !inQuotes){
-        out.push(cur); cur = "";
-      } else {
-        cur += ch;
-      }
-    }
-    out.push(cur);
-    return out;
+  const a = Math.min(num1, num2);
+  const b = Math.max(num1, num2);
+  const match = parejas.some(p => p[0] === a && p[1] === b);
+
+  if (match) {
+    resultado.textContent = "🔥 ¡Perfect Match! 🔥";
+    resultado.style.color = "#00ff66";
+  } else {
+    resultado.textContent = "No es tu match 😅";
+    resultado.style.color = "#ff4d4d";
   }
+}
 
-  function toInt(v){
-    if (v==null) return null;
-    const t = String(v).replace(/"/g,"").trim();
-    if (!t) return null;
-    const n = parseInt(t,10);
-    return Number.isFinite(n) ? n : null;
-  }
-
-  function verificar(){
-    const res = document.getElementById("res");
-    const status = document.getElementById("status");
-    if (!parejasSet){
-      status.textContent = "Cargando datos…";
-      res.textContent = "";
-      return;
-    }
-
-    const a = toInt(document.getElementById("n1").value);
-    const b = toInt(document.getElementById("n2").value);
-
-    if (a==null || b==null){
-      res.className = "result";
-      res.textContent = "Introduce ambos números";
-      return;
-    }
-    if (a === b){
-      res.className = "result no";
-      res.textContent = "No es tu match 😅";
-      return;
-    }
-
-    const key = a < b ? ${a}|${b} : ${b}|${a};
-    const ok = parejasSet.has(key);
-    res.className = "result " + (ok ? "ok" : "no");
-    res.textContent = ok ? "🔥 Perfect Match 🔥" : "No es tu match 😅";
-  }
-
-  document.getElementById("btn").addEventListener("click", verificar);
-  document.getElementById("n1").addEventListener("keyup", e => { if(e.key === "Enter") verificar(); });
-  document.getElementById("n2").addEventListener("keyup", e => { if(e.key === "Enter") verificar(); });
-
-  cargarCSV();
+cargarDatos();
 </script>
 </body>
 </html>
