@@ -1,158 +1,137 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Xcode — Verificación de Match</title>
-<style>
-  :root{
-    --gold:#d4af37;       /* dorado elegante para textos */
-    --goldBtn:#ffcc66;    /* dorado suave para botón */
-    --goldBtnH:#ffd87a;   /* hover botón */
-    --ok:#00d084;         /* verde suave */
-    --no:#ff5c5c;         /* rojo coral */
-  }
-  html,body{
-    height:100%; margin:0; background:#000; color:var(--gold);
-    font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .card{
-    text-align:center; background:#111; padding:36px 28px; border-radius:16px;
-    box-shadow:0 0 25px rgba(0,0,0,.7); border:1px solid rgba(212,175,55,.25);
-    width:90%; max-width:420px;
-  }
-  .logo{width:120px; margin:4px auto 16px; display:block; filter:drop-shadow(0 0 10px rgba(212,175,55,.4));}
-  h1{margin:0 0 20px; font-size:22px; letter-spacing:.2px;}
-  .row{display:flex; gap:10px; justify-content:center; margin-bottom:12px;}
-  input[type=number]{
-    width:120px; padding:12px 10px; text-align:center; border-radius:10px;
-    border:1px solid var(--gold); background:#000; color:#fff; font-size:18px; outline:none;
-  }
-  /* accesibilidad: etiqueta oculta visualmente */
-  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
-  button{
-    margin-top:6px; background:var(--goldBtn); color:#111; border:none; padding:12px 22px;
-    border-radius:10px; cursor:pointer; font-weight:700;
-  }
-  button:hover{background:var(--goldBtnH);}
-  button[disabled]{opacity:.55; cursor:not-allowed;}
-  #resultado{margin-top:18px; font-size:18px; font-weight:800; min-height:26px;}
-  #status{margin-top:8px; color:#a7a7a7; font-size:12px;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>X Code — Verificación de Match</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #ffcc00;
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background: rgba(30, 30, 30, 0.85);
+      border: 1px solid #ffcc00;
+      border-radius: 14px;
+      padding: 25px 40px;
+      box-shadow: 0 0 30px rgba(255, 204, 0, 0.15);
+      text-align: center;
+    }
+
+    h1 {
+      font-weight: 600;
+      color: #ffcc00;
+      margin-top: 15px;
+      font-size: 22px;
+    }
+
+    input {
+      width: 80px;
+      height: 40px;
+      font-size: 18px;
+      text-align: center;
+      border-radius: 6px;
+      border: 1px solid #ffcc00;
+      background: #222;
+      color: #ffcc00;
+      margin: 10px;
+    }
+
+    button {
+      background-color: #ffcc00;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #ffdb4d;
+    }
+
+    #resultado {
+      margin-top: 18px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    #logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+      object-fit: contain;
+    }
+  </style>
 </head>
 <body>
   <div class="card">
-    <!-- Sube un archivo llamado EXACTAMENTE logo.png al mismo nivel que index.html -->
-    <img src="logo.png" class="logo" onerror="this.style.display='none'">
-    <h1>Xcode — Verificación de Match</h1>
-
-    <div class="row">
-      <label class="sr-only" for="num1">Número 1</label>
-      <input id="num1" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="">
-      <label class="sr-only" for="num2">Número 2</label>
-      <input id="num2" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="">
+    <img id="logo" src="logo.png" alt="X Code Logo" />
+    <h1>X Code — Verificación de Match</h1>
+    <div>
+      <input id="numero1" type="number" placeholder="" />
+      <input id="numero2" type="number" placeholder="" />
     </div>
-
-    <button id="btn" disabled>Verificar</button>
-    <div id="status">Cargando datos…</div>
-    <div id="resultado"></div>
+    <button id="verificar">Verificar</button>
+    <div id="resultado">Cargando datos...</div>
   </div>
 
-<script>
-  // CSV publicado de tu Google Sheets (pestaña "Parejas")
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTjnhmP38eh73oT-3DTwDmqTKBL9ErGsbOCRU62gyhZ25qneFNuugkW8FB8bKb4sg/pub?gid=819499349&single=true&output=csv";
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTjnhmP38eh73oT-3DTwDmqTKBL9ErGsbOCRU62gyhZ25qneFNuugkW8FB8bKb4sg/pub?gid=819499349&single=true&output=csv";
+    let parejas = [];
 
-  let parejasSet = null;
-
-  // Parser CSV simple que respeta comillas
-  function parseCSVRow(line){
-    const out=[]; let cur="", inQ=false;
-    for(let i=0;i<line.length;i++){
-      const ch=line[i];
-      if(ch==='"'){
-        if(inQ && line[i+1]==='"'){ cur+='"'; i++; } else { inQ=!inQ; }
-      }else if(ch===',' && !inQ){ out.push(cur); cur=""; }
-      else{ cur+=ch; }
+    async function cargarDatos() {
+      try {
+        const res = await fetch(CSV_URL);
+        const data = await res.text();
+        const filas = data.split("\n").slice(1);
+        parejas = filas.map(f => {
+          const c = f.split(",");
+          return { n1: c[2]?.trim(), n2: c[3]?.trim() };
+        });
+        document.getElementById("resultado").textContent = "";
+      } catch (e) {
+        document.getElementById("resultado").textContent = "Error al cargar datos.";
+      }
     }
-    out.push(cur);
-    return out;
-  }
-  const toInt = v => {
-    if(v==null) return null;
-    const t=String(v).replace(/"/g,"").trim(); if(!t) return null;
-    const n=parseInt(t,10); return Number.isFinite(n)?n:null;
-  };
 
-  async function cargarCSV(){
-    try{
-      const resp = await fetch(CSV_URL, {cache:"no-store"});
-      const text = await resp.text();
-      const lines = text.trim().split(/\r?\n/);
-      if(lines.length<=1) throw new Error("CSV vacío");
+    function verificarMatch() {
+      const n1 = document.getElementById("numero1").value.trim();
+      const n2 = document.getElementById("numero2").value.trim();
+      const res = document.getElementById("resultado");
 
-      const header = parseCSVRow(lines[0]).map(h=>h.trim().toLowerCase());
-      const idxMin = header.indexOf("min");
-      const idxMax = header.indexOf("max");
-      const idxN1  = header.indexOf("numero1");
-      const idxN2  = header.indexOf("numero2");
-
-      if ((idxMin===-1 || idxMax===-1) && (idxN1===-1 || idxN2===-1)){
-        throw new Error("No encuentro columnas Min/Max ni Numero1/Numero2");
+      if (!n1 || !n2) {
+        res.textContent = "Introduce ambos números";
+        res.style.color = "#ff5555";
+        return;
       }
 
-      const set = new Set();
-      for(let i=1;i<lines.length;i++){
-        const row = parseCSVRow(lines[i]); if(!row.length) continue;
-        let a=null,b=null;
-        if(idxMin!==-1 && idxMax!==-1){
-          a = toInt(row[idxMin]); b = toInt(row[idxMax]);
-        }else{
-          const n1 = toInt(row[idxN1]); const n2 = toInt(row[idxN2]);
-          if(n1==null || n2==null) continue;
-          a = Math.min(n1,n2); b = Math.max(n1,n2);
-        }
-        if(a==null || b==null) continue;
-        set.add(a<b ? ${a}|${b} : ${b}|${a});
+      const match = parejas.some(p =>
+        (p.n1 === n1 && p.n2 === n2) || (p.n1 === n2 && p.n2 === n1)
+      );
+
+      if (match) {
+        res.textContent = "🔥 ¡MATCH PERFECTO! 🔥";
+        res.style.color = "#00ff99";
+      } else {
+        res.textContent = "😅 No es tu match";
+        res.style.color = "#ff4444";
       }
-      parejasSet = set;
-      document.getElementById("btn").disabled = false;
-      document.getElementById("status").textContent = "Datos listos. Introduce dos números.";
-    }catch(e){
-      console.error(e);
-      document.getElementById("status").textContent = "Error cargando datos. Revisa que la hoja esté publicada como CSV.";
     }
-  }
 
-  function verificar(){
-    const resEl = document.getElementById("resultado");
-    if(!parejasSet){ resEl.textContent="Cargando datos…"; return; }
-
-    const a = toInt(document.getElementById("num1").value);
-    const b = toInt(document.getElementById("num2").value);
-
-    if(a==null || b==null){
-      resEl.style.color = "#eaeaea";
-      resEl.textContent = "Introduce ambos números";
-      return;
-    }
-    if(a===b){
-      resEl.style.color = "var(--no)";
-      resEl.textContent = "No es tu match 😅";
-      return;
-    }
-    const key = a<b ? ${a}|${b} : ${b}|${a};
-    const ok = parejasSet.has(key);
-
-    resEl.style.color = ok ? "var(--ok)" : "var(--no)";
-    resEl.textContent  = ok ? "🔥 Perfect Match 🔥" : "No es tu match 😅";
-  }
-
-  document.getElementById("btn").addEventListener("click", verificar);
-  document.getElementById("num1").addEventListener("keyup", e=>{ if(e.key==="Enter") verificar(); });
-  document.getElementById("num2").addEventListener("keyup", e=>{ if(e.key==="Enter") verificar(); });
-
-  cargarCSV();
-</script>
+    document.getElementById("verificar").addEventListener("click", verificarMatch);
+    cargarDatos();
+  </script>
 </body>
 </html>
