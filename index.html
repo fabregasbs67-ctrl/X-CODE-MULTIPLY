@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>X Code – Verificador de Match</title>
+<style>
+  body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    padding-top: 80px;
+  }
+  h1 { color: #d4af37; }
+  input {
+    width: 120px; padding: 10px;
+    margin: 10px; text-align: center;
+    font-size: 18px;
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+    background: #111; color: #fff;
+  }
+  button {
+    background-color: #d4af37;
+    color: #000; border: none;
+    padding: 10px 25px;
+    border-radius: 8px; cursor: pointer;
+  }
+  #resultado {
+    margin-top: 40px;
+    font-size: 22px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <h1>X code – Verificador de Match</h1>
+
+  <input id="num1" type="number" placeholder="Tu número">
+  <input id="num2" type="number" placeholder="Otro número">
+  <br>
+  <button onclick="verificar()">Verificar</button>
+
+  <div id="resultado"></div>
+
+<script>
+  // pares de ejemplo; luego se puede sustituir por tu base real
+  const parejas = [
+    [1, 55], [2, 88], [3, 120], [4, 199],
+    [5, 310], [6, 74], [7, 215], [8, 100]
+  ];
+
+  function verificar() {
+    const n1 = parseInt(document.getElementById('num1').value);
+    const n2 = parseInt(document.getElementById('num2').value);
+    const res = document.getElementById('resultado');
+    if (!n1 || !n2) {
+      res.innerHTML = 'Introduce ambos números';
+      res.style.color = '#999';
+      return;
+    }
+    const a = Math.min(n1, n2);
+    const b = Math.max(n1, n2);
+    const match = parejas.some(p => p[0] === a && p[1] === b);
+    if (match) {
+      res.innerHTML = '🔥 ¡Es tu match!';
+      res.style.color = '#00ff7f';
+    } else {
+      res.innerHTML = 'No es tu match 😅';
+      res.style.color = '#ff5050';
+    }
+  }
+</script>
+</body>
+</html>
