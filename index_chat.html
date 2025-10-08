@@ -7,27 +7,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#000;
-      --fg:#fff;
+      --bg:#000; --fg:#fff;
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     .app{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:12px}
-    .card{width:100%;max-width:640px;border:1px solid #fff;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 10px 40px rgba(0,0,0,.6)}
-    .head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #fff;background:#000;position:sticky;top:0;z-index:2}
-    .logo{width:42px;height:auto}
+    .card{width:100%;max-width:680px;border:1px solid #fff;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+    .head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #fff;position:sticky;top:0;background:#000;z-index:2}
+    .logo{width:36px;height:auto}
     h1{font-size:18px;font-weight:600;margin:0}
     .sub{font-size:12px;opacity:.85}
     .sp{flex:1}
     .btn{appearance:none;background:#fff;color:#000;border:none;border-radius:10px;padding:9px 14px;font-weight:600;cursor:pointer}
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    .login{padding:18px;text-align:center}
-    .login p{margin:6px 0 12px}
+    .muted{background:#111;color:#fff;border:1px solid #fff}
+    .login{padding:16px 16px 6px 16px;text-align:center}
+    .login p{margin:6px 0 10px}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
-    .input, .pin{width:100%;padding:12px 14px;border:1px solid #fff;border-radius:10px;background:#000;color:#fff;text-align:center;font-size:16px}
-    .help{font-size:12px;opacity:.8;margin-top:6px}
-    .err{color:#ff6b6b}
-    .ok{color:#00ffa3}
+    .input,.pin{width:100%;padding:12px 14px;border:1px solid #fff;border-radius:10px;background:#000;color:#fff;text-align:center;font-size:16px}
+    .help{font-size:12px;opacity:.9;margin-top:6px}
+    .err{color:#ff6b6b} .ok{color:#00ffa3}
+    .bar{display:flex;gap:8px;justify-content:center;padding:10px 16px 16px 16px;border-bottom:1px solid #fff}
     .chat{display:flex;flex-direction:column;height:70vh;max-height:78vh}
     .list{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
     .msg{max-width:84%;border:1px solid #fff;border-radius:12px;padding:8px 12px;line-height:1.4;font-size:15px;word-wrap:break-word;background:#000}
@@ -36,23 +36,31 @@
     .meta{font-size:11px;opacity:.8;margin-top:4px}
     .compose{display:flex;gap:8px;padding:10px;border-top:1px solid #fff;position:sticky;bottom:0;background:#000}
     .text{flex:1;padding:12px 14px;border:1px solid #fff;border-radius:10px;background:#000;color:#fff;font-size:16px}
-    @media (max-width:480px){
-      .grid{grid-template-columns:1fr}
-      .logo{width:36px}
-    }
+    .hint{font-size:12px;opacity:.8;text-align:center;padding:4px 0}
+    /* Admin */
+    #adminPanel{padding:12px;border-top:1px solid #fff}
+    #usersTable table{width:100%;border-collapse:collapse;color:#fff}
+    #usersTable th,#usersTable td{border-bottom:1px solid #333;padding:6px;text-align:left;font-size:14px}
+    @media (max-width:480px){ .grid{grid-template-columns:1fr} .logo{width:30px} }
   </style>
 </head>
 <body>
 <div class="app">
   <div class="card" id="loginView">
     <div class="head">
-      <img src="images/logo.png" class="logo" alt="X Code Logo" onerror="this.style.display='none'">
+      <img src="images/logo.png" class="logo" alt="X Code Logo" onerror="this.style.display='none';document.getElementById('fallbackLogo1').style.display='block'">
+      <svg id="fallbackLogo1" class="logo" viewBox="0 0 100 100" style="display:none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs><linearGradient id="g1" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#f1d27a"/><stop offset="100%" stop-color="#b58e2b"/></linearGradient></defs>
+        <circle cx="50" cy="50" r="42" fill="none" stroke="url(#g1)" stroke-width="5"/>
+        <path d="M35 28 L50 50 L65 72 M65 28 L50 50 L35 72" stroke="url(#g1)" stroke-width="7" stroke-linecap="round" fill="none"/>
+      </svg>
       <div>
         <h1>X Code — Chat</h1>
         <div class="sub">Sala: <b>Primera Edición X Code</b></div>
       </div>
       <div class="sp"></div>
     </div>
+
     <div class="login">
       <p>Acceso con <b>número</b> y <b>PIN</b>. Si es tu primer acceso, el PIN se genera automáticamente.</p>
       <div class="grid">
@@ -60,16 +68,35 @@
         <input id="pinInput" class="pin" type="number" inputmode="numeric" placeholder="Tu PIN (si ya tienes)">
       </div>
       <div id="loginMsg" class="help"></div>
-      <div style="margin-top:10px">
-        <button id="enterBtn" class="btn">Entrar</button>
+    </div>
+    <div class="bar">
+      <button id="enterBtn" class="btn">Entrar</button>
+      <button id="showPinBtn" class="btn muted">Mostrar mi PIN</button>
+    </div>
+
+    <!-- Panel organizador -->
+    <div id="adminPanel">
+      <h3 style="margin:0 0 8px 0">Panel organizador</h3>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+        <input id="adminPass" placeholder="Contraseña admin" style="padding:8px;border-radius:8px;border:1px solid #fff;background:#000;color:#fff">
+        <button id="adminLoginBtn" class="btn">Entrar</button>
+        <button id="adminLogoutBtn" class="btn muted">Salir admin</button>
       </div>
-      <div class="help" style="margin-top:10px">Se recordará en este dispositivo. Puedes cerrar sesión cuando quieras.</div>
+      <div id="adminContent" style="display:none;">
+        <div id="adminMsg" class="help" style="margin-bottom:8px;"></div>
+        <div id="usersTable" style="max-height:240px; overflow:auto; border:1px solid #fff; padding:8px; border-radius:8px;"></div>
+      </div>
     </div>
   </div>
 
   <div class="card" id="chatView" style="display:none">
     <div class="head">
-      <img src="images/logo.png" class="logo" alt="X Code Logo" onerror="this.style.display='none'">
+      <img src="images/logo.png" class="logo" alt="X Code Logo" onerror="this.style.display='none';document.getElementById('fallbackLogo2').style.display='block'">
+      <svg id="fallbackLogo2" class="logo" viewBox="0 0 100 100" style="display:none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs><linearGradient id="g2" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#f1d27a"/><stop offset="100%" stop-color="#b58e2b"/></linearGradient></defs>
+        <circle cx="50" cy="50" r="42" fill="none" stroke="url(#g2)" stroke-width="5"/>
+        <path d="M35 28 L50 50 L65 72 M65 28 L50 50 L35 72" stroke="url(#g2)" stroke-width="7" stroke-linecap="round" fill="none"/>
+      </svg>
       <div>
         <h1>X Code — Chat</h1>
         <div class="sub" id="youAre"></div>
@@ -77,21 +104,23 @@
       <div class="sp"></div>
       <button id="logoutBtn" class="btn">Salir</button>
     </div>
+
     <div class="chat">
       <div id="list" class="list"></div>
       <div class="compose">
-        <input id="textInput" class="text" type="text" placeholder="Escribe un mensaje…">
+        <input id="textInput" class="text" type="text" placeholder="Escribe un mensaje… (usa @número para privado)">
         <button id="sendBtn" class="btn">Enviar</button>
       </div>
+      <div class="hint">Público: escribe normal · Privado: <b>@120 hola</b> (solo lo verá el 120)</div>
     </div>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-  import { getDatabase, ref, child, get, set, update, push, onChildAdded, query, limitToLast, onDisconnect, remove, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+  import { getDatabase, ref, child, get, set, update, push, onChildAdded, query, limitToLast, onDisconnect, remove } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
-  // Config Firebase (misma que nos diste)
+  // Firebase config (tu proyecto)
   const firebaseConfig = {
     apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
     authDomain: "x-code-chat.firebaseapp.com",
@@ -105,9 +134,9 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Parámetros
   const EVENT_ID = "primera_edicion_x_code";
   const MIN = 1, MAX = 320;
+  const ADMIN_PASSWORD = "131215";
 
   // UI
   const loginView = document.getElementById('loginView');
@@ -116,11 +145,22 @@
   const pinInput  = document.getElementById('pinInput');
   const loginMsg  = document.getElementById('loginMsg');
   const enterBtn  = document.getElementById('enterBtn');
+  const showPinBtn= document.getElementById('showPinBtn');
+
   const youAre    = document.getElementById('youAre');
   const list      = document.getElementById('list');
   const textInput = document.getElementById('textInput');
   const sendBtn   = document.getElementById('sendBtn');
   const logoutBtn = document.getElementById('logoutBtn');
+
+  // Admin UI
+  const adminPanel = document.getElementById('adminPanel');
+  const adminPass  = document.getElementById('adminPass');
+  const adminLoginBtn = document.getElementById('adminLoginBtn');
+  const adminLogoutBtn= document.getElementById('adminLogoutBtn');
+  const adminContent  = document.getElementById('adminContent');
+  const adminMsg   = document.getElementById('adminMsg');
+  const usersTable = document.getElementById('usersTable');
 
   // Estado sesión
   let myCode = null;
@@ -153,25 +193,26 @@
     const code = isAuto ? myCode : parseInt(codeInput.value,10);
     const pin  = isAuto ? myPIN  : (pinInput.value.trim() || null);
 
-    if(!validCode(code)){ loginMsg.textContent='Código no válido (1–320).'; loginMsg.classList.add('err'); return; }
+    if(!validCode(code)){
+      loginMsg.textContent='Código no válido (1–320).'; loginMsg.classList.add('err'); return;
+    }
 
     const uRef = ref(db, `rooms/${EVENT_ID}/usuarios/${code}`);
     const snap = await get(uRef);
 
     if(!snap.exists()){
-      // Primer acceso → generar PIN
+      // Primer acceso → generar PIN y NO entrar aún (mostrarlo primero)
       const newPIN = rndPIN();
       await set(uRef, { pin:newPIN, createdAt: Date.now() });
       myPIN = newPIN;
       myCode = code;
       localStorage.setItem('xcode_current_code', String(code));
       localStorage.setItem(pinKey(code), newPIN);
-      loginMsg.innerHTML = `Tu PIN es <b>${newPIN}</b>. Se ha guardado en este dispositivo.`;
-      await createSessionOrFail(code);
-      openChat();
+      loginMsg.innerHTML = `Tu PIN es <b>${newPIN}</b>. Se ha guardado en este dispositivo.<br>Vuelve a pulsar <b>Entrar</b> para acceder.`;
+      loginMsg.classList.remove('err');
       return;
     } else {
-      // Usuario existe: validar PIN
+      // Usuario existe: validar PIN (introducido o del dispositivo)
       const data = snap.val();
       const expectedPIN = String(data.pin || '');
       const candidatePIN = pin || localStorage.getItem(pinKey(code));
@@ -189,25 +230,20 @@
   }
 
   async function createSessionOrFail(code){
-    // ruta de sesiones activas
     const sBase = ref(db, `rooms/${EVENT_ID}/activeSessions/${code}`);
     const curr = await get(sBase);
-    // si hay otra sesión distinta, bloquear
     if(curr.exists()){
       const data = curr.val();
-      // permitir reingresar si es el mismo navegador con mismo sessionId
       const existingId = data.sessionId;
       const localId = localStorage.getItem(sessKey(code));
-      if(existingId && localId && existingId===localId){
-        mySessionId = existingId;
-        return;
-      }
-      throw (loginMsg.textContent='Este número ya está en uso ahora mismo. Intenta más tarde.');
+      if(existingId && localId && existingId===localId){ mySessionId = existingId; return; }
+      loginMsg.textContent='Este número ya está en uso ahora mismo. Intenta más tarde.';
+      loginMsg.classList.add('err');
+      throw new Error('locked');
     }
-    // crear nueva sesión y registrar onDisconnect para liberar al salir
     const newId = `${code}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
     await set(sBase, { sessionId:newId, since: Date.now() });
-    try { onDisconnect(sBase).remove(); } catch(e) {}
+    try { onDisconnect(sBase).remove(); } catch(e){}
     mySessionId = newId;
     localStorage.setItem(sessKey(code), newId);
   }
@@ -219,28 +255,53 @@
     subscribeMessages();
   }
 
+  // Mostrar PIN del usuario actual (si existe en el dispositivo)
+  showPinBtn.addEventListener('click', ()=>{
+    const stored = localStorage.getItem('xcode_current_code');
+    const storedPin = stored ? localStorage.getItem(pinKey(stored)) : null;
+    if(!stored || !storedPin){ loginMsg.textContent = 'No hay PIN guardado en este dispositivo.'; loginMsg.classList.add('err'); return; }
+    loginMsg.innerHTML = `Tu PIN es <b>${storedPin}</b>.`;
+    loginMsg.classList.remove('err');
+  });
+
   // Escucha de mensajes (últimos 200)
   function subscribeMessages(){
     const messagesRef = query(ref(db, `rooms/${EVENT_ID}/messages`), limitToLast(200));
     onChildAdded(messagesRef, (snap)=> renderMsg(snap.val()));
   }
 
+  // Render con soporte a privados (@número)
   function renderMsg(m){
+    // Mostrar solo si: público, o soy destino, o soy emisor
+    if(m.to && String(m.to)!==String(myCode) && String(m.code)!==String(myCode)) return;
+
     const el = document.createElement('div');
     el.className = 'msg ' + (String(m.code)===String(myCode) ? 'me' : 'other');
     const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+    const tag = m.to ? ` · Privado → #${m.to}` : '';
     el.innerHTML = `<div>${(m.text||'').replace(/</g,'&lt;')}</div>
-                    <div class="meta">${m.code||'?'} · ${time}</div>`;
+                    <div class="meta">#${m.code||'?'} · ${time}${tag}</div>`;
     list.appendChild(el);
     list.scrollTop = list.scrollHeight;
   }
 
+  function parsePrivateTarget(txt){
+    // formato: @123 mensaje
+    const m = txt.match(/^@(\d+)\s+(.*)$/);
+    if(!m) return null;
+    const num = parseInt(m[1],10);
+    if(!validCode(num)) return null;
+    return { to:num, text:m[2] };
+  }
+
   async function send(){
-    const text = textInput.value.trim();
-    if(!text) return;
-    await push(ref(db, `rooms/${EVENT_ID}/messages`), {
-      code: myCode, text, time: Date.now()
-    });
+    const raw = textInput.value.trim();
+    if(!raw) return;
+    const parsed = parsePrivateTarget(raw);
+    const payload = parsed
+      ? { code: myCode, text: parsed.text, to: parsed.to, time: Date.now() }
+      : { code: myCode, text: raw, time: Date.now(), to: null };
+    await push(ref(db, `rooms/${EVENT_ID}/messages`), payload);
     textInput.value='';
   }
 
@@ -249,16 +310,53 @@
 
   // Logout
   logoutBtn.addEventListener('click', async ()=>{
-    try{
-      const sBase = ref(db, `rooms/${EVENT_ID}/activeSessions/${myCode}`);
-      await remove(sBase);
-    }catch(e){}
+    try{ await remove(ref(db, `rooms/${EVENT_ID}/activeSessions/${myCode}`)); }catch(e){}
     localStorage.removeItem('xcode_current_code');
     localStorage.removeItem(pinKey(myCode));
     localStorage.removeItem(sessKey(myCode));
     location.reload();
   });
+
+  // ADMIN
+  adminLoginBtn.addEventListener('click', async ()=>{
+    const pass = adminPass.value || '';
+    if(pass !== ADMIN_PASSWORD){ adminMsg.textContent = 'Contraseña incorrecta'; return; }
+    adminContent.style.display = 'block';
+    adminMsg.textContent = 'Conectado como admin';
+    await loadAllUsersForAdmin();
+  });
+
+  adminLogoutBtn.addEventListener('click', ()=>{
+    adminContent.style.display = 'none';
+    adminMsg.textContent = '';
+    adminPass.value = '';
+  });
+
+  async function loadAllUsersForAdmin(){
+    usersTable.innerHTML = 'Cargando...';
+    const usersSnap = await get(ref(db, `rooms/${EVENT_ID}/usuarios`));
+    if(!usersSnap.exists()){ usersTable.innerHTML = '<i>No hay usuarios</i>'; return; }
+    const data = usersSnap.val();
+    let html = '<table><thead><tr><th>#</th><th>PIN</th><th>Acción</th></tr></thead><tbody>';
+    for(const key of Object.keys(data)){
+      const pin = data[key].pin || '';
+      html += `<tr><td>${key}</td><td>${pin}</td>
+               <td><button data-k="${key}" class="btn muted adminDisconnect">Desconectar</button></td></tr>`;
+    }
+    html += '</tbody></table>';
+    usersTable.innerHTML = html;
+
+    document.querySelectorAll('.adminDisconnect').forEach(btn=>{
+      btn.addEventListener('click', async (e)=>{
+        const k = e.currentTarget.dataset.k;
+        await remove(ref(db, `rooms/${EVENT_ID}/activeSessions/${k}`));
+        adminMsg.textContent = `Sesión ${k} desconectada (si existía).`;
+        await loadAllUsersForAdmin();
+      });
+    });
+  }
 </script>
 </body>
 </html>
+
 
