@@ -3,216 +3,262 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>X Code | Chat</title>
+  <title>X Code — Chat Seguro</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body {
-      background-color: #000;
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+    :root{
+      --bg:#000;
+      --fg:#fff;
     }
-    header {
-      text-align: center;
-      padding: 15px 0;
-      border-bottom: 1px solid #fff;
-    }
-    header img {
-      width: 80px;
-      height: auto;
-    }
-    h1 {
-      font-size: 18px;
-      margin: 8px 0 0 0;
-      color: #fff;
-      font-weight: 600;
-    }
-    #chat-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 10px;
-      overflow: hidden;
-    }
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      margin-bottom: 10px;
-    }
-    .message {
-      border: 1px solid #fff;
-      border-radius: 10px;
-      padding: 8px 12px;
-      margin: 4px 0;
-      max-width: 80%;
-      word-wrap: break-word;
-    }
-    .mine {
-      align-self: flex-end;
-      background-color: #000;
-    }
-    .theirs {
-      align-self: flex-start;
-      background-color: #000;
-    }
-    #input-container {
-      display: flex;
-      border-top: 1px solid #fff;
-      padding: 8px;
-      background-color: #000;
-    }
-    #message-input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #fff;
-      border-radius: 8px;
-      background: none;
-      color: #fff;
-      outline: none;
-    }
-    #send-button, #logout-button {
-      background-color: #fff;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      margin-left: 8px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    #login-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    #login-container input {
-      margin: 10px 0;
-      padding: 10px;
-      border: 1px solid #fff;
-      background: none;
-      color: #fff;
-      border-radius: 8px;
-      width: 200px;
-      text-align: center;
-    }
-    #login-container button {
-      background-color: #fff;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-weight: 600;
-      cursor: pointer;
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .app{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:12px}
+    .card{width:100%;max-width:640px;border:1px solid #fff;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+    .head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #fff;background:#000;position:sticky;top:0;z-index:2}
+    .logo{width:42px;height:auto}
+    h1{font-size:18px;font-weight:600;margin:0}
+    .sub{font-size:12px;opacity:.85}
+    .sp{flex:1}
+    .btn{appearance:none;background:#fff;color:#000;border:none;border-radius:10px;padding:9px 14px;font-weight:600;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .login{padding:18px;text-align:center}
+    .login p{margin:6px 0 12px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+    .input, .pin{width:100%;padding:12px 14px;border:1px solid #fff;border-radius:10px;background:#000;color:#fff;text-align:center;font-size:16px}
+    .help{font-size:12px;opacity:.8;margin-top:6px}
+    .err{color:#ff6b6b}
+    .ok{color:#00ffa3}
+    .chat{display:flex;flex-direction:column;height:70vh;max-height:78vh}
+    .list{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+    .msg{max-width:84%;border:1px solid #fff;border-radius:12px;padding:8px 12px;line-height:1.4;font-size:15px;word-wrap:break-word;background:#000}
+    .me{align-self:flex-end;background:#111}
+    .other{align-self:flex-start}
+    .meta{font-size:11px;opacity:.8;margin-top:4px}
+    .compose{display:flex;gap:8px;padding:10px;border-top:1px solid #fff;position:sticky;bottom:0;background:#000}
+    .text{flex:1;padding:12px 14px;border:1px solid #fff;border-radius:10px;background:#000;color:#fff;font-size:16px}
+    @media (max-width:480px){
+      .grid{grid-template-columns:1fr}
+      .logo{width:36px}
     }
   </style>
 </head>
 <body>
-  <div id="login-container">
-    <img src="images/logo.png" alt="X Code Logo" width="70">
-    <h1>X Code Verificación de Match</h1>
-    <input type="text" id="user-number" placeholder="Introduce tu número">
-    <button id="login-button">Entrar</button>
-  </div>
-
-  <div id="chat-container" style="display:none;">
-    <header>
-      <img src="images/logo.png" alt="X Code Logo">
-      <h1>Chat - Primera Edición X Code</h1>
-    </header>
-    <div id="messages"></div>
-    <div id="input-container">
-      <input id="message-input" type="text" placeholder="Escribe un mensaje...">
-      <button id="send-button">Enviar</button>
-      <button id="logout-button">Salir</button>
+<div class="app">
+  <div class="card" id="loginView">
+    <div class="head">
+      <img src="images/logo.png" class="logo" alt="X Code Logo" onerror="this.style.display='none'">
+      <div>
+        <h1>X Code — Chat</h1>
+        <div class="sub">Sala: <b>Primera Edición X Code</b></div>
+      </div>
+      <div class="sp"></div>
+    </div>
+    <div class="login">
+      <p>Acceso con <b>número</b> y <b>PIN</b>. Si es tu primer acceso, el PIN se genera automáticamente.</p>
+      <div class="grid">
+        <input id="codeInput" class="input" type="number" min="1" max="320" placeholder="Tu número (ej. 70)">
+        <input id="pinInput" class="pin" type="number" inputmode="numeric" placeholder="Tu PIN (si ya tienes)">
+      </div>
+      <div id="loginMsg" class="help"></div>
+      <div style="margin-top:10px">
+        <button id="enterBtn" class="btn">Entrar</button>
+      </div>
+      <div class="help" style="margin-top:10px">Se recordará en este dispositivo. Puedes cerrar sesión cuando quieras.</div>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+  <div class="card" id="chatView" style="display:none">
+    <div class="head">
+      <img src="images/logo.png" class="logo" alt="X Code Logo" onerror="this.style.display='none'">
+      <div>
+        <h1>X Code — Chat</h1>
+        <div class="sub" id="youAre"></div>
+      </div>
+      <div class="sp"></div>
+      <button id="logoutBtn" class="btn">Salir</button>
+    </div>
+    <div class="chat">
+      <div id="list" class="list"></div>
+      <div class="compose">
+        <input id="textInput" class="text" type="text" placeholder="Escribe un mensaje…">
+        <button id="sendBtn" class="btn">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
-      authDomain: "x-code-chat.firebaseapp.com",
-      databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "x-code-chat",
-      storageBucket: "x-code-chat.firebasestorage.app",
-      messagingSenderId: "819845037951",
-      appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
-    };
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+  import { getDatabase, ref, child, get, set, update, push, onChildAdded, query, limitToLast, onDisconnect, remove, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  // Config Firebase (misma que nos diste)
+  const firebaseConfig = {
+    apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
+    authDomain: "x-code-chat.firebaseapp.com",
+    databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "x-code-chat",
+    storageBucket: "x-code-chat.firebasestorage.app",
+    messagingSenderId: "819845037951",
+    appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
+  };
 
-    const EVENT_ID = "primera_edicion_x_code";
-    const loginContainer = document.getElementById("login-container");
-    const chatContainer = document.getElementById("chat-container");
-    const messagesDiv = document.getElementById("messages");
-    const messageInput = document.getElementById("message-input");
-    const sendButton = document.getElementById("send-button");
-    const logoutButton = document.getElementById("logout-button");
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-    const userNumberInput = document.getElementById("user-number");
-    const loginButton = document.getElementById("login-button");
+  // Parámetros
+  const EVENT_ID = "primera_edicion_x_code";
+  const MIN = 1, MAX = 320;
 
-    let userNumber = localStorage.getItem("userNumber");
+  // UI
+  const loginView = document.getElementById('loginView');
+  const chatView  = document.getElementById('chatView');
+  const codeInput = document.getElementById('codeInput');
+  const pinInput  = document.getElementById('pinInput');
+  const loginMsg  = document.getElementById('loginMsg');
+  const enterBtn  = document.getElementById('enterBtn');
+  const youAre    = document.getElementById('youAre');
+  const list      = document.getElementById('list');
+  const textInput = document.getElementById('textInput');
+  const sendBtn   = document.getElementById('sendBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
 
-    function enterChat() {
-      loginContainer.style.display = "none";
-      chatContainer.style.display = "flex";
-      loadMessages();
+  // Estado sesión
+  let myCode = null;
+  let myPIN  = null;
+  let mySessionId = null;
+
+  // Helpers
+  const validCode = n => Number.isInteger(n) && n>=MIN && n<=MAX;
+  const rndPIN = () => String(Math.floor(1000 + Math.random()*9000)); // 4 dígitos
+  const pinKey  = c => `xcode_pin_${EVENT_ID}_${c}`;
+  const sessKey = c => `xcode_session_${EVENT_ID}_${c}`;
+
+  // Autologin si guardado
+  (function tryAuto(){
+    const storedCode = localStorage.getItem('xcode_current_code');
+    const storedPin  = storedCode ? localStorage.getItem(pinKey(storedCode)) : null;
+    const storedSess = storedCode ? localStorage.getItem(sessKey(storedCode)) : null;
+    if(storedCode && storedPin){
+      myCode = parseInt(storedCode,10);
+      myPIN  = storedPin;
+      mySessionId = storedSess || null;
+      startLoginFlow(true).catch(()=>{});
     }
+  })();
 
-    if (userNumber) {
-      enterChat();
-    }
+  enterBtn.addEventListener('click', ()=> startLoginFlow(false));
 
-    loginButton.addEventListener("click", () => {
-      const num = userNumberInput.value.trim();
-      if (num) {
-        userNumber = num;
-        localStorage.setItem("userNumber", num);
-        enterChat();
+  async function startLoginFlow(isAuto){
+    loginMsg.textContent = '';
+    const code = isAuto ? myCode : parseInt(codeInput.value,10);
+    const pin  = isAuto ? myPIN  : (pinInput.value.trim() || null);
+
+    if(!validCode(code)){ loginMsg.textContent='Código no válido (1–320).'; loginMsg.classList.add('err'); return; }
+
+    const uRef = ref(db, `rooms/${EVENT_ID}/usuarios/${code}`);
+    const snap = await get(uRef);
+
+    if(!snap.exists()){
+      // Primer acceso → generar PIN
+      const newPIN = rndPIN();
+      await set(uRef, { pin:newPIN, createdAt: Date.now() });
+      myPIN = newPIN;
+      myCode = code;
+      localStorage.setItem('xcode_current_code', String(code));
+      localStorage.setItem(pinKey(code), newPIN);
+      loginMsg.innerHTML = `Tu PIN es <b>${newPIN}</b>. Se ha guardado en este dispositivo.`;
+      await createSessionOrFail(code);
+      openChat();
+      return;
+    } else {
+      // Usuario existe: validar PIN
+      const data = snap.val();
+      const expectedPIN = String(data.pin || '');
+      const candidatePIN = pin || localStorage.getItem(pinKey(code));
+      if(!candidatePIN || String(candidatePIN)!==expectedPIN){
+        loginMsg.textContent='PIN incorrecto o faltante. Pide tu PIN al organizador.';
+        loginMsg.classList.add('err');
+        return;
       }
-    });
-
-    logoutButton.addEventListener("click", () => {
-      localStorage.removeItem("userNumber");
-      location.reload();
-    });
-
-    sendButton.addEventListener("click", () => {
-      const text = messageInput.value.trim();
-      if (text) {
-        push(ref(db, chats/${EVENT_ID}), {
-          user: userNumber,
-          message: text,
-          timestamp: Date.now()
-        });
-        messageInput.value = "";
-      }
-    });
-
-    function loadMessages() {
-      const chatRef = ref(db, chats/${EVENT_ID});
-      onChildAdded(chatRef, (data) => {
-        const msg = data.val();
-        const msgDiv = document.createElement("div");
-        msgDiv.classList.add("message");
-        msgDiv.classList.add(msg.user === userNumber ? "mine" : "theirs");
-        msgDiv.innerText = msg.user + ": " + msg.message;
-        messagesDiv.appendChild(msgDiv);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      });
+      myPIN = expectedPIN; myCode = code;
+      localStorage.setItem('xcode_current_code', String(code));
+      localStorage.setItem(pinKey(code), expectedPIN);
+      await createSessionOrFail(code);
+      openChat();
     }
-  </script>
+  }
+
+  async function createSessionOrFail(code){
+    // ruta de sesiones activas
+    const sBase = ref(db, `rooms/${EVENT_ID}/activeSessions/${code}`);
+    const curr = await get(sBase);
+    // si hay otra sesión distinta, bloquear
+    if(curr.exists()){
+      const data = curr.val();
+      // permitir reingresar si es el mismo navegador con mismo sessionId
+      const existingId = data.sessionId;
+      const localId = localStorage.getItem(sessKey(code));
+      if(existingId && localId && existingId===localId){
+        mySessionId = existingId;
+        return;
+      }
+      throw (loginMsg.textContent='Este número ya está en uso ahora mismo. Intenta más tarde.');
+    }
+    // crear nueva sesión y registrar onDisconnect para liberar al salir
+    const newId = `${code}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+    await set(sBase, { sessionId:newId, since: Date.now() });
+    try { onDisconnect(sBase).remove(); } catch(e) {}
+    mySessionId = newId;
+    localStorage.setItem(sessKey(code), newId);
+  }
+
+  function openChat(){
+    loginView.style.display='none';
+    chatView.style.display='block';
+    youAre.textContent = `Sala: Primera Edición X Code · Tu código: ${myCode}`;
+    subscribeMessages();
+  }
+
+  // Escucha de mensajes (últimos 200)
+  function subscribeMessages(){
+    const messagesRef = query(ref(db, `rooms/${EVENT_ID}/messages`), limitToLast(200));
+    onChildAdded(messagesRef, (snap)=> renderMsg(snap.val()));
+  }
+
+  function renderMsg(m){
+    const el = document.createElement('div');
+    el.className = 'msg ' + (String(m.code)===String(myCode) ? 'me' : 'other');
+    const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+    el.innerHTML = `<div>${(m.text||'').replace(/</g,'&lt;')}</div>
+                    <div class="meta">${m.code||'?'} · ${time}</div>`;
+    list.appendChild(el);
+    list.scrollTop = list.scrollHeight;
+  }
+
+  async function send(){
+    const text = textInput.value.trim();
+    if(!text) return;
+    await push(ref(db, `rooms/${EVENT_ID}/messages`), {
+      code: myCode, text, time: Date.now()
+    });
+    textInput.value='';
+  }
+
+  sendBtn.addEventListener('click', send);
+  textInput.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+
+  // Logout
+  logoutBtn.addEventListener('click', async ()=>{
+    try{
+      const sBase = ref(db, `rooms/${EVENT_ID}/activeSessions/${myCode}`);
+      await remove(sBase);
+    }catch(e){}
+    localStorage.removeItem('xcode_current_code');
+    localStorage.removeItem(pinKey(myCode));
+    localStorage.removeItem(sessKey(myCode));
+    location.reload();
+  });
+</script>
 </body>
 </html>
 
