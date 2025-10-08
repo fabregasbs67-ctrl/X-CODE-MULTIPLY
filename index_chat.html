@@ -1,191 +1,218 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>X Code — Chat</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#121212;
-    --panel:#0b0b0b;
-    --beige:#d9c8a9;
-    --beige-soft:#cdbb98;
-    --line:rgba(217,200,169,.35);
-    --me:#171717;
-    --other:#101010;
-    --error:#ff6b6b;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0; height:100%; background:var(--bg); color:var(--beige);
-             font-family:'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
-  .app{min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:16px;}
-  .card{width:100%; max-width:640px; background:var(--panel); border:1px solid var(--line); border-radius:16px;
-         box-shadow:0 18px 50px rgba(0,0,0,.6); overflow:hidden;}
-  .head{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--panel); z-index:2;}
-  .logo{width:26px; height:26px; display:block}
-  .title{font-size:16px; font-weight:600; letter-spacing:.2px; margin:0;}
-  .sub{font-size:12px; opacity:.75}
-  .spacer{flex:1}
-  .btn{appearance:none; border:none; border-radius:10px; padding:8px 12px; background:var(--beige); color:#000;
-        font-weight:600; cursor:pointer;}
-  .btn:disabled{opacity:.6; cursor:not-allowed}
-  .login{padding:22px; text-align:center;}
-  .login p{margin:8px 0 14px; color:var(--beige-soft)}
-  .input{width:100%; padding:12px 14px; background:#141414; border:1px solid var(--line); color:#fff; border-radius:12px; text-align:center; font-size:16px;}
-  .helper{font-size:12px; color:#a9a9a9; margin-top:6px}
-  .err{color:var(--error)}
-  .chat{display:flex; flex-direction:column; height:70dvh; max-height:76dvh;}
-  .list{flex:1; overflow:auto; padding:14px; display:flex; flex-direction:column; gap:10px;}
-  .msg{max-width:86%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); line-height:1.4; font-size:15px; color:#e9e9e9; word-wrap:break-word;}
-  .me{align-self:flex-end; background:var(--me);}
-  .other{align-self:flex-start; background:var(--other);}
-  .meta{font-size:11px; opacity:.75; margin-top:4px}
-  .compose{display:flex; gap:8px; padding:10px; border-top:1px solid var(--line); position:sticky; bottom:0; background:var(--panel);}
-  .text{flex:1; padding:12px 14px; background:#141414; border:1px solid var(--line); color:#fff; border-radius:12px; font-size:16px;}
-  @media (max-width:480px){
-    .card{border-radius:14px}
-    .title{font-size:15px}
-    .msg{font-size:14px}
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X Code | Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      text-align: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #fff;
+    }
+    header img {
+      width: 80px;
+      height: auto;
+    }
+    h1 {
+      font-size: 18px;
+      margin: 8px 0 0 0;
+      color: #fff;
+      font-weight: 600;
+    }
+    #chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px;
+      overflow: hidden;
+    }
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .message {
+      border: 1px solid #fff;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin: 4px 0;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+    .mine {
+      align-self: flex-end;
+      background-color: #000;
+    }
+    .theirs {
+      align-self: flex-start;
+      background-color: #000;
+    }
+    #input-container {
+      display: flex;
+      border-top: 1px solid #fff;
+      padding: 8px;
+      background-color: #000;
+    }
+    #message-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #fff;
+      border-radius: 8px;
+      background: none;
+      color: #fff;
+      outline: none;
+    }
+    #send-button, #logout-button {
+      background-color: #fff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-left: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    #login-container input {
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #fff;
+      background: none;
+      color: #fff;
+      border-radius: 8px;
+      width: 200px;
+      text-align: center;
+    }
+    #login-container button {
+      background-color: #fff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-<div class="app">
-  <div class="card" id="loginView">
-    <div class="head">
-      <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#f1d27a"/><stop offset="100%" stop-color="#b58e2b"/></linearGradient></defs>
-        <circle cx="50" cy="50" r="42" fill="none" stroke="url(#g)" stroke-width="5"/>
-        <path d="M35 28 L50 50 L65 72 M65 28 L50 50 L35 72" stroke="url(#g)" stroke-width="7" stroke-linecap="round" fill="none"/>
-      </svg>
-      <div>
-        <p class="title">X Code — Chat</p>
-        <div class="sub">Sala: <b>Primera Edición X code</b></div>
-      </div>
-      <div class="spacer"></div>
-    </div>
-    <div class="login">
-      <p>Introduce tu <b>código de participante</b> (1–320) para entrar al chat del evento.</p>
-      <input id="codeInput" class="input" type="number" min="1" max="320" placeholder="Tu código (ej. 90)">
-      <div id="loginMsg" class="helper"></div>
-      <div style="margin-top:12px">
-        <button id="enterBtn" class="btn">Entrar</button>
-      </div>
+  <div id="login-container">
+    <img src="images/logo.png" alt="X Code Logo" width="70">
+    <h1>X Code Verificación de Match</h1>
+    <input type="text" id="user-number" placeholder="Introduce tu número">
+    <button id="login-button">Entrar</button>
+  </div>
+
+  <div id="chat-container" style="display:none;">
+    <header>
+      <img src="images/logo.png" alt="X Code Logo">
+      <h1>Chat - Primera Edición X Code</h1>
+    </header>
+    <div id="messages"></div>
+    <div id="input-container">
+      <input id="message-input" type="text" placeholder="Escribe un mensaje...">
+      <button id="send-button">Enviar</button>
+      <button id="logout-button">Salir</button>
     </div>
   </div>
 
-  <div class="card" id="chatView" style="display:none">
-    <div class="head">
-      <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs><linearGradient id="g2" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#f1d27a"/><stop offset="100%" stop-color="#b58e2b"/></linearGradient></defs>
-        <circle cx="50" cy="50" r="42" fill="none" stroke="url(#g2)" stroke-width="5"/>
-        <path d="M35 28 L50 50 L65 72 M65 28 L50 50 L35 72" stroke="url(#g2)" stroke-width="7" stroke-linecap="round" fill="none"/>
-      </svg>
-      <div>
-        <p class="title">X Code — Chat</p>
-        <div class="sub" id="youAre"></div>
-      </div>
-      <div class="spacer"></div>
-      <button id="logoutBtn" class="btn" style="background:#2b2b2b; color:#e9e9e9; border:1px solid var(--line);">Salir</button>
-    </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-    <div class="chat">
-      <div id="list" class="list"></div>
-      <div class="compose">
-        <input id="textInput" class="text" type="text" placeholder="Escribe un mensaje…">
-        <button id="sendBtn" class="btn">Enviar</button>
-      </div>
-    </div>
-  </div>
-</div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
+      authDomain: "x-code-chat.firebaseapp.com",
+      databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "x-code-chat",
+      storageBucket: "x-code-chat.firebasestorage.app",
+      messagingSenderId: "819845037951",
+      appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
+    };
 
-<script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-  import { getDatabase, ref, push, onChildAdded, query, limitToLast } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  
-const firebaseConfig = {
-  apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
-  authDomain: "x-code-chat.firebaseapp.com",
-  databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "x-code-chat",
-  storageBucket: "x-code-chat.firebasestorage.app",
-  messagingSenderId: "819845037951",
-  appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
-};
+    const EVENT_ID = "primera_edicion_x_code";
+    const loginContainer = document.getElementById("login-container");
+    const chatContainer = document.getElementById("chat-container");
+    const messagesDiv = document.getElementById("messages");
+    const messageInput = document.getElementById("message-input");
+    const sendButton = document.getElementById("send-button");
+    const logoutButton = document.getElementById("logout-button");
 
+    const userNumberInput = document.getElementById("user-number");
+    const loginButton = document.getElementById("login-button");
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    let userNumber = localStorage.getItem("userNumber");
 
-  const EVENT_ID = "primera_edicion_x_code";
-  const MIN = 1, MAX = 320;
-
-  const loginView = document.getElementById('loginView');
-  const chatView  = document.getElementById('chatView');
-
-  const codeInput = document.getElementById('codeInput');
-  const loginMsg  = document.getElementById('loginMsg');
-  const enterBtn  = document.getElementById('enterBtn');
-
-  const youAre   = document.getElementById('youAre');
-  const list     = document.getElementById('list');
-  const textInput= document.getElementById('textInput');
-  const sendBtn  = document.getElementById('sendBtn');
-  const logoutBtn= document.getElementById('logoutBtn');
-
-  let myCode = null;
-
-  function validCode(n) { return Number.isInteger(n) && n>=MIN && n<=MAX; }
-
-  const saved = localStorage.getItem('xcode_chat_code');
-  if (saved) { myCode = parseInt(saved,10); startChat(); }
-
-  enterBtn.addEventListener('click', () => {
-    const n = parseInt(codeInput.value,10);
-    if (!validCode(n)) {
-      loginMsg.textContent = 'Código no válido (1–320).'; loginMsg.classList.add('err'); return;
+    function enterChat() {
+      loginContainer.style.display = "none";
+      chatContainer.style.display = "flex";
+      loadMessages();
     }
-    myCode = n;
-    localStorage.setItem('xcode_chat_code', String(myCode));
-    startChat();
-  });
 
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('xcode_chat_code');
-    list.innerHTML=''; textInput.value='';
-    chatView.style.display='none'; loginView.style.display='block'; codeInput.value='';
-  });
+    if (userNumber) {
+      enterChat();
+    }
 
-  function startChat() {
-    loginView.style.display='none'; chatView.style.display='block';
-    youAre.textContent = `Sala: Primera Edición X code · Tu código: ${myCode}`;
-    subscribe();
-  }
+    loginButton.addEventListener("click", () => {
+      const num = userNumberInput.value.trim();
+      if (num) {
+        userNumber = num;
+        localStorage.setItem("userNumber", num);
+        enterChat();
+      }
+    });
 
-  function render(msg) {
-    const el = document.createElement('div');
-    el.className = 'msg ' + (msg.code===myCode ? 'me' : 'other');
-    el.innerHTML = `<div>${(msg.text||'').replace(/</g,'&lt;')}</div>
-                    <div class="meta">${msg.code||'?'} · ${msg.time ? new Date(msg.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : ''}</div>`;
-    list.appendChild(el); list.scrollTop = list.scrollHeight;
-  }
+    logoutButton.addEventListener("click", () => {
+      localStorage.removeItem("userNumber");
+      location.reload();
+    });
 
-  function subscribe() {
-    const messagesRef = query(ref(db, `rooms/${EVENT_ID}/messages`), limitToLast(200));
-    onChildAdded(messagesRef, snap => render(snap.val()));
-  }
+    sendButton.addEventListener("click", () => {
+      const text = messageInput.value.trim();
+      if (text) {
+        push(ref(db, chats/${EVENT_ID}), {
+          user: userNumber,
+          message: text,
+          timestamp: Date.now()
+        });
+        messageInput.value = "";
+      }
+    });
 
-  async function send() {
-    const text = textInput.value.trim(); if (!text) return;
-    await push(ref(db, `rooms/${EVENT_ID}/messages`), { code: myCode, text, time: Date.now() });
-    textInput.value='';
-  }
-
-  sendBtn.addEventListener('click', send);
-  textInput.addEventListener('keydown', e=>{ if (e.key==='Enter') send(); });
-</script>
+    function loadMessages() {
+      const chatRef = ref(db, chats/${EVENT_ID});
+      onChildAdded(chatRef, (data) => {
+        const msg = data.val();
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("message");
+        msgDiv.classList.add(msg.user === userNumber ? "mine" : "theirs");
+        msgDiv.innerText = msg.user + ": " + msg.message;
+        messagesDiv.appendChild(msgDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+    }
+  </script>
 </body>
 </html>
 
