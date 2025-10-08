@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>X Code — Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --beige:#d9c8a9;
+    --bg:#1a1a1a;
+    --panel:#000000;
+  }
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--beige);
+             font-family:'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
+  .wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 14px; }
+  .card{ width:100%; max-width:520px; background:var(--panel); color:var(--beige);
+          border:1px solid rgba(217,200,169,.55); border-radius:14px; text-align:center;
+          box-shadow:0 14px 44px rgba(0,0,0,.55); padding:22px 18px 24px; }
+  .logo{ width:50px; height:50px; margin:2px auto 10px; display:block; }
+  h1{ margin:6px 0 14px; font-size:18px; font-weight:600; letter-spacing:.15px; }
+  input[type=number], input[type=text]{ width:100%; padding:12px; text-align:center; border-radius:10px;
+    border:1px solid rgba(217,200,169,.7); background:#0a0a0a; color:#fff; font-size:16px; outline:none; box-sizing:border-box; }
+  button{ background:var(--beige); color:#000; border:none; font-weight:700; padding:10px 18px;
+           border-radius:10px; cursor:pointer; margin-top:12px; }
+  button:disabled{ opacity:.6; cursor:not-allowed; }
+  .hidden{ display:none }
+  #chatBox{ height:48vh; min-height:320px; max-height:58vh; overflow:auto; background:#0a0a0a; border-radius:10px; padding:10px; text-align:left; border:1px solid rgba(217,200,169,.25); }
+  .msg{ display:flex; gap:8px; margin:8px 0; align-items:flex-end; }
+  .bubble{ max-width:72%; padding:10px 12px; border-radius:12px; line-height:1.35; font-size:14px; word-break:break-word; }
+  .me .bubble{ background:#1f1f1f; border:1px solid rgba(217,200,169,.4); color:#fff; margin-left:auto; }
+  .other .bubble{ background:#111; border:1px solid rgba(217,200,169,.2); color:#e7e7e7; }
+  .meta{ font-size:11px; opacity:.7; margin-top:4px; }
+  .imgmsg img{ max-width:100%; border-radius:10px; border:1px solid rgba(217,200,169,.25); }
+  .composer{ display:flex; gap:8px; align-items:center; margin-top:10px; }
+  .composer input[type=text]{ flex:1; text-align:left; }
+  .composer input[type=file]{ color:#b9b9b9; font-size:12px; }
+  .small{ font-size:12px; color:#a9a9a9; margin-top:6px }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="loginCard">
+      <img id="imglogo1" src="logo.png" class="logo" alt="X Code Logo" onerror="this.style.display='none'; document.getElementById('svglogo1').style.display='block';">
+      <svg id="svglogo1" class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
+        <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#f1d27a"/><stop offset="100%" stop-color="#b58e2b"/></linearGradient></defs>
+        <circle cx="50" cy="50" r="42" fill="none" stroke="url(#g)" stroke-width="5"/>
+        <path d="M35 28 L50 50 L65 72 M65 28 L50 50 L35 72" stroke="url(#g)" stroke-width="7" stroke-linecap="round" fill="none"/>
+      </svg>
+      <h1>X Code — Chat</h1>
+      <p class="small">Introduce tu <b>código de participante</b> (1–320) para entrar al chat.</p>
+      <input id="codigoInput" type="number" placeholder="Tu código (ej. 97)" min="1" max="320">
+      <button id="btnEntrar">Entrar</button>
+      <div id="loginMsg" class="small"></div>
+    </div>
+
+    <div class="card hidden" id="chatCard">
+      <img id="imglogo2" src="logo.png" class="logo" alt="X Code Logo" onerror="this.style.display='none'; document.getElementById('svglogo2').style.display='block';">
+      <svg id="svglogo2" class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
+        <defs><linearGradient id="g2" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#f1d27a"/><stop offset="100%" stop-color="#b58e2b"/></linearGradient></defs>
+        <circle cx="50" cy="50" r="42" fill="none" stroke="url(#g2)" stroke-width="5"/>
+        <path d="M35 28 L50 50 L65 72 M65 28 L50 50 L35 72" stroke="url(#g2)" stroke-width="7" stroke-linecap="round" fill="none"/>
+      </svg>
+      <h1>X Code — Chat</h1>
+      <div class="small" id="youAre"></div>
+      <div id="chatBox"></div>
+
+      <div class="composer">
+        <input id="textInput" type="text" placeholder="Escribe un mensaje…">
+        <input id="fileInput" type="file" accept="image/*">
+        <button id="sendBtn">Enviar</button>
+      </div>
+      <div class="small">Puedes enviar texto o una imagen. Mantén el respeto; este chat es parte de la experiencia.</div>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
+  import { getDatabase, ref, push, onChildAdded, serverTimestamp, query, limitToLast } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+  import { getStorage, ref as sref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js';
+
+  
+const firebaseConfig = {
+  apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
+  authDomain: "x-code-chat.firebaseapp.com",
+  databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "x-code-chat",
+  storageBucket: "x-code-chat.firebasestorage.app",
+  messagingSenderId: "819845037951",
+  appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
+};
+
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const storage = getStorage(app);
+
+  const MIN_CODE = 1;
+  const MAX_CODE = 320;
+
+  const loginCard = document.getElementById('loginCard');
+  const chatCard = document.getElementById('chatCard');
+  const btnEntrar = document.getElementById('btnEntrar');
+  const codigoInput = document.getElementById('codigoInput');
+  const loginMsg = document.getElementById('loginMsg');
+
+  const chatBox = document.getElementById('chatBox');
+  const textInput = document.getElementById('textInput');
+  const fileInput = document.getElementById('fileInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const youAre = document.getElementById('youAre');
+
+  let myCode = null;
+
+  function isValidCode(code) {
+    return Number.isInteger(code) && code >= MIN_CODE && code <= MAX_CODE;
+  }
+
+  btnEntrar.addEventListener('click', () => {
+    const code = parseInt(codigoInput.value, 10);
+    if(!isValidCode(code)) {
+      loginMsg.style.color = '#ff5c5c';
+      loginMsg.textContent = 'Código no válido. Debe estar entre ' + MIN_CODE + ' y ' + MAX_CODE + '.';
+      return;
+    }
+    myCode = code;
+    youAre.textContent = 'Estás chateando como: ' + myCode;
+    loginCard.classList.add('hidden');
+    chatCard.classList.remove('hidden');
+    iniciarChat();
+  });
+
+  function renderMessage(msg) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + (msg.code === myCode ? 'me' : 'other');
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+
+    if (msg.text) {
+      const t = document.createElement('div');
+      t.textContent = msg.text;
+      bubble.appendChild(t);
+    }
+
+    if (msg.imageUrl) {
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'imgmsg';
+      const img = document.createElement('img');
+      img.src = msg.imageUrl;
+      img.alt = 'imagen';
+      imgWrap.appendChild(img);
+      bubble.appendChild(imgWrap);
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const when = msg.time ? new Date(msg.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+    meta.textContent = (msg.code || '?') + ' · ' + when;
+    bubble.appendChild(meta);
+
+    div.appendChild(bubble);
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function iniciarChat() {
+    const messagesRef = query(ref(db, 'rooms/global/messages'), limitToLast(200));
+    onChildAdded(messagesRef, (snapshot) => {
+      const data = snapshot.val();
+      renderMessage(data);
+    });
+
+    sendBtn.addEventListener('click', async () => {
+      await enviarMensaje();
+    });
+    textInput.addEventListener('keydown', async (e) => {
+      if(e.key === 'Enter') {
+        await enviarMensaje();
+      }
+    });
+  }
+
+  async function enviarMensaje() {
+    const text = textInput.value.trim();
+    const file = fileInput.files[0];
+
+    if(!text && !file) return;
+
+    let imageUrl = null;
+    if (file) {
+      const path = `uploads/{myCode}/{Date.now()}_{file.name}`.replace(/{|}/g,'');
+      const fileRef = sref(storage, path);
+      await uploadBytes(fileRef, file);
+      imageUrl = await getDownloadURL(fileRef);
+      fileInput.value = '';
+    }
+
+    await push(ref(db, 'rooms/global/messages'), {
+      code: myCode,
+      text: text || null,
+      imageUrl: imageUrl || null,
+      time: Date.now()
+    });
+
+    textInput.value = '';
+  }
+</script>
+</body>
+</html>
