@@ -13,7 +13,7 @@
       margin:0; background:#000; color:#fff;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
-    .wrap{ max-width:900px; margin:0 auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+    .wrap{ max-width:900px; margin:0 auto; padding:16px; display:flex; flex-direction:column; gap:12px; min-height:100vh; }
     .card{ border:1px solid var(--line); border-radius:16px; background:rgba(255,255,255,0.02); padding:14px; }
     .header{ display:flex; align-items:center; gap:12px; }
     .logo{
@@ -25,7 +25,8 @@
     h1{ margin:0; font-size:22px; line-height:1.1; font-weight:700; }
     .sub{ margin:4px 0 0 0; font-size:13px; color:var(--muted); }
     /* Login centrado */
-    .loginBox{ display:grid; grid-template-columns:1fr; gap:10px; max-width:560px; margin:8px auto 4px; }
+    .loginBox{ display:grid; grid-template-columns:1fr; gap:10px; max-width:560px; margin:8px auto; }
+    .centerLogin{ flex:1; display:flex; align-items:center; justify-content:center; }
     input, button, select{
       border-radius:12px; padding:14px; font-size:16px; outline:none;
     }
@@ -78,14 +79,16 @@
         </div>
       </div>
       <!-- LOGIN -->
-      <div id="login" class="loginBox">
-        <p class="sub" id="loginHelp">Acceso con <b>número</b> y <b>PIN</b>. Si es tu primer acceso, el PIN se genera automáticamente.</p>
-        <input id="inpNum" type="number" inputmode="numeric" min="0" placeholder="Tu número (ej. 70)">
-        <input id="inpPin" type="password" placeholder="Tu PIN (si ya tienes) · Admin: contraseña">
-        <div class="row">
-          <button id="btnEnter">Entrar</button>
+      <div class="centerLogin" id="loginWrap">
+        <div id="login" class="loginBox">
+          <p class="sub" id="loginHelp">Acceso con <b>número</b> y <b>PIN</b>. Si es tu primer acceso, el PIN se genera automáticamente.</p>
+          <input id="inpNum" type="number" inputmode="numeric" min="0" placeholder="Tu número (ej. 70)">
+          <input id="inpPin" type="password" placeholder="Tu PIN (si ya tienes)">
+          <div class="row">
+            <button id="btnEnter">Entrar</button>
+          </div>
+          <p id="loginMsg" class="sub" style="margin:0"></p>
         </div>
-        <p id="loginMsg" class="sub" style="margin:0"></p>
       </div>
     </div>
 
@@ -151,6 +154,7 @@
   const db  = getDatabase(app);
 
   // ===== UI refs =====
+  const loginWrap= document.getElementById('loginWrap');
   const login    = document.getElementById('login');
   const chat     = document.getElementById('chat');
   const admin    = document.getElementById('admin');
@@ -222,14 +226,14 @@
     selRoom.value = state.room;
   }
   async function ensureRoomMeta(r){
-    await update(ref(db,`roomsMeta/${r}`),{ name:r, updatedAt:Date.now() });
+    await update(ref(db,`roomsMeta/${r}`),{ name:r, updatedAt: Date.now() });
   }
 
   // ===== Auto re-login (persistente) =====
   (async function boot(){
     await ensureRoomMeta(state.room);
     if(state.me && state.role){
-      show(login,false);
+      show(loginWrap,false);
       show(chat,true);
       btnLogout.style.display='inline-block';
       if(state.role==='admin'){ show(admin,true); roomsBar.style.display='flex'; refreshRooms(); }
@@ -241,7 +245,7 @@
   })();
 
   function centerLogin(){
-    show(login,true); show(chat,false); show(admin,false);
+    show(loginWrap,true); show(chat,false); show(admin,false);
     roomsBar.style.display='none';
     btnLogout.style.display='none';
     setTimeout(()=>{ login.scrollIntoView({block:'center'}); }, 10);
@@ -253,7 +257,7 @@
       inpPin.placeholder = 'Contraseña admin';
       loginHelp.textContent = 'Acceso admin: usa el número 0 y la contraseña.';
     }else{
-      inpPin.placeholder = 'Tu PIN (si ya tienes) · Admin: contraseña';
+      inpPin.placeholder = 'Tu PIN (si ya tienes)';
       loginHelp.innerHTML = 'Acceso con <b>número</b> y <b>PIN</b>. Si es tu primer acceso, el PIN se genera automáticamente.';
     }
   });
@@ -268,7 +272,7 @@
     if(code === '0'){ // admin sin PIN
       if(pin !== ADMIN_PASSWORD){ loginMsg.textContent='Contraseña admin incorrecta.'; return; }
       state.me='0'; state.role='admin'; state.pin=''; save();
-      show(login,false); show(chat,true); show(admin,true); roomsBar.style.display='flex'; btnLogout.style.display='inline-block';
+      show(loginWrap,false); show(chat,true); show(admin,true); roomsBar.style.display='flex'; btnLogout.style.display='inline-block';
       await refreshRooms();
       attach(); return;
     }
@@ -302,7 +306,7 @@
       state.sess = newSess;
 
       state.me = code; state.role='user'; state.pin = pin; save();
-      show(login,false); show(chat,true); show(admin,false); roomsBar.style.display='none'; btnLogout.style.display='inline-block';
+      show(loginWrap,false); show(chat,true); show(admin,false); roomsBar.style.display='none'; btnLogout.style.display='inline-block';
       attach();
     }
   });
@@ -346,6 +350,7 @@
     // mensajes
     const mref = ref(db, `rooms/${state.room}/messages`);
     state.subs.msgsOff = onValue(mref, (snap)=>{
+      const wasAtBottom = (scrollEl.scrollTop + scrollEl.clientHeight + 10) >= scrollEl.scrollHeight;
       msgsEl.innerHTML = '';
       const arr = [];
       if(snap.exists()){
@@ -369,6 +374,7 @@
         hasAny = true;
       }
       if(hasAny) welcome.style.display='none';
+      // auto scroll siempre al final (según tu petición)
       stick();
     });
 
@@ -389,7 +395,7 @@
           row.innerHTML = `
             <div>#${id}</div>
             <div class="status">PIN: <b>${u.pin||'—'}</b> · ${u.active===false?'<span style="color:#ffbebe">Desactivado</span>':'Activo'}</div>
-            <button class="ghost" data-act="${u.active===false?'activar':'desactivar'}" data-id="${id}">${u.active===false?'Activar':'Desactivar'}</button>
+            <button class="ghost" data-act="${u.active===false?'activar':'desactivar'}" data-id="${id}" style="border-color:${u.active===false?'#ff6b6b':'#77ff77'};color:${u.active===false?'#ff6b6b':'#77ff77'}">${u.active===false?'Activar':'Desactivar'}</button>
             <button class="" data-kick="${id}">Desconectar</button>
           `;
           usersBox.appendChild(row);
@@ -491,3 +497,4 @@
 </script>
 </body>
 </html>
+
