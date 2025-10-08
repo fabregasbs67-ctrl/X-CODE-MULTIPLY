@@ -1,135 +1,155 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>X Code — Verificación de Match</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background-color: #1a1a1a; /* fondo gris oscuro */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    color: #d9c8a9; /* beige elegante */
+  :root{
+    --beige:#d9c8a9;
+    --bg:#1a1a1a;       /* fondo general gris oscuro */
+    --panel:#000000;    /* panel negro */
+    --ok:#00d084;
+    --no:#ff5c5c;
   }
-
-  .container {
-    background-color: #000000; /* panel negro */
-    border: 1px solid #d9c8a9;
-    border-radius: 12px;
-    padding: 40px 50px;
-    box-shadow: 0 0 20px rgba(217, 200, 169, 0.2);
-    text-align: center;
-    width: 90%;
-    max-width: 400px;
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--beige);
+             font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
+  .wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 14px; }
+  .card{ width:100%; max-width:420px; background:var(--panel); color:var(--beige);
+          border:1px solid rgba(217,200,169,.55); border-radius:14px; text-align:center;
+          box-shadow:0 14px 44px rgba(0,0,0,.55); padding:22px 18px 24px; }
+  .logo{ width:70px; height:70px; margin:2px auto 10px; display:block; }
+  h1{ margin:6px 0 14px; font-size:18px; font-weight:600; letter-spacing:.15px; }
+  .inputs{ display:flex; gap:10px; justify-content:center; margin-top:8px; }
+  input[type=number]{
+    width:46%; max-width:160px; padding:10px; text-align:center; border-radius:10px;
+    border:1px solid rgba(217,200,169,.7); background:#0a0a0a; color:#fff; font-size:16px; outline:none;
+    appearance: textfield; -moz-appearance: textfield;
   }
+  input::placeholder{ color:#7f7f7f; }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+  button{ background:var(--beige); color:#000; border:none; font-weight:700; padding:10px 18px;
+           border-radius:10px; cursor:pointer; margin-top:12px; }
+  button:disabled{ opacity:.6; cursor:not-allowed; }
+  #hint{ margin-top:10px; color:#aaaaaa; font-size:12px; min-height:16px }
+  #res{ margin-top:14px; font-weight:800; font-size:17px; min-height:26px }
+  .ok{ color:var(--ok) } .no{ color:var(--no) }
 
-  img.logo {
-    width: 80px; /* logo más pequeño */
-    margin-bottom: 15px;
-  }
-
-  h1 {
-    font-size: 1.2rem;
-    margin-bottom: 25px;
-    font-weight: 600;
-  }
-
-  input {
-    width: 90px;
-    text-align: center;
-    margin: 5px;
-    padding: 8px 0;
-    border-radius: 6px;
-    border: 1px solid #d9c8a9;
-    background-color: #111;
-    color: #d9c8a9;
-    font-size: 1rem;
-  }
-
-  button {
-    margin-top: 15px;
-    background-color: #d9c8a9;
-    color: #000;
-    font-weight: 600;
-    padding: 8px 25px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-
-  button:hover {
-    background-color: #c9b899;
-  }
-
-  #resultado {
-    margin-top: 20px;
-    font-size: 1rem;
+  @media (max-width:420px){
+    .card{ padding:20px 16px }
+    h1{ font-size:17px }
+    #res{ font-size:16px }
   }
 </style>
 </head>
 <body>
-  <div class="container">
-    <img src="https://raw.githubusercontent.com/fabregasbs67-ctrl/X-CODE-MULTIPLY/main/xcode_logo.png" alt="X Code Logo" class="logo" />
-    <h1>X Code — Verificación de Match</h1>
+  <div class="wrap">
+    <div class="card">
+      <!-- Logo preferente desde 'logo.png' si el repo lo tiene; fallback a SVG si no carga -->
+      <img id="imglogo" src="logo.png" class="logo" alt="X Code Logo" onerror="this.style.display='none'; document.getElementById('svglogo').style.display='block';">
+      <svg id="svglogo" class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
+        <defs>
+          <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stop-color="#e7d8bb"/>
+            <stop offset="100%" stop-color="#bfae8a"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="42" fill="none" stroke="url(#g)" stroke-width="5"/>
+        <path d="M35 28 L50 50 L65 72 M65 28 L50 50 L35 72" stroke="url(#g)" stroke-width="7" stroke-linecap="round" fill="none"/>
+      </svg>
 
-    <input type="number" id="num1" placeholder="" />
-    <input type="number" id="num2" placeholder="" />
-    <br>
-    <button onclick="verificarMatch()">Verificar</button>
-    <p id="resultado">Cargando datos...</p>
+      <h1>X Code — Verificación de Match</h1>
+
+      <div class="inputs">
+        <input id="n1" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="">
+        <input id="n2" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="">
+      </div>
+
+      <button id="btn" disabled>Verificar</button>
+      <div id="hint">Cargando datos…</div>
+      <div id="res"></div>
+    </div>
   </div>
 
-  <script>
-    let parejas = [];
+<script>
+  // URL CSV pública EXACTA con gid de la hoja 'Parejas'
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTjnhmP38eh73oT-3DTwDmqTKBL9ErGsbOCRU62gyhZ25qneFNuugkW8FB8bKb4sg/pub?gid=819499349&single=true&output=csv";
 
-    async function cargarDatos() {
-      const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTjnhmP38eh73oT-3DTwDmqTKBL9ErGsbOCRU62gyhZ25qneFNuugkW8FB8bKb4sg/pub?output=csv";
-      const respuesta = await fetch(url);
-      const texto = await respuesta.text();
-      const filas = texto.split("\n").slice(1);
+  let parejasSet = null;
 
-      parejas = filas.map(f => {
-        const celdas = f.split(",");
-        return {
-          n1: celdas[2]?.trim(),
-          n2: celdas[3]?.trim()
-        };
-      });
-
-      document.getElementById("resultado").textContent = "";
+  function parseCSVRow(line){
+    const out=[]; let cur="", inQ=false;
+    for(let i=0;i<line.length;i++){ const ch=line[i];
+      if(ch==='"'){ if(inQ && line[i+1]==='"'){cur+='"'; i++;} else inQ=!inQ; }
+      else if(ch===',' && !inQ){ out.push(cur); cur=""; }
+      else cur+=ch;
     }
+    out.push(cur); return out;
+  }
+  const toInt = v => { if(v==null) return null; const t=String(v).replace(/"/g,"").trim(); if(!t) return null; const n=parseInt(t,10); return Number.isFinite(n)?n:null; };
 
-    async function verificarMatch() {
-      const num1 = document.getElementById("num1").value.trim();
-      const num2 = document.getElementById("num2").value.trim();
-      const resultado = document.getElementById("resultado");
+  async function loadCSV(){
+    const h=document.getElementById('hint');
+    const btn=document.getElementById('btn');
+    try{
+      const resp = await fetch(CSV_URL, { cache:'no-store' });
+      const text = await resp.text();
+      const lines = text.trim().split(/\r?\n/);
+      if(lines.length<=1) throw new Error('CSV vacío');
 
-      if (!num1 || !num2) {
-        resultado.textContent = "Introduce ambos números ⚠️";
-        resultado.style.color = "#f66";
-        return;
+      const header = parseCSVRow(lines[0]).map(h=>h.trim().toLowerCase());
+      const idxMin = header.indexOf('min');
+      const idxMax = header.indexOf('max');
+      const idxN1  = header.indexOf('numero1');
+      const idxN2  = header.indexOf('numero2');
+
+      if ((idxMin===-1 || idxMax===-1) && (idxN1===-1 || idxN2===-1))
+        throw new Error('Faltan columnas Min/Max o Numero1/Numero2');
+
+      const set = new Set();
+      for(let i=1;i<lines.length;i++){
+        const row = parseCSVRow(lines[i]); if(!row.length) continue;
+        let a=null,b=null;
+        if(idxMin!==-1 && idxMax!==-1){
+          a = toInt(row[idxMin]); b = toInt(row[idxMax]);
+        } else {
+          const n1 = toInt(row[idxN1]); const n2 = toInt(row[idxN2]);
+          if(n1==null || n2==null) continue; a = Math.min(n1,n2); b = Math.max(n1,n2);
+        }
+        if(a==null || b==null) continue;
+        set.add(a<b ? `${a}|${b}` : `${b}|${a}`);
       }
-
-      const match = parejas.some(p => 
-        (p.n1 === num1 && p.n2 === num2) || (p.n1 === num2 && p.n2 === num1)
-      );
-
-      if (match) {
-        resultado.textContent = "🔥 ¡MATCH PERFECTO!";
-        resultado.style.color = "#00ff9d";
-      } else {
-        resultado.textContent = "😅 No es tu match";
-        resultado.style.color = "#ff5555";
-      }
+      parejasSet = set;
+      h.textContent = "";
+      btn.disabled = false;
+    } catch(e){
+      console.error(e);
+      h.textContent = "Error cargando datos. Revisa que la hoja esté publicada como CSV y el gid sea el correcto.";
     }
+  }
 
-    cargarDatos();
-  </script>
+  function verificar(){
+    const res=document.getElementById('res');
+    const a = toInt(document.getElementById('n1').value);
+    const b = toInt(document.getElementById('n2').value);
+
+    if(!parejasSet){ res.textContent='Cargando datos…'; res.className=''; return; }
+    if(a==null || b==null){ res.className=''; res.style.color='#eaeaea'; res.textContent='Introduce ambos números'; return; }
+    if(a===b){ res.className='no'; res.textContent='No es tu match 😅'; return; }
+
+    const key = a<b ? `${a}|${b}` : `${b}|${a}`;
+    const ok = parejasSet.has(key);
+    res.className = ok ? 'ok' : 'no';
+    res.textContent = ok ? '🔥 ¡MATCH PERFECTO! 🔥' : 'No es tu match 😅';
+  }
+
+  document.getElementById('btn').addEventListener('click', verificar);
+  document.getElementById('n1').addEventListener('keyup', e=>{ if(e.key==='Enter') verificar(); });
+  document.getElementById('n2').addEventListener('keyup', e=>{ if(e.key==='Enter') verificar(); });
+
+  loadCSV();
+</script>
 </body>
 </html>
 
