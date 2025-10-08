@@ -1,53 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
   <title>X Code Chat — Official</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root{ --bg:#000; --fg:#fff; --gold1:#f1d27a; --gold2:#b58e2b; }
-    *{box-sizing:border-box}
-    html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    /* Header minimal */
-    .header{display:flex;align-items:center;gap:12px;padding:14px 16px;position:sticky;top:0;background:#000;z-index:10;border-bottom:1px solid #111}
-    .logo{width:34px;height:auto;flex:0 0 auto}
-    .ttl{margin:0; font-size:18px; font-weight:600; line-height:1.1}
-    .sub{font-size:12px;opacity:.9}
-    .sp{flex:1}
-    .btn{appearance:none;border:none;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
-    .btn-primary{background:#fff;color:#000}
-    .btn-ghost{background:transparent;color:#fff;border:1px solid #fff}
-    .input, .pin, .text{width:100%;padding:12px 14px;border:1px solid #fff;border-radius:10px;background:#000;color:#fff;font-size:16px}
-    /* Login centrado vertical y horizontal */
-    .login-wrap{min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:16px}
-    .login{display:flex;flex-direction:column;gap:12px;max-width:720px;width:100%}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media (max-width:560px){ .row{grid-template-columns:1fr} }
-    .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .help{font-size:12px;opacity:.9}
-    .err{color:#ff6b6b} .ok{color:#00ffa3}
-    /* Chat */
-    .chat{display:flex;flex-direction:column;gap:0;max-width:860px;margin:0 auto;padding:0 12px 16px 12px}
-    .banner{display:none; text-align:center; padding:10px 12px; margin-top:10px; border:1px solid #fff; border-radius:10px}
-    .list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:12px 0;min-height:60vh}
-    .msg{max-width:85%;border:1px solid #fff;border-radius:12px;padding:8px 12px;line-height:1.4;font-size:15px;word-wrap:break-word;background:#000}
-    .me{align-self:flex-end;background:#111}
-    .other{align-self:flex-start}
-    .org{border-color:var(--gold1)}
-    .meta{font-size:11px;opacity:.8;margin-top:4px}
-    .compose{display:flex;gap:8px;padding:10px 0;position:sticky;bottom:0;background:#000}
-    .hint{font-size:12px;opacity:.85;text-align:center;padding:6px 0}
-    /* Admin panel (solo organizador) */
-    #adminPanel{max-width:860px;margin:0 auto;padding:10px 12px 16px 12px;border-top:1px solid #111}
-    #usersTable table{width:100%;border-collapse:collapse;color:#fff;font-size:14px}
-    #usersTable th,#usersTable td{border-bottom:1px solid #222;padding:6px;text-align:left}
-    .admin-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
-    .small{font-size:12px;opacity:.85}
+    *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+    html,body{ margin:0; height:100%; background:#000; color:#fff; font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+    .header{ display:flex; align-items:center; gap:12px; padding:14px 16px; position:sticky; top:0; background:#000; z-index:10; border-bottom:1px solid #111; }
+    .logo{ width:30px; height:auto; flex:0 0 auto }
+    @media (min-width:540px){ .logo{ width:34px } }
+    .ttl{ margin:0; font-size:18px; font-weight:600; line-height:1.1 }
+    .sub{ font-size:12px; opacity:.9 }
+    .sp{ flex:1 }
+    .btn{ appearance:none; border:none; border-radius:12px; padding:12px 14px; font-weight:600; cursor:pointer; line-height:1 }
+    .btn-primary{ background:#fff; color:#000 }
+    .btn-ghost{ background:transparent; color:#fff; border:1px solid #fff }
+    .btn-danger{ background:transparent; color:#ff6b6b; border:1px solid #ff6b6b }
+    .btn-success{ background:transparent; color:#00ffa3; border:1px solid #00ffa3 }
+    .input,.pin,.text,.select{ width:100%; padding:14px 16px; border:1px solid #fff; border-radius:12px; background:#000; color:#fff; font-size:16px }
+    .select{ appearance:none }
+    @media (max-width:380px){ .input,.pin,.text,.select{ font-size:15px; padding:12px 14px } .btn{ padding:11px 13px } }
+    .login-wrap{ min-height:calc(100vh - 64px); display:flex; align-items:center; justify-content:center; padding:16px }
+    .login{ display:flex; flex-direction:column; gap:12px; max-width:760px; width:100% }
+    .row{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+    @media (max-width:560px){ .row{ grid-template-columns:1fr } }
+    .actions{ display:flex; gap:8px; flex-wrap:wrap }
+    .help{ font-size:12px; opacity:.9 }
+    .err{ color:#ff6b6b } .ok{ color:#00ffa3 }
+    .chat{ display:flex; flex-direction:column; gap:0; max-width:900px; margin:0 auto; padding:0 12px 16px 12px }
+    .banner{ display:none; text-align:center; padding:10px 12px; margin-top:10px; border:1px solid #fff; border-radius:12px }
+    .list{ flex:1; overflow:auto; display:flex; flex-direction:column; gap:8px; padding:12px 0; min-height:56vh; scroll-behavior:smooth }
+    .msg{ max-width:92%; border:1px solid #fff; border-radius:14px; padding:10px 12px; line-height:1.45; font-size:15px; word-wrap:break-word; background:#000 }
+    .me{ align-self:flex-end; background:#111 }
+    .other{ align-self:flex-start }
+    .org{ border-color:var(--gold1) }
+    .meta{ font-size:11px; opacity:.8; margin-top:4px }
+    .compose{ display:flex; gap:8px; padding:10px 0; position:sticky; bottom:0; background:#000 }
+    .compose .text{ flex:1 }
+    .hint{ font-size:12px; opacity:.85; text-align:center; padding:6px 0 }
+    #adminPanel{ max-width:900px; margin:0 auto; padding:10px 12px 16px 12px; border-top:1px solid #111 }
+    #usersTable table{ width:100%; border-collapse:collapse; color:#fff; font-size:14px }
+    #usersTable th,#usersTable td{ border-bottom:1px solid #222; padding:8px 6px; text-align:left }
+    .admin-controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:10px 0 }
+    .small{ font-size:12px; opacity:.85 }
+    .rooms-row{ display:grid; grid-template-columns:1fr auto auto auto; gap:8px; margin-top:8px }
+    @media (max-width:640px){ .rooms-row{ grid-template-columns:1fr; } }
+    body{ padding-bottom: env(safe-area-inset-bottom) }
   </style>
 </head>
 <body>
-  <!-- HEADER -->
   <div class="header">
     <img src="images/logo.png" class="logo" alt="X Code Logo" onerror="this.style.display='none';document.getElementById('fallbackLogo').style.display='block'">
     <svg id="fallbackLogo" class="logo" viewBox="0 0 100 100" style="display:none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -60,14 +64,19 @@
       <div class="sub" id="youAreTop">Sala: X Code</div>
     </div>
     <div class="sp"></div>
-    <button id="logoutBtn" class="btn btn-ghost" style="display:none">Salir</button>
+    <button id="logoutBtn" class="btn btn-primary" style="display:none">Salir</button>
   </div>
 
-  <!-- LOGIN -->
   <section id="loginWrap" class="login-wrap">
     <div id="loginView" class="login">
-      <div class="help">Acceso con <b>número</b> y <b>PIN</b>. Si es tu primer acceso, el PIN se genera automáticamente. (Organizador: usa el número <b>0</b> y contraseña).</div>
       <div class="row">
+        <select id="roomSelect" class="select"></select>
+        <div class="actions">
+          <button id="refreshRooms" class="btn btn-ghost">Actualizar salas</button>
+        </div>
+      </div>
+      <div class="help" id="roomsHelp">Elige una sala para entrar al chat.</div>
+      <div class="row" style="margin-top:8px">
         <input id="codeInput" class="input" type="number" min="0" max="320" placeholder="Tu número (ej. 70)">
         <input id="pinInput" class="pin" type="number" inputmode="numeric" placeholder="Tu PIN (si ya tienes)">
       </div>
@@ -79,7 +88,6 @@
     </div>
   </section>
 
-  <!-- CHAT -->
   <section id="chatView" class="chat" style="display:none">
     <div id="welcomeBanner" class="banner">✨ Bienvenido a X Code Chat — Official ✨</div>
     <div class="list" id="list"></div>
@@ -90,32 +98,38 @@
     <div class="hint">Público: escribe normal · Privado: <b>@120 hola</b> (solo lo verá el 120)</div>
   </section>
 
-  <!-- ADMIN: solo visible para organizador (número 0) -->
   <section id="adminPanel" style="display:none">
     <h3 style="margin:0 0 6px 0">Panel del organizador</h3>
     <div id="adminMsg" class="small"></div>
-
+    <div class="admin-controls" style="border-top:1px solid #111; padding-top:10px">
+      <div class="small">Sala actual:</div>
+      <select id="roomAdminSelect" class="select" style="max-width:260px"></select>
+      <button id="roomUseBtn" class="btn btn-primary">Usar sala</button>
+    </div>
+    <div class="rooms-row">
+      <input id="roomNameInput" class="input" placeholder="Nombre de sala (ej. X Code · 1ª Edición)">
+      <button id="roomAddBtn" class="btn btn-success">Añadir</button>
+      <button id="roomEditBtn" class="btn btn-ghost">Renombrar</button>
+      <button id="roomDelBtn" class="btn btn-danger">Eliminar</button>
+    </div>
     <div class="admin-controls">
-      <div class="small">Mensajes automáticos cada</div>
+      <div class="small">Mensajes automáticos:</div>
+      <button id="autoToggle" class="btn btn-ghost">Mensajes auto ON/OFF</button>
+      <div class="small">cada</div>
       <input id="autoEvery" type="number" class="input" style="max-width:90px" min="1" value="10">
       <div class="small">min</div>
-      <button id="autoStart" class="btn btn-primary">Activar</button>
-      <button id="autoStop" class="btn btn-ghost">Pausar</button>
     </div>
-
     <div class="admin-controls" style="margin-top:0">
       <input id="orgText" class="text" placeholder="Mensaje global (aparecerá para todos)">
       <button id="orgSend" class="btn btn-primary">Publicar</button>
     </div>
-
     <div id="usersTable" style="max-height:260px; overflow:auto; margin-top:10px;"></div>
   </section>
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-  import { getDatabase, ref, get, set, push, onChildAdded, query, limitToLast, onDisconnect, remove, update } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+  import { getDatabase, ref, get, set, push, onChildAdded, query, limitToLast, onDisconnect, remove, update, onValue } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
-  // Firebase config (tu proyecto)
   const firebaseConfig = {
     apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
     authDomain: "x-code-chat.firebaseapp.com",
@@ -126,58 +140,143 @@
     appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  const EVENT_ID = "primera_edicion_x_code";
-  const MIN = 0, MAX = 320; // 0 = organizador
+  const DEFAULT_ROOM = "X Code";
   const ADMIN_PASSWORD = "131215";
+  const MIN = 0, MAX = 320;
 
-  // UI
-  const loginWrap = document.getElementById('loginWrap');
-  const loginView = document.getElementById('loginView');
-  const chatView  = document.getElementById('chatView');
-  const codeInput = document.getElementById('codeInput');
-  const pinInput  = document.getElementById('pinInput');
-  const loginMsg  = document.getElementById('loginMsg');
-  const enterBtn  = document.getElementById('enterBtn');
-  const showPinBtn= document.getElementById('showPinBtn');
-
-  const youAreTop = document.getElementById('youAreTop');
-  const list      = document.getElementById('list');
-  const textInput = document.getElementById('textInput');
-  const sendBtn   = document.getElementById('sendBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const welcomeBanner = document.getElementById('welcomeBanner');
-
-  // Admin UI
-  const adminPanel = document.getElementById('adminPanel');
-  const adminMsg   = document.getElementById('adminMsg');
-  const usersTable = document.getElementById('usersTable');
-  const orgText    = document.getElementById('orgText');
-  const orgSend    = document.getElementById('orgSend');
-  const autoEvery  = document.getElementById('autoEvery');
-  const autoStart  = document.getElementById('autoStart');
-  const autoStop   = document.getElementById('autoStop');
-
-  // Estado
+  let CURRENT_ROOM = localStorage.getItem('xcode_current_room') || DEFAULT_ROOM;
   let myCode = null;
   let myPIN  = null;
   let mySessionId = null;
   let isOrganizer = false;
   let autoTimer = null;
 
-  // Helpers
-  const validCode = n => Number.isInteger(n) && n>=MIN && n<=MAX;
-  const rndPIN = () => String(Math.floor(1000 + Math.random()*9000)); // 4 dígitos
-  const pinKey  = c => `xcode_pin_${EVENT_ID}_${c}`;
-  const sessKey = c => `xcode_session_${EVENT_ID}_${c}`;
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-  // Auto-login si hay datos
+  const youAreTop = document.getElementById('youAreTop');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginWrap = document.getElementById('loginWrap');
+  const chatView  = document.getElementById('chatView');
+  const welcomeBanner = document.getElementById('welcomeBanner');
+
+  const roomSelect = document.getElementById('roomSelect');
+  const refreshRooms = document.getElementById('refreshRooms');
+  const roomAdminSelect = document.getElementById('roomAdminSelect');
+  const roomUseBtn = document.getElementById('roomUseBtn');
+  const roomNameInput = document.getElementById('roomNameInput');
+  const roomAddBtn = document.getElementById('roomAddBtn');
+  const roomEditBtn = document.getElementById('roomEditBtn');
+  const roomDelBtn = document.getElementById('roomDelBtn');
+
+  const codeInput = document.getElementById('codeInput');
+  const pinInput = document.getElementById('pinInput');
+  const loginMsg = document.getElementById('loginMsg');
+  const enterBtn = document.getElementById('enterBtn');
+  const showPinBtn= document.getElementById('showPinBtn');
+
+  const list = document.getElementById('list');
+  const textInput = document.getElementById('textInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  const adminPanel = document.getElementById('adminPanel');
+  const adminMsg = document.getElementById('adminMsg');
+  const usersTable = document.getElementById('usersTable');
+  const orgText = document.getElementById('orgText');
+  const orgSend = document.getElementById('orgSend');
+  const autoEvery = document.getElementById('autoEvery');
+  const autoToggle = document.getElementById('autoToggle');
+
+  const validCode = n => Number.isInteger(n) && n>=MIN && n<=MAX;
+  const rndPIN = () => String(Math.floor(1000 + Math.random()*9000));
+  const pinKey  = (room,c) => `xcode_pin_${room}_${c}`;
+  const sessKey = (room,c) => `xcode_session_${room}_${c}`;
+
+  async function ensureDefaultRoom(){
+    const rRef = ref(db, `roomsMeta/list/${DEFAULT_ROOM}`);
+    const s = await get(rRef);
+    if(!s.exists()){
+      await set(rRef, { createdAt: Date.now() });
+    }
+  }
+  function renderRoomsSelects(rooms, el){
+    el.innerHTML = '';
+    const names = Object.keys(rooms).sort();
+    names.forEach(n => {
+      const opt = document.createElement('option');
+      opt.value = n; opt.textContent = n;
+      if(n === CURRENT_ROOM) opt.selected = true;
+      el.appendChild(opt);
+    });
+    if(names.length===0){
+      const opt = document.createElement('option');
+      opt.value = DEFAULT_ROOM; opt.textContent = DEFAULT_ROOM;
+      el.appendChild(opt);
+    }
+  }
+  async function loadRooms(){
+    await ensureDefaultRoom();
+    const snap = await get(ref(db, `roomsMeta/list`));
+    const data = snap.exists()? snap.val() : { [DEFAULT_ROOM]: {createdAt: Date.now()} };
+    renderRoomsSelects(data, roomSelect);
+    renderRoomsSelects(data, roomAdminSelect);
+  }
+  function subscribeRoomsRealtime(){
+    onValue(ref(db, `roomsMeta/list`), snap=>{
+      const data = snap.exists()? snap.val() : { [DEFAULT_ROOM]: {createdAt: Date.now()} };
+      renderRoomsSelects(data, roomSelect);
+      renderRoomsSelects(data, roomAdminSelect);
+    });
+  }
+
+  refreshRooms.addEventListener('click', loadRooms);
+  roomSelect.addEventListener('change', ()=>{
+    CURRENT_ROOM = roomSelect.value;
+    localStorage.setItem('xcode_current_room', CURRENT_ROOM);
+    document.getElementById('youAreTop').textContent = `Sala: ${CURRENT_ROOM}`;
+  });
+  roomUseBtn.addEventListener('click', ()=>{
+    CURRENT_ROOM = roomAdminSelect.value;
+    localStorage.setItem('xcode_current_room', CURRENT_ROOM);
+    document.getElementById('youAreTop').textContent = `Sala: ${CURRENT_ROOM}`;
+    alert(`Usando sala: ${CURRENT_ROOM}`);
+  });
+  roomAddBtn.addEventListener('click', async ()=>{
+    const name = roomNameInput.value.trim();
+    if(!name) return;
+    await set(ref(db, `roomsMeta/list/${name}`), { createdAt: Date.now() });
+    roomNameInput.value = '';
+  });
+  roomEditBtn.addEventListener('click', async ()=>{
+    const oldName = roomAdminSelect.value;
+    const newName = prompt('Nuevo nombre de sala:', oldName);
+    if(!newName || newName===oldName) return;
+    const oldRef = ref(db, `roomsMeta/list/${oldName}`);
+    const oldDataSnap = await get(oldRef);
+    if(oldDataSnap.exists()){
+      const oldData = oldDataSnap.val();
+      await set(ref(db, `roomsMeta/list/${newName}`), oldData);
+      await remove(oldRef);
+      if(CURRENT_ROOM===oldName){ CURRENT_ROOM=newName; localStorage.setItem('xcode_current_room', CURRENT_ROOM); }
+    }
+  });
+  roomDelBtn.addEventListener('click', async ()=>{
+    const name = roomAdminSelect.value;
+    if(!confirm(`Eliminar sala "${name}"?`)) return;
+    await remove(ref(db, `roomsMeta/list/${name}`));
+    if(CURRENT_ROOM===name){ CURRENT_ROOM=DEFAULT_ROOM; localStorage.setItem('xcode_current_room', CURRENT_ROOM); }
+  });
+
+  loadRooms();
+  subscribeRoomsRealtime();
+  document.getElementById('youAreTop').textContent = `Sala: ${CURRENT_ROOM}`;
+
   (function tryAuto(){
+    const storedRoom = localStorage.getItem('xcode_current_room') || CURRENT_ROOM;
+    CURRENT_ROOM = storedRoom;
     const storedCode = localStorage.getItem('xcode_current_code');
-    const storedPin  = storedCode ? localStorage.getItem(pinKey(storedCode)) : null;
-    const storedSess = storedCode ? localStorage.getItem(sessKey(storedCode)) : null;
+    const storedPin  = storedCode ? localStorage.getItem(pinKey(CURRENT_ROOM, storedCode)) : null;
+    const storedSess = storedCode ? localStorage.getItem(sessKey(CURRENT_ROOM, storedCode)) : null;
     if(storedCode && storedPin){
       myCode = parseInt(storedCode,10);
       myPIN  = storedPin;
@@ -187,139 +286,120 @@
   })();
 
   enterBtn.addEventListener('click', ()=> startLoginFlow(false));
+  showPinBtn.addEventListener('click', ()=>{
+    const storedCode = localStorage.getItem('xcode_current_code');
+    const storedPin = storedCode ? localStorage.getItem(pinKey(CURRENT_ROOM, storedCode)) : null;
+    if(!storedCode || !storedPin){ loginMsg.textContent='No hay PIN guardado en este dispositivo.'; loginMsg.classList.add('err'); return; }
+    loginMsg.innerHTML = `Tu PIN es <b>${storedPin}</b>.`;
+    loginMsg.classList.remove('err');
+  });
 
   async function startLoginFlow(isAuto){
-    loginMsg.textContent = '';
+    loginMsg.textContent='';
     const code = isAuto ? myCode : parseInt(codeInput.value,10);
     const pin  = isAuto ? myPIN  : (pinInput.value.trim() || null);
+    if(!validCode(code)){ loginMsg.textContent='Código no válido.'; loginMsg.classList.add('err'); return; }
 
-    if(!validCode(code)){
-      loginMsg.textContent='Código no válido (0–320).'; loginMsg.classList.add('err'); return;
-    }
-
-    // Si es organizador (0), pedir contraseña admin (solo primer intento manual)
     if(code === 0 && !isAuto){
       const pass = prompt('Contraseña de organizador:');
       if(pass !== ADMIN_PASSWORD){ loginMsg.textContent='Contraseña admin incorrecta.'; loginMsg.classList.add('err'); return; }
       isOrganizer = true;
     }
 
-    const uRef = ref(db, `rooms/${EVENT_ID}/usuarios/${code}`);
+    const uRef = ref(db, `rooms/${CURRENT_ROOM}/usuarios/${code}`);
     const snap = await get(uRef);
 
     if(!snap.exists()){
-      // Primer acceso → generar PIN y NO entrar aún (mostrarlo primero)
-      const newPIN = rndPIN();
-      await set(uRef, { pin:newPIN, createdAt: Date.now(), welcomeShown: (code===0?true:false) });
-      myPIN = newPIN;
-      myCode = code;
+      const newPIN = (code===0 ? 'ORG' : rndPIN());
+      await set(uRef, { pin:newPIN, createdAt: Date.now(), welcomeShown: (code===0?true:false), activo: true });
+      myPIN = newPIN; myCode = code;
       localStorage.setItem('xcode_current_code', String(code));
-      localStorage.setItem(pinKey(code), newPIN);
-      loginMsg.innerHTML = `Tu PIN es <b>${newPIN}</b>. Se ha guardado en este dispositivo.<br>Vuelve a pulsar <b>Entrar</b> para acceder.`;
-      loginMsg.classList.remove('err');
-      return;
+      if(code!==0){ localStorage.setItem(pinKey(CURRENT_ROOM, code), newPIN); }
+      if(code!==0){
+        loginMsg.innerHTML = `Tu PIN es <b>${newPIN}</b>. Se ha guardado en este dispositivo.<br>Vuelve a pulsar <b>Entrar</b> para acceder.`;
+        loginMsg.classList.remove('err');
+        return;
+      }
     } else {
-      // Usuario existe: validar PIN (introducido o del dispositivo)
       const data = snap.val();
       const expectedPIN = String(data.pin || '');
-      const candidatePIN = pin || localStorage.getItem(pinKey(code));
+      const candidatePIN = (code===0) ? 'ORG' : (pin || localStorage.getItem(pinKey(CURRENT_ROOM, code)));
       if(code !== 0 && (!candidatePIN || String(candidatePIN)!==expectedPIN)){
-        loginMsg.textContent='PIN incorrecto o faltante. Pide tu PIN al organizador.';
-        loginMsg.classList.add('err');
-        return;
+        loginMsg.textContent='PIN incorrecto o faltante.'; loginMsg.classList.add('err'); return;
+      }
+      if(data.activo === false && code !== 0){
+        loginMsg.textContent='Tu usuario está desactivado por el organizador.'; loginMsg.classList.add('err'); return;
       }
       myPIN = (code===0 ? 'ORG' : expectedPIN); myCode = code;
       localStorage.setItem('xcode_current_code', String(code));
-      if(code!==0) localStorage.setItem(pinKey(code), expectedPIN);
-      await createSessionOrFail(code);
-      await openChat(data);
+      if(code!==0) localStorage.setItem(pinKey(CURRENT_ROOM, code), expectedPIN);
     }
+
+    await createSessionOrFail(code);
+    await openChat();
   }
 
   async function createSessionOrFail(code){
-    const sBase = ref(db, `rooms/${EVENT_ID}/activeSessions/${code}`);
+    const sBase = ref(db, `rooms/${CURRENT_ROOM}/activeSessions/${code}`);
     const curr = await get(sBase);
     if(curr.exists()){
       const data = curr.val();
       const existingId = data.sessionId;
-      const localId = localStorage.getItem(sessKey(code));
+      const localId = localStorage.getItem(sessKey(CURRENT_ROOM, code));
       if(existingId && localId && existingId===localId){ mySessionId = existingId; return; }
-      loginMsg.textContent='Este número ya está en uso ahora mismo. Intenta más tarde.';
-      loginMsg.classList.add('err');
-      throw new Error('locked');
+      loginMsg.textContent='Este número ya está en uso ahora mismo.'; loginMsg.classList.add('err'); throw new Error('locked');
     }
     const newId = `${code}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
     await set(sBase, { sessionId:newId, since: Date.now() });
     try { onDisconnect(sBase).remove(); } catch(e){}
     mySessionId = newId;
-    localStorage.setItem(sessKey(code), newId);
+    localStorage.setItem(sessKey(CURRENT_ROOM, code), newId);
   }
 
-  async function openChat(userData){
-    // UI
-    loginWrap.style.display='none';
-    chatView.style.display='block';
-    logoutBtn.style.display='inline-block';
-    youAreTop.textContent = `Sala: X Code · Tu código: ${myCode}`;
+  async function openChat(){
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('chatView').style.display='block';
+    document.getElementById('logoutBtn').style.display='inline-block';
+    youAreTop.textContent = `Sala: ${CURRENT_ROOM}`;
 
-    // Banner de bienvenida solo la primera vez (no para organizador)
-    if(myCode !== 0){
-      const welcome = userData && userData.welcomeShown ? true : false;
-      if(!welcome){
-        welcomeBanner.style.display = 'block';
-        setTimeout(()=>{ welcomeBanner.style.display='none'; }, 4500);
-        // marcar como mostrado
-        try {
-          await update(ref(db, `rooms/${EVENT_ID}/usuarios/${myCode}`), { welcomeShown: true });
-        } catch(e) { /* noop */ }
-      }
+    const uRef = ref(db, `rooms/${CURRENT_ROOM}/usuarios/${myCode}`);
+    const snap = await get(uRef);
+    const data = snap.exists()? snap.val() : null;
+    if(myCode !== 0 && data && !data.welcomeShown){
+      document.getElementById('welcomeBanner').style.display='block';
+      setTimeout(()=>{ document.getElementById('welcomeBanner').style.display='none'; }, 4500);
+      try{ await update(uRef, { welcomeShown:true }); }catch(e){}
     }
 
-    // Mostrar panel admin solo para organizador
-    if(myCode === 0 || isOrganizer){
-      adminPanel.style.display='block';
-      adminMsg.textContent = 'Conectado como organizador';
+    if(myCode === 0){
+      document.getElementById('adminPanel').style.display='block';
+      document.getElementById('adminMsg').textContent = `Organizador conectado · Sala: ${CURRENT_ROOM}`;
       await loadAllUsersForAdmin();
     } else {
-      adminPanel.style.display='none';
+      document.getElementById('adminPanel').style.display='none';
     }
 
     subscribeMessages();
   }
 
-  // Mostrar PIN del usuario actual (si existe en el dispositivo)
-  showPinBtn.addEventListener('click', ()=>{
-    const stored = localStorage.getItem('xcode_current_code');
-    const storedPin = stored ? localStorage.getItem(pinKey(stored)) : null;
-    if(!stored || !storedPin){ loginMsg.textContent = 'No hay PIN guardado en este dispositivo.'; loginMsg.classList.add('err'); return; }
-    loginMsg.innerHTML = `Tu PIN es <b>${storedPin}</b>.`;
-    loginMsg.classList.remove('err');
-  });
-
-  // Escucha de mensajes (últimos 200)
   function subscribeMessages(){
-    const messagesRef = query(ref(db, `rooms/${EVENT_ID}/messages`), limitToLast(200));
+    list.innerHTML='';
+    const messagesRef = query(ref(db, `rooms/${CURRENT_ROOM}/messages`), limitToLast(200));
     onChildAdded(messagesRef, (snap)=> renderMsg(snap.val()));
   }
-
-  // Render con soporte a privados (@número) y mensajes de organizador
   function renderMsg(m){
     const isMine = String(m.code)===String(myCode);
     const isToMe = m.to && String(m.to)===String(myCode);
     const isOrg = m.org === true;
-
     if(!isOrg && m.to && !isToMe && !isMine) return;
-
     const el = document.createElement('div');
     el.className = 'msg ' + (isOrg ? 'org' : (isMine ? 'me' : 'other'));
     const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
     const tag = isOrg ? ' · Organizador' : (m.to ? ` · Privado → #${m.to}` : '');
-    el.innerHTML = `<div>${(m.text||'').replace(/</g,'&lt;')}</div>
-                    <div class="meta">#${m.code||'ORG'} · ${time}${tag}</div>`;
+    el.innerHTML = `<div>${(m.text||'').replace(/</g,'&lt;')}</div><div class="meta">#${m.code||'ORG'} · ${time}${tag}</div>`;
     list.appendChild(el);
     list.scrollTop = list.scrollHeight;
   }
-
   function parsePrivateTarget(txt){
     const m = txt.match(/^@(\d+)\s+(.*)$/);
     if(!m) return null;
@@ -327,79 +407,92 @@
     if(!(num>=1 && num<=MAX)) return null;
     return { to:num, text:m[2] };
   }
-
   async function send(){
     const raw = textInput.value.trim();
     if(!raw) return;
+    if(myCode !== 0){
+      const uRef = ref(db, `rooms/${CURRENT_ROOM}/usuarios/${myCode}`);
+      const s = await get(uRef);
+      if(s.exists() && s.val().activo === false){
+        alert('No puedes enviar mensajes: usuario desactivado por el organizador.');
+        return;
+      }
+    }
     const parsed = parsePrivateTarget(raw);
-    const payload = parsed
-      ? { code: myCode, text: parsed.text, to: parsed.to, time: Date.now() }
-      : { code: myCode, text: raw, time: Date.now(), to: null };
-    await push(ref(db, `rooms/${EVENT_ID}/messages`), payload);
+    const payload = parsed ?
+      { code: myCode, text: parsed.text, to: parsed.to, time: Date.now() } :
+      { code: myCode, text: raw, time: Date.now(), to: null };
+    await push(ref(db, `rooms/${CURRENT_ROOM}/messages`), payload);
     textInput.value='';
   }
-
   sendBtn.addEventListener('click', send);
   textInput.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
 
-  // --- ADMIN ----
   async function loadAllUsersForAdmin(){
     usersTable.innerHTML = 'Cargando...';
-    const usersSnap = await get(ref(db, `rooms/${EVENT_ID}/usuarios`));
+    const usersSnap = await get(ref(db, `rooms/${CURRENT_ROOM}/usuarios`));
     if(!usersSnap.exists()){ usersTable.innerHTML = '<i>No hay usuarios</i>'; return; }
     const data = usersSnap.val();
-    let html = '<table><thead><tr><th>#</th><th>PIN</th><th>Acción</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>#</th><th>PIN</th><th>Estado</th><th>Acción</th></tr></thead><tbody>';
     for(const key of Object.keys(data).sort((a,b)=>parseInt(a)-parseInt(b))){
       const pin = data[key].pin || '';
-      html += `<tr><td>${key}</td><td>${pin}</td>
-               <td><button data-k="${key}" class="btn btn-ghost adminDisconnect">Desconectar</button></td></tr>`;
+      const act = (data[key].activo !== false);
+      const label = act ? 'Desactivar' : 'Activar';
+      const cls = act ? 'btn-danger' : 'btn-success';
+      html += `<tr><td>${key}</td><td>${pin}</td><td>${act ? 'Activo' : 'Inactivo'}</td>
+               <td><button data-k="${key}" class="btn ${cls} adminToggle">${label}</button></td></tr>`;
     }
     html += '</tbody></table>';
     usersTable.innerHTML = html;
 
-    document.querySelectorAll('.adminDisconnect').forEach(btn=>{
+    document.querySelectorAll('.adminToggle').forEach(btn=>{
       btn.addEventListener('click', async (e)=>{
         const k = e.currentTarget.dataset.k;
-        await remove(ref(db, `rooms/${EVENT_ID}/activeSessions/${k}`));
-        adminMsg.textContent = `Sesión #${k} desconectada (si existía).`;
+        const uRef = ref(db, `rooms/${CURRENT_ROOM}/usuarios/${k}`);
+        const s = await get(uRef);
+        const active = s.exists() ? (s.val().activo !== false) : true;
+        await update(uRef, { activo: !active });
+        if(active){
+          await remove(ref(db, `rooms/${CURRENT_ROOM}/activeSessions/${k}`));
+        }
         await loadAllUsersForAdmin();
       });
     });
   }
 
-  // Mensaje global de organizador
   orgSend.addEventListener('click', async ()=>{
     const txt = orgText.value.trim();
     if(!txt) return;
-    await push(ref(db, `rooms/${EVENT_ID}/messages`), { code: 0, text: txt, time: Date.now(), org: true });
+    await push(ref(db, `rooms/${CURRENT_ROOM}/messages`), { code: 0, text: txt, time: Date.now(), org: true });
     orgText.value='';
   });
 
-  // Mensajes automáticos (activación manual)
-  autoStart.addEventListener('click', ()=>{
+  let autoOn = false;
+  autoToggle.addEventListener('click', ()=>{
+    autoOn = !autoOn;
     const mins = Math.max(1, parseInt(autoEvery.value||'10',10));
-    if(autoTimer) clearInterval(autoTimer);
-    autoTimer = setInterval(async ()=>{
-      const autoTxt = '🔔 Recordatorio: mantén viva la química. Descubre tu match con respeto y misterio.';
-      await push(ref(db, `rooms/${EVENT_ID}/messages`), { code: 0, text: autoTxt, time: Date.now(), org: true });
-    }, mins*60*1000);
-    adminMsg.textContent = `Mensajes automáticos activados cada ${mins} min.`;
+    if(autoOn){
+      if(autoTimer) clearInterval(autoTimer);
+      autoTimer = setInterval(async ()=>{
+        const autoTxt = '🔥 Bienvenido a X Code Chat — disfruta, conéctate y siente la energía del evento.';
+        await push(ref(db, `rooms/${CURRENT_ROOM}/messages`), { code: 0, text: autoTxt, time: Date.now(), org: true });
+      }, mins*60*1000);
+      adminMsg.textContent = `Mensajes automáticos ACTIVADOS cada ${mins} min.`;
+    } else {
+      if(autoTimer) clearInterval(autoTimer);
+      autoTimer = null;
+      adminMsg.textContent = 'Mensajes automáticos PAUSADOS.';
+    }
   });
 
-  autoStop.addEventListener('click', ()=>{
-    if(autoTimer) clearInterval(autoTimer);
-    autoTimer = null;
-    adminMsg.textContent = 'Mensajes automáticos pausados.';
-  });
-
-  // Logout
   logoutBtn.addEventListener('click', async ()=>{
-    try{ await remove(ref(db, `rooms/${EVENT_ID}/activeSessions/${myCode}`)); }catch(e){}
+    try{ await remove(ref(db, `rooms/${CURRENT_ROOM}/activeSessions/${myCode}`)); }catch(e){}
     localStorage.removeItem('xcode_current_code');
-    localStorage.removeItem(pinKey(myCode));
-    localStorage.removeItem(sessKey(myCode));
+    localStorage.removeItem(pinKey(CURRENT_ROOM, myCode));
+    localStorage.removeItem(sessKey(CURRENT_ROOM, myCode));
     location.reload();
   });
 </script>
 </body>
 </html>
+
