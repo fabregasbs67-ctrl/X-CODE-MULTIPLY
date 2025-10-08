@@ -1,348 +1,351 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>X Code Chat — Official</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#000;
-      --panel:#0b0b0b;
-      --text:#fff;
-      --muted:#bdbdbd;
-      --accent:#fff;
-      --border:rgba(255,255,255,0.2);
-      --chip:#111;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .wrap{
-      max-width:960px;
-      margin:0 auto;
-      padding:12px 14px 16px;
-      min-height:100%;
-      display:flex; flex-direction:column;
-      gap:12px;
-    }
-    header{
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:14px 16px;
-      background:var(--panel);
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-    }
-    .brand{display:flex; align-items:center; gap:12px;}
-    .logo{
-      width:28px; height:28px; border-radius:50%;
-      display:grid; place-items:center; border:1px solid var(--border);
-      background:#000;
-    }
-    .logo svg{width:20px; height:20px; display:block}
-    .title{font-weight:700; font-size:22px; line-height:1}
-    .subtitle{font-size:14px; color:var(--muted)}
-    .btn{
-      background:#fff; color:#000; border:none; border-radius:12px;
-      padding:10px 14px; font-weight:600; cursor:pointer
-    }
-    .btn:disabled{opacity:.6; cursor:not-allowed}
-    .panel{
-      border:1px solid var(--border);
-      border-radius:18px;
-      background:var(--panel);
-      padding:14px;
-    }
-    .login p{margin:0 0 10px; color:var(--muted)}
-    .field{position:relative; margin-bottom:10px}
-    input[type="number"],input[type="password"],input[type="text"]{
-      width:100%; background:#0f0f0f; color:var(--text);
-      border:1px solid var(--border); border-radius:14px;
-      padding:14px 46px 14px 16px; font-size:18px; outline:none;
-    }
-    .eye{
-      position:absolute; right:6px; top:50%; transform:translateY(-50%);
-      width:36px; height:36px; border-radius:10px; display:grid; place-items:center;
-      cursor:pointer; border:1px solid var(--border); background:#0e0e0e;
-    }
-    .chat{
-      flex:1; min-height:0; display:flex; flex-direction:column;
-      gap:10px;
-    }
-    #messages{
-      flex:1; min-height:240px; max-height:calc(100vh - 320px);
-      overflow:auto; padding:8px 4px;
-      display:flex; flex-direction:column; gap:8px;
-      scroll-behavior:smooth;
-    }
-    .msg{
-      max-width:85%; padding:10px 12px; border:1px solid var(--border);
-      border-radius:14px; background:var(--chip); font-size:16px;
-      line-height:1.25;
-    }
-    .mine{margin-left:auto; border-color:#fff; box-shadow:0 0 0 1px #fff inset}
-    .meta{color:var(--muted); font-size:12px; margin-top:4px}
-    .composer{
-      display:flex; gap:10px; align-items:center;
-      border:1px solid var(--border); border-radius:18px; padding:10px;
-      background:var(--panel);
-      position:sticky; bottom:0;
-    }
-    .composer input{flex:1; padding:12px 14px; border-radius:12px}
-    .helper{color:var(--muted); font-size:12px; margin-top:6px; text-align:center}
-    .toast{position:fixed; left:50%; transform:translateX(-50%);
-      bottom:16px; background:#111; color:#fff; border:1px solid var(--border);
-      padding:10px 14px; border-radius:12px; z-index:99; display:none;}
-    .pill{display:inline-block; padding:4px 8px; border:1px solid var(--border); border-radius:999px; font-size:12px; color:var(--muted)}
-    @media (max-width:480px){
-      .title{font-size:20px}
-      #messages{max-height:calc(100vh - 300px);}
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>X Code Chat — Official</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--fg:#fff;--muted:#cfcfcf;--card:#0b0b0b;--line:#2a2a2a;--gold:#D0A500}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Roboto,Arial,sans-serif}
+.wrap{min-height:100svh;display:flex;flex-direction:column;gap:12px;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,255,255,.12);background:#000}
+.logo svg{width:22px;height:22px}
+.title{font-weight:700;font-size:20px}
+.subtitle{font-size:13px;color:var(--muted)}
+.btn{appearance:none;border:1px solid #fff;background:#fff;color:#000;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:#fff}
+.field{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:8px;background:#0a0a0a}
+.field input{flex:1;background:transparent;border:none;outline:none;color:var(--fg);font-size:16px;padding:10px}
+.eye{cursor:pointer;user-select:none;padding:6px;border-radius:8px}
+.login{max-width:720px;margin:6svh auto 0;display:flex;flex-direction:column;gap:10px}
+.hint{color:var(--muted);font-size:13px}
+.pinNotice{border:1px dashed var(--line);color:#eee;border-radius:12px;padding:10px 12px}
+.chat{max-width:920px;margin:0 auto;padding:0;overflow:hidden}
+.chatHead{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding:12px 14px}
+.messages{height:calc(100svh - 320px);min-height:280px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.bubble{max-width:86%;padding:10px 12px;border:1px solid #3a3a3a;border-radius:14px;background:#0f0f0f;white-space:pre-wrap;word-break:break-word}
+.me{align-self:flex-end;background:#141414;border-color:#555}
+.system{border-style:dashed;color:#e8e8e8}
+.meta{margin-top:6px;font-size:11px;color:#9a9a9a}
+.composer{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding:10px;background:#080808}
+.composer .field{flex:1}
+.admin{display:none;gap:10px;margin:0 auto;max-width:920px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,.select{height:44px;border-radius:10px;border:1px solid var(--line);background:#0a0a0a;color:#fff;padding:0 12px}
+.userRow{display:grid;grid-template-columns:80px 1fr auto auto;gap:8px;align-items:center;border-top:1px dashed var(--line);padding:8px 0}
+.badge{display:inline-block;padding:2px 8px;border:1px solid #3a3a3a;border-radius:999px;font-size:12px;background:#0a0a0a}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;border:1px solid var(--line);color:#fff;padding:10px 14px;border-radius:12px;display:none;z-index:999}
+.toast.show{display:block}
+
+/* Modal PIN */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal{background:var(--card);border:1px solid var(--line);padding:18px;border-radius:12px;min-width:280px;max-width:90%}
+.modal h3{margin:0 0 8px;color:var(--gold)}
+.modal p{margin:0 0 12px;color:var(--muted)}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end}
+@media(max-width:480px){.messages{height:calc(100svh - 360px)}}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo" aria-hidden="true">
-          <!-- Gold X inline SVG -->
-          <svg viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="#D0A500" stroke-width="2"/>
-            <path d="M8 8l8 8M16 8l-8 8" stroke="#D0A500" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div>
-          <div class="title">X Code Chat — Official</div>
-          <div class="subtitle">Sala: <span id="roomName">Sala de Prueba</span></div>
-        </div>
+<div class="wrap">
+  <div class="card header">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#D0A500" stroke-width="2"/><path d="M8 8l8 8M16 8l-8 8" stroke="#D0A500" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
-      <button id="logoutBtn" class="btn" style="display:none">Salir</button>
-    </header>
-
-    <!-- Login -->
-    <section id="loginBox" class="panel login">
-      <p><strong>Acceso con número y PIN.</strong> En tu primer acceso, el PIN se genera automáticamente.</p>
-      <div class="field">
-        <input id="numberInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)" />
+      <div>
+        <div class="title">X Code Chat — Official</div>
+        <div class="subtitle">Sala: <span id="roomHdr">Sala de Prueba</span></div>
       </div>
-      <div class="field">
-        <input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN (si ya tienes) · Admin: contraseña" />
-        <button class="eye" id="togglePin" aria-label="Ver PIN">👁️</button>
-      </div>
-      <button id="enterBtn" class="btn">Entrar</button>
-    </section>
-
-    <!-- Chat -->
-    <section id="chatBox" class="panel chat" style="display:none">
-      <div id="messages"></div>
-      <div class="composer">
-        <input id="msgInput" type="text" placeholder="Escribe un mensaje… · Privado: @número" autocomplete="off" />
-        <button id="sendBtn" class="btn">Enviar</button>
-      </div>
-      <div class="helper">Público por defecto · Privado con <b>@número</b> (ej. @120 hola)</div>
-    </section>
-
-    <div class="toast" id="toast"></div>
+    </div>
+    <button id="logoutTop" class="btn ghost" style="display:none">Salir</button>
   </div>
 
-  <script type="module">
-    // Firebase v9 modular from CDN
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-    import { getDatabase, ref, get, set, push, onChildAdded, onValue, update } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+  <div id="loginCard" class="card login">
+    <div class="hint">Acceso con <b>número</b> y <b>PIN</b>. Usuario 0 (organizador) con contraseña.</div>
+    <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)"></div>
+    <div class="field">
+      <input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN (o contraseña admin)">
+      <div id="togglePin" class="eye">👁️</div>
+    </div>
+    <div class="row"><button id="loginBtn" class="btn">Entrar</button></div>
+    <div id="pinNotice" class="pinNotice" style="display:none"></div>
+  </div>
 
-    // ---------- Config (mantengo la que me diste) ----------
-    const firebaseConfig = {
-      apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
-      authDomain: "x-code-chat.firebaseapp.com",
-      databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "x-code-chat",
-      storageBucket: "x-code-chat.firebasestorage.app",
-      messagingSenderId: "819845037951",
-      appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
-    };
-    const ADMIN_PASS = "131215";
-    const ROOM = "Sala de Prueba";
+  <div id="chatCard" class="card chat" style="display:none">
+    <div class="chatHead">
+      <div class="logo" style="width:22px;height:22px"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#D0A500" stroke-width="2"/><path d="M8 8l8 8M16 8l-8 8" stroke="#D0A500" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div>
+        <div class="title" style="font-size:18px">X Code Chat — Official</div>
+        <div class="subtitle">Sala: <span id="roomHdr2">Sala de Prueba</span> · Tu código: <span id="meCode">-</span></div>
+      </div>
+      <div style="flex:1"></div>
+      <button id="logoutBtn" class="btn ghost">Salir</button>
+    </div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    <div id="messages" class="messages">
+      <div id="welcomeBox" class="bubble system">👋 Bienvenido. Aún no hay mensajes. Este aviso desaparecerá en cuanto se publique alguno.</div>
+    </div>
 
-    // ---------- Helpers UI ----------
-    const $ = sel => document.querySelector(sel);
-    const toast = (msg, ms=3000) => {
-      const t = $("#toast"); t.textContent = msg; t.style.display="block";
-      clearTimeout(window.__t); window.__t=setTimeout(()=>t.style.display="none", ms);
-    };
-    const scrollToBottom = () => {
-      const el = $("#messages"); el.scrollTop = el.scrollHeight;
-    };
+    <div class="composer">
+      <div class="field"><input id="msgInput" type="text" placeholder="Escribe un mensaje… · Privado con @número (ej. @120 hola)" autocomplete="off"></div>
+      <button id="sendBtn" class="btn">Enviar</button>
+    </div>
+    <div class="hint">Público por defecto · Privado con <b>@número</b></div>
+  </div>
 
-    // ---------- Elements ----------
-    const loginBox = $("#loginBox");
-    const chatBox = $("#chatBox");
-    const roomName = $("#roomName");
-    const numberInput = $("#numberInput");
-    const pinInput = $("#pinInput");
-    const enterBtn = $("#enterBtn");
-    const togglePin = $("#togglePin");
-    const logoutBtn = $("#logoutBtn");
-    const messagesEl = $("#messages");
-    const msgInput = $("#msgInput");
-    const sendBtn = $("#sendBtn");
+  <div id="adminCard" class="card admin">
+    <div class="row">
+      <button id="broadcastBtn" class="btn ghost">Mensaje global</button>
+      <button id="autoBtn" class="btn ghost">Mensajes auto: <b id="autoState">OFF</b></button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <select id="roomSelect" class="select"></select>
+      <input id="newRoom" class="input" placeholder="Nuevo nombre de sala…">
+      <button id="useRoom" class="btn">Usar</button>
+      <button id="addRoom" class="btn ghost">Añadir</button>
+      <button id="renRoom" class="btn ghost">Renombrar</button>
+      <button id="delRoom" class="btn danger">Eliminar</button>
+    </div>
+    <div style="font-weight:600;margin-top:6px">Usuarios <span class="sub">(PIN visible solo para admin)</span></div>
+    <div id="usersList"></div>
+  </div>
 
-    roomName.textContent = ROOM;
+</div>
 
-    togglePin.addEventListener("click", () => {
-      pinInput.type = pinInput.type === "password" ? "text" : "password";
-    });
+<div id="pinModal" class="modal-back" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h3>🔐 Tu PIN</h3>
+    <p id="pinText">Tu PIN es 0000</p>
+    <div class="actions">
+      <button id="pinClose" class="btn">Entendido</button>
+    </div>
+  </div>
+</div>
 
-    // ---------- Session ----------
-    function saveSession(s){
-      localStorage.setItem("xcode_session", JSON.stringify(s));
+<div id="toast" class="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getDatabase, ref, get, set, update, remove, push, onChildAdded, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
+  authDomain: "x-code-chat.firebaseapp.com",
+  databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "x-code-chat",
+  storageBucket: "x-code-chat.firebasestorage.app",
+  messagingSenderId: "819845037951",
+  appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
+};
+const ADMIN_PASSWORD = "131215";
+const DEFAULT_ROOM = "Sala de Prueba";
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const $ = q=>document.querySelector(q);
+const toast = (t,ms=2500)=>{ const z=$("#toast"); z.textContent=t; z.classList.add("show"); clearTimeout(window.__t); window.__t=setTimeout(()=>z.classList.remove("show"),ms); };
+
+const loginCard=$("#loginCard"), chatCard=$("#chatCard"), adminCard=$("#adminCard");
+const roomHdr=$("#roomHdr"), roomHdr2=$("#roomHdr2"), meCode=$("#meCode");
+const logoutTop=$("#logoutTop"), logoutBtn=$("#logoutBtn");
+
+const numInput=$("#numInput"), pinInput=$("#pinInput"), togglePin=$("#togglePin"), loginBtn=$("#loginBtn");
+const pinNotice=$("#pinNotice");
+const pinModal=$("#pinModal"), pinText=$("#pinText"), pinClose=$("#pinClose");
+
+const messages=$("#messages"), welcomeBox=$("#welcomeBox"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn");
+
+const broadcastBtn=$("#broadcastBtn"), autoBtn=$("#autoBtn"), autoState=$("#autoState");
+const roomSelect=$("#roomSelect"), newRoom=$("#newRoom"), useRoom=$("#useRoom"), addRoom=$("#addRoom"), renRoom=$("#renRoom"), delRoom=$("#delRoom");
+const usersList=$("#usersList");
+
+const LS_PREFIX="xcode_chat_final_v1";
+function saveSession(s){ localStorage.setItem(LS_PREFIX+":session", JSON.stringify(s)); }
+function loadSession(){ try{ return JSON.parse(localStorage.getItem(LS_PREFIX+":session")||"null"); }catch{return null;} }
+function setLocalPin(room,num,pin){ localStorage.setItem(`${LS_PREFIX}:pin:${room}:${num}`, String(pin)); }
+function getLocalPin(room,num){ return localStorage.getItem(`${LS_PREFIX}:pin:${room}:${num}`); }
+function clearSession(){ localStorage.removeItem(LS_PREFIX+":session"); }
+
+let session = { room: DEFAULT_ROOM, num:null, role:"guest" };
+
+roomHdr.textContent = DEFAULT_ROOM;
+roomHdr2.textContent = DEFAULT_ROOM;
+
+togglePin.addEventListener("click", ()=>{ pinInput.type = pinInput.type==="password"?"text":"password"; });
+
+// db refs
+const roomsIndexRef = ref(db, "rooms_index");
+const roomRef = (path)=> ref(db, `rooms/${session.room}/${path}`);
+
+function hhmm(ts){ const d=new Date(ts||Date.now()); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function newPIN(){ return String(Math.floor(1000+Math.random()*9000)); }
+function isAdmin(){ return session.num===0 && session.role==="admin"; }
+
+async function ensureIndex(roomName){
+  const s=await get(roomsIndexRef); const list=s.exists()?s.val():{};
+  if(!list[roomName]){ list[roomName]=true; await set(roomsIndexRef, list); }
+  fillRooms(list);
+}
+function fillRooms(obj){ roomSelect.innerHTML=""; Object.keys(obj||{}).sort().forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=k; if(k===session.room) o.selected=true; roomSelect.appendChild(o); }); }
+
+async function doLogin(){
+  const n = Number((numInput.value||"").trim());
+  const pTyped = (pinInput.value||"").trim();
+  if(!(n>=0)){ toast("Introduce tu número"); return; }
+  loginBtn.disabled=true;
+  try{
+    if(n===0){
+      if(pTyped!==ADMIN_PASSWORD) throw new Error("Contraseña admin incorrecta");
+      session = { room: DEFAULT_ROOM, num:0, role:"admin" };
+      saveSession(session);
+      enterApp();
+      showAdmin();
+      return;
     }
-    function loadSession(){
-      try { return JSON.parse(localStorage.getItem("xcode_session")||"null"); } catch(e){ return null; }
+    const uRef = roomRef(`users/${n}`);
+    const snap = await get(uRef);
+    if(!snap.exists()){
+      // generate PIN and show in modal (persist until user confirms)
+      const pin = newPIN();
+      await set(uRef, { pin, active:true, connected:true, createdAt: Date.now() });
+      setLocalPin(DEFAULT_ROOM, n, pin);
+      pinText.textContent = `Tu PIN es ${pin}. Se ha guardado en este dispositivo. Pulsa "Entendido" y después "Entrar" para acceder.`;
+      pinModal.style.display="flex";
+      // do not login automatically: require user to press Enter again (ensures they saw PIN)
+      loginBtn.disabled=false;
+      return;
     }
-    function clearSession(){
-      localStorage.removeItem("xcode_session");
-    }
+    const data = snap.val();
+    let pinToUse = pTyped || getLocalPin(DEFAULT_ROOM, n);
+    if(!pinToUse) throw new Error("PIN incorrecto o no guardado. Introduce tu PIN.");
+    if(String(pinToUse)!==String(data.pin)) throw new Error("PIN incorrecto.");
+    await update(uRef, { connected:true, updated:Date.now() });
+    session = { room: DEFAULT_ROOM, num:n, role:"user" };
+    saveSession(session);
+    enterApp();
+  }catch(err){
+    toast(err.message || "No se pudo iniciar sesión");
+  }finally{
+    loginBtn.disabled=false;
+  }
+}
 
-    // ---------- Auth flow ----------
-    async function ensureUser(number, pinMaybe){
-      const userRef = ref(db, `rooms/${ROOM}/users/${number}`);
-      const snap = await get(userRef);
-      if(number === 0){
-        // admin: password only
-        if(pinMaybe !== ADMIN_PASS) throw new Error("Contraseña admin incorrecta.");
-        await set(userRef, { active: true, admin: true, updated: Date.now() });
-        return { number, pin: null, admin: true };
-      }
-      if(snap.exists()){
-        const data = snap.val();
-        if(String(pinMaybe) !== String(data.pin)) throw new Error("PIN incorrecto o faltante.");
-        await update(userRef, { active: true, updated: Date.now() });
-        return { number, pin: data.pin, admin:false };
-      }else{
-        // first time: generate pin
-        const pin = Math.floor(1000 + Math.random()*9000);
-        await set(userRef, { pin, active: true, admin:false, created: Date.now() });
-        toast(`Tu PIN es ${pin}. Se ha guardado en este dispositivo. Entrando…`, 2500);
-        return { number, pin, admin:false, first:true };
-      }
-    }
+pinClose.addEventListener("click", ()=>{ pinModal.style.display="none"; });
 
-    async function login(){
-      const number = Number(numberInput.value.trim());
-      const pin = pinInput.value.trim();
-      if(!number && number !== 0) { toast("Introduce tu número", 2000); return; }
-      enterBtn.disabled = true;
+loginBtn.addEventListener("click", doLogin);
+numInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter") doLogin(); });
+pinInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter") doLogin(); });
 
-      try{
-        const session = await ensureUser(number, pin);
-        saveSession({ room: ROOM, number: session.number, pin: session.pin, admin: !!session.admin });
-        startChat(session.number, session.pin, !!session.admin);
-        numberInput.value=""; pinInput.value="";
-        loginBox.style.display="none"; chatBox.style.display="";
-        logoutBtn.style.display="";
-      }catch(e){
-        toast(e.message || "No se pudo iniciar sesión");
-      }finally{
-        enterBtn.disabled = false;
-      }
-    }
+async function enterApp(){
+  loginCard.style.display="none"; chatCard.style.display="block"; logoutTop.style.display="inline-flex"; logoutBtn.style.display="inline-flex";
+  roomHdr.textContent=session.room; roomHdr2.textContent=session.room; meCode.textContent=session.num;
+  attachMessages();
+  if(isAdmin()) showAdmin(); else hideAdmin();
+}
 
-    enterBtn.addEventListener("click", login);
-    pinInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") login(); });
-    numberInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") login(); });
+function showAdmin(){
+  adminCard.style.display="grid";
+  ensureIndex(session.room);
+  loadUsers();
+  loadRooms();
+  loadAutoFlag();
+}
+function hideAdmin(){ adminCard.style.display="none"; }
 
-    logoutBtn.addEventListener("click", async ()=>{
-      const s = loadSession();
-      if(s){
-        await update(ref(db, `rooms/${ROOM}/users/${s.number}`), { active:false, updated: Date.now() });
-      }
-      clearSession();
-      chatBox.style.display="none";
-      logoutBtn.style.display="none";
-      loginBox.style.display="";
-      messagesEl.innerHTML="";
-      msgInput.value="";
-    });
+async function doLogout(){
+  try{ if(session.num>0) await update(roomRef(`users/${session.num}`), { connected:false, updated:Date.now() }); }catch{}
+  clearSession();
+  chatCard.style.display="none"; logoutTop.style.display="none"; logoutBtn.style.display="none";
+  pinNotice.style.display="none"; loginCard.style.display="flex";
+  messages.innerHTML=""; msgInput.value="";
+}
+logoutTop.addEventListener("click", doLogout);
+logoutBtn.addEventListener("click", doLogout);
 
-    // ---------- Chat ----------
-    let myNumber = null;
-    function renderMessage(key, obj){
-      const isPrivate = !!obj.to;
-      // show only if public, or I'm sender, or I'm target
-      if(isPrivate && !(obj.from===myNumber || obj.to===myNumber)) return;
+let listening=false;
+function attachMessages(){
+  if(listening) return; listening=true;
+  onValue(roomRef("messages"), (snap)=>{
+    if(!snap.exists()){ messages.innerHTML=""; const w=welcomeBox.cloneNode(true); messages.appendChild(w); }
+    else{ messages.innerHTML=""; snap.forEach(ch=> renderMsg(ch.val())); }
+    messages.scrollTop = messages.scrollHeight;
+  });
+  onChildAdded(roomRef("messages"), (snap)=>{ renderMsg(snap.val()); messages.scrollTop = messages.scrollHeight; });
+}
 
-      const li = document.createElement("div");
-      li.className = "msg" + (obj.from===myNumber ? " mine": "");
-      const time = new Date(obj.ts||Date.now());
-      const hh = String(time.getHours()).padStart(2,"0");
-      const mm = String(time.getMinutes()).padStart(2,"0");
-      let meta = `#${obj.from} · ${hh}:${mm}`;
-      if(isPrivate) meta += ` · Privado ${obj.from===myNumber ? `→ #${obj.to}` : `de #${obj.from}`}`;
-      li.innerHTML = `${obj.text.replace(/</g,"&lt;")}
-        <div class="meta">${meta}</div>`;
-      messagesEl.appendChild(li);
-      scrollToBottom();
-    }
+function renderMsg(m){
+  if(m.to && !(isAdmin() || m.from===session.num || m.to===session.num)) return;
+  const wrap=document.createElement("div");
+  wrap.style.display="flex"; wrap.style.justifyContent = (m.from===session.num || (isAdmin() && m.from===0)) ? "flex-end":"flex-start";
+  const b=document.createElement("div");
+  b.className="bubble"+(m.system?" system":(m.from===session.num||m.from===0?" me":""));
+  b.textContent = m.text || "";
+  const meta=document.createElement("div"); meta.className="meta";
+  meta.textContent = (m.to? `#${m.from} → #${m.to}`:`#${m.from}`) + " · " + hhmm(m.ts);
+  b.appendChild(meta);
+  wrap.appendChild(b); messages.appendChild(wrap);
+}
 
-    function startChat(number, pin, admin){
-      myNumber = number;
-      // welcome if empty
-      const roomRef = ref(db, `rooms/${ROOM}`);
-      onValue(ref(db, `rooms/${ROOM}/messages`), (snap)=>{
-        if(!snap.exists()){
-          messagesEl.innerHTML = `<div class="msg"><b>👋 Bienvenido.</b> Aún no hay mensajes. Este aviso desaparecerá en cuanto se publique alguno.</div>`;
-        }else{
-          messagesEl.innerHTML="";
-          snap.forEach(child=> renderMessage(child.key, child.val()));
-        }
-        scrollToBottom();
-      });
-      onChildAdded(ref(db, `rooms/${ROOM}/messages`), (snap)=>{
-        renderMessage(snap.key, snap.val());
-      });
+async function sendMsg(){
+  const raw=(msgInput.value||"").trim(); if(!raw) return;
+  let payload = { from: isAdmin()?0:session.num, text: raw, ts: Date.now() };
+  const m = raw.match(/^@(\d+)\s+(.+)/);
+  if(m){ payload.to = Number(m[1]); payload.text = m[2]; }
+  await push(roomRef("messages"), payload);
+  msgInput.value="";
+}
+sendBtn.addEventListener("click", sendMsg);
+msgInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter"){ e.preventDefault(); sendMsg(); }});
 
-      async function send(){
-        const text = msgInput.value.trim();
-        if(!text) return;
-        let payload = { from: number, text, ts: Date.now() };
-        const m = text.match(/^@(\d+)\s+(.*)$/);
-        if(m){ payload.to = Number(m[1]); payload.text = m[2]; }
-        await push(ref(db, `rooms/${ROOM}/messages`), payload);
-        msgInput.value="";
-      }
-      sendBtn.onclick = send;
-      msgInput.onkeydown = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); send(); } };
-    }
+async function loadUsers(){
+  const s=await get(roomRef("users")); usersList.innerHTML="";
+  if(!s.exists()) return;
+  const users=s.val();
+  Object.keys(users).sort((a,b)=>Number(a)-Number(b)).forEach(k=>{
+    const u=users[k];
+    const row=document.createElement("div"); row.className="userRow";
+    const c1=document.createElement("div"); c1.textContent="#"+k; row.appendChild(c1);
+    const c2=document.createElement("div"); c2.innerHTML=`PIN: <span class="badge">${u.pin||"-"}</span> · <span class="badge">${u.active?"Activo":"Inactivo"}</span>`; row.appendChild(c2);
+    const tog=document.createElement("button"); tog.className="btn"; tog.textContent=u.active?"Desactivar":"Activar";
+    tog.addEventListener("click", async()=>{ await update(roomRef("users/"+k), { active: !u.active }); loadUsers(); });
+    row.appendChild(tog);
+    const kick=document.createElement("button"); kick.className="btn ghost"; kick.textContent="Desconectar";
+    kick.addEventListener("click", async()=>{ await update(roomRef("users/"+k), { connected:false }); loadUsers(); });
+    row.appendChild(kick);
+    usersList.appendChild(row);
+  });
+}
 
-    // ---------- Auto-resume ----------
-    (async function auto(){
-      try{
-        const s = loadSession();
-        if(!s || s.room!==ROOM) return;
-        // validate
-        if(s.number===0){
-          // admin stays if password known previously (not stored). Require manual re-login for admin for seguridad
-          return;
-        }
-        const snap = await get(ref(db, `rooms/${ROOM}/users/${s.number}`));
-        if(snap.exists() && String(snap.val().pin)===String(s.pin)){
-          startChat(s.number, s.pin, false);
-          loginBox.style.display="none"; chatBox.style.display=""; logoutBtn.style.display="";
-        }else{
-          clearSession();
-        }
-      }catch(_){}
-    })();
-  </script>
+async function loadRooms(){
+  const s=await get(roomsIndexRef); const list=s.exists()?s.val():{ [DEFAULT_ROOM]:true };
+  fillRooms(list);
+}
+function fillRooms(obj){ roomSelect.innerHTML=""; Object.keys(obj||{}).sort().forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=k; if(k===session.room) o.selected=true; roomSelect.appendChild(o); }); }
+useRoom.addEventListener("click", async()=>{ const r=roomSelect.value; if(!r||r===session.room) return; session.room=r; saveSession(session); roomHdr.textContent=r; roomHdr2.textContent=r; messages.innerHTML=""; messages.appendChild(welcomeBox.cloneNode(true)); listening=false; attachMessages(); if(isAdmin()) loadUsers(); });
+addRoom.addEventListener("click", async()=>{ const n=(newRoom.value||"").trim(); if(!n) return; const s=await get(roomsIndexRef); const list=s.exists()?s.val():{}; list[n]=true; await set(roomsIndexRef, list); fillRooms(list); newRoom.value=""; });
+renRoom.addEventListener("click", async()=>{ const n=(newRoom.value||"").trim(); if(!n) return; const old=roomSelect.value; if(old===n) return; const s=await get(roomsIndexRef); const list=s.exists()?s.val():{}; delete list[old]; list[n]=true; await set(roomsIndexRef, list); const oldSnap=await get(ref(db, `rooms/${old}`)); if(oldSnap.exists()){ await set(ref(db, `rooms/${n}`), oldSnap.val()); } await remove(ref(db, `rooms/${old}`)); session.room=n; saveSession(session); roomHdr.textContent=n; roomHdr2.textContent=n; loadRooms(); loadUsers(); messages.innerHTML=""; listening=false; attachMessages(); });
+delRoom.addEventListener("click", async()=>{ const r=roomSelect.value; if(!r) return; if(!confirm(`Eliminar sala "${r}"?`)) return; const s=await get(roomsIndexRef); const list=s.exists()?s.val():{}; delete list[r]; await set(roomsIndexRef, list); await remove(ref(db, `rooms/${r}`)); session.room=DEFAULT_ROOM; saveSession(session); roomHdr.textContent=DEFAULT_ROOM; roomHdr2.textContent=DEFAULT_ROOM; loadRooms(); loadUsers(); messages.innerHTML=""; listening=false; attachMessages(); });
+
+async function loadAutoFlag(){ const s=await get(roomRef("state")); const v=(s.exists() && s.val().autoMsgs)?true:false; autoState.textContent = v?"ON":"OFF"; }
+autoBtn.addEventListener("click", async()=>{ const s=await get(roomRef("state")); const v=(s.exists() && s.val().autoMsgs)?true:false; await update(roomRef("state"), { autoMsgs: !v }); loadAutoFlag(); });
+
+(async function init(){
+  await ensureIndex(DEFAULT_ROOM);
+  const s = loadSession();
+  if(s && s.room===DEFAULT_ROOM && s.num!==null && s.role!=="admin"){
+    const localPin = getLocalPin(s.room, s.num) || s.pin;
+    const snap = await get(ref(db, `rooms/${s.room}/users/${s.num}`));
+    if(snap.exists() && String(snap.val().pin)===String(localPin)){ session=s; enterApp(); return; } else { clearSession(); }
+  }
+  // show login
+  loginCard.style.display="flex";
+})();
+</script>
 </body>
 </html>
