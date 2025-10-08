@@ -1,310 +1,361 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
-<title>X Code Chat — Official</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{--bg:#000;--fg:#fff;--muted:#bdbdbd;--line:#222;--accent:#fff;--bubble:#0a0a0a;--bubbleLine:#707070}
-  *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  .wrap{width:100%;max-width:900px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:12px}
-  .card{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(255,255,255,.02)}
-  .header{display:flex;align-items:center;gap:12px;margin-bottom:4px}
-  .logo{width:32px;height:32px;border-radius:50%;background:#000 url('https://raw.githubusercontent.com/fabregasbs67-ctrl/X-CODE-MULTIPLY/main/assets/x_logo.png') center/cover no-repeat;border:1px solid #555}
-  h1{font-size:22px;line-height:1.15;margin:0 0 2px 0;font-weight:700}
-  .sub{color:var(--muted);font-size:14px;margin:0 0 10px 0}
-  .login{display:grid;grid-template-columns:1fr;gap:10px;max-width:560px;margin:0 auto}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  input[type="number"],input[type="text"],input[type="password"],select{width:100%;padding:14px;border-radius:12px;background:transparent;border:1px solid var(--accent);color:var(--fg);font-size:16px;outline:none}
-  input::placeholder{color:#8d8d8d}
-  button{padding:12px 18px;border-radius:12px;border:1px solid var(--accent);background:#fff;color:#000;font-weight:600;cursor:pointer}
-  button.ghost{background:transparent;color:#fff}
-  button.small{padding:8px 12px;font-size:14px}
-  .adminBar{display:none;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
-  .adminBar .pill{border:1px solid var(--accent);border-radius:999px;padding:8px 10px}
-  .roomLine{display:none;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
-  .chat{display:none;flex-direction:column;gap:10px;height:65vh;min-height:420px;border:1px solid var(--line);border-radius:16px;padding:10px;background:rgba(255,255,255,.02)}
-  .scroll{flex:1 1 auto;overflow:auto;padding:6px}
-  .bubble{display:inline-block;max-width:min(84%,680px);background:var(--bubble);border:1px solid var(--bubbleLine);border-radius:14px;padding:10px 12px;margin:4px 0;color:var(--fg);word-break:break-word}
-  .me{margin-left:auto;border-color:#999}
-  .meta{color:#9a9a9a;font-size:12px;margin-top:4px}
-  .system{border-style:dashed;color:#e6e6e6}
-  .composer{display:flex;gap:10px;align-items:center;margin-top:4px}
-  .composer input{flex:1 1 auto}
-  .hint{font-size:12px;color:#9a9a9a;margin-top:4px;text-align:center}
-  .users{display:none;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;max-height:240px;overflow:auto;background:rgba(255,255,255,.02)}
-  .userRow{display:grid;grid-template-columns:60px 1fr 100px 120px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed #2b2b2b}
-  .userRow:last-child{border-bottom:none}
-  .status{font-size:12px;color:#bdbdbd}
-  .welcome{position:sticky;top:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);border:1px dashed #5b5b5b;border-radius:10px;padding:8px 10px;margin:0 0 6px 0}
-  @media (max-width:520px){h1{font-size:20px}.chat{height:64vh}.userRow{grid-template-columns:50px 1fr 88px 100px}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>X Code Chat — Official</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{ --bg:#000; --fg:#fff; --line:#2a2a2a; --muted:#bdbdbd; }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+    html,body{ height:100%; }
+    body{
+      margin:0; background:#000; color:#fff;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    .wrap{ max-width:900px; margin:0 auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+    .card{ border:1px solid var(--line); border-radius:16px; background:rgba(255,255,255,0.02); padding:14px; }
+    .header{ display:flex; align-items:center; gap:12px; }
+    .logo{
+      width:32px; height:32px; border-radius:50%;
+      background:#000 url('https://raw.githubusercontent.com/fabregasbs67-ctrl/X-CODE-MULTIPLY/main/assets/x_logo.png') center/cover no-repeat;
+      border:1px solid #555;
+    }
+    h1{ margin:0; font-size:22px; line-height:1.1; font-weight:700; }
+    .sub{ margin:4px 0 0 0; font-size:13px; color:var(--muted); }
+    /* Login centrado */
+    .loginBox{ display:grid; grid-template-columns:1fr; gap:10px; max-width:560px; margin:8px auto 4px; }
+    input, select, button{
+      border-radius:12px; padding:14px; font-size:16px; outline:none;
+    }
+    input, select{
+      width:100%; background:transparent; color:var(--fg); border:1px solid #fff;
+    }
+    input::placeholder{ color:#8d8d8d; }
+    button{ border:1px solid #fff; background:#fff; color:#000; font-weight:600; cursor:pointer; }
+    button.ghost{ background:transparent; color:#fff; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    /* Chat */
+    .chat{ display:none; flex-direction:column; gap:10px; border:1px solid var(--line); border-radius:16px; padding:10px; background:rgba(255,255,255,0.02); height:68vh; min-height:420px; }
+    .scroll{ flex:1 1 auto; overflow:auto; padding:6px; }
+    .welcome{ position:sticky; top:0; background:rgba(0,0,0,.6); border:1px dashed #555; border-radius:10px; padding:8px 10px; margin-bottom:6px; }
+    .msg{ display:inline-block; max-width:min(84%,680px); background:#0a0a0a; border:1px solid #707070; border-radius:14px; padding:10px 12px; margin:4px 0; word-break:break-word; }
+    .me{ margin-left:auto; border-color:#9d9d9d; }
+    .meta{ color:#9a9a9a; font-size:12px; margin-top:4px; }
+    .system{ border-style:dashed; color:#e6e6e6; }
+    .composer{ display:flex; gap:10px; align-items:center; }
+    .composer input{ flex:1 1 auto; }
+    .hint{ text-align:center; font-size:12px; color:#9a9a9a; }
+    /* Admin */
+    .admin{ display:none; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(255,255,255,.02); }
+    .users .rowu{ display:grid; grid-template-columns:60px 1fr 120px 120px; gap:8px; padding:6px 0; border-bottom:1px dashed #2b2b2b; align-items:center; }
+    .users .rowu:last-child{ border-bottom:none; }
+    .status{ font-size:12px; color:#bdbdbd; }
+    .topbar{ display:flex; align-items:center; gap:10px; justify-content:space-between; }
+    .right{ display:flex; align-items:center; gap:8px; }
+    @media (max-width:560px){
+      h1{ font-size:20px; }
+      .chat{ height:64vh; }
+      .users .rowu{ grid-template-columns:50px 1fr 96px 100px; }
+    }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card">
-    <div class="header">
-      <div class="logo" aria-label="X Code logo"></div>
-      <div><h1>X Code Chat — Official</h1><p class="sub">Sala: <span id="roomName">X Code</span></p></div>
+  <div class="wrap">
+    <div class="card">
+      <div class="topbar">
+        <div class="header">
+          <div class="logo" aria-label="X Code logo"></div>
+          <div>
+            <h1>X Code Chat — Official</h1>
+            <p class="sub">Sala: <b id="roomName">Sala de Prueba</b></p>
+          </div>
+        </div>
+        <div class="right">
+          <button id="btnLogout" class="ghost" style="display:none">Salir</button>
+        </div>
+      </div>
+      <!-- LOGIN -->
+      <div id="login" class="loginBox">
+        <p class="sub" id="loginHelp">Acceso con <b>número</b> y <b>PIN</b>. Si es tu primer acceso, el PIN se genera automáticamente.</p>
+        <input id="inpNum" type="number" inputmode="numeric" min="0" placeholder="Tu número (ej. 70)">
+        <input id="inpPin" type="password" placeholder="Tu PIN (si ya tienes) · Admin: contraseña">
+        <div class="row">
+          <button id="btnEnter">Entrar</button>
+        </div>
+        <p id="loginMsg" class="sub" style="margin:0"></p>
+      </div>
     </div>
-    <div id="loginBox" class="login">
-      <p class="sub" id="loginHelp">Acceso con <b>número</b> y <b>PIN</b>. Si es tu primer acceso, el PIN se genera automáticamente.</p>
-      <input id="inpNumber" type="number" inputmode="numeric" min="0" placeholder="Tu número (ej. 70)"/>
-      <input id="inpPin" type="password" placeholder="Tu PIN (si ya tienes)"/>
-      <div class="row">
-        <button id="btnEnter">Entrar</button>
+
+    <!-- ADMIN (solo usuario 0) -->
+    <div id="admin" class="admin">
+      <div class="row" style="justify-content:space-between; align-items:center;">
+        <div class="sub">Panel del organizador (usuario 0)</div>
+        <div class="row">
+          <button id="btnGlobal" class="ghost">Mensaje global</button>
+        </div>
       </div>
-      <div id="adminBar" class="adminBar">
-        <span class="pill">Conectado como admin</span>
-        <button id="btnAdminOn" class="small">Entrar admin</button>
-        <button id="btnAdminOff" class="small ghost">Salir admin</button>
-        <button id="btnAuto" class="small">Mensajes auto: OFF</button>
-        <button id="btnGlobalMsg" class="small ghost">Enviar mensaje global</button>
+      <div id="users" class="users"></div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="chat" class="chat">
+      <div id="scroll" class="scroll">
+        <div id="welcome" class="welcome">👋 Bienvenido. Aún no hay mensajes. Este aviso desaparecerá en cuanto se publique alguno.</div>
+        <div id="msgs"></div>
       </div>
-      <div id="roomLine" class="roomLine">
-        <select id="selRoom"></select>
-        <input id="roomNewName" type="text" placeholder="Nuevo/renombrar sala…">
-        <button id="roomAdd" class="small">Añadir</button>
-        <button id="roomRename" class="small ghost">Renombrar</button>
-        <button id="roomDelete" class="small ghost">Eliminar</button>
+      <div class="composer">
+        <input id="inpText" type="text" placeholder="Escribe un mensaje… · Privado: @120 hola">
+        <button id="btnSend">Enviar</button>
       </div>
+      <div class="hint">Público por defecto · Privado con <b>@número</b> (ej. @120 hola)</div>
     </div>
   </div>
-
-  <div id="usersBox" class="users"></div>
-
-  <div id="chatBox" class="chat">
-    <div id="scroll" class="scroll">
-      <div id="welcome" class="welcome">👋 Bienvenido. Aún no hay mensajes. Este aviso desaparecerá en cuanto se publique alguno.</div>
-      <div id="msgs"></div>
-    </div>
-    <div class="composer">
-      <input id="inpMsg" type="text" placeholder="Escribe un mensaje…">
-      <input id="inpTo" type="number" min="1" placeholder="Privado: @nº (opcional)" style="max-width:140px">
-      <button id="btnSend">Enviar</button>
-    </div>
-    <div id="hint" class="hint">Público por defecto · Privados: escribe destino en “Privado”</div>
-  </div>
-</div>
 
 <script type="module">
-const ADMIN_PASSWORD = "131215";
-const AUTO_EVERY_MIN = 10;
-const DEFAULT_ROOM = "xcode";
+  // ===== CONFIG =====
+  const DEFAULT_ROOM = "Sala de Prueba";
+  const ADMIN_PASSWORD = "131215";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, child, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  // Firebase (misma config)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getDatabase, ref, get, set, update, onValue
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
-  authDomain: "x-code-chat.firebaseapp.com",
-  databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "x-code-chat",
-  storageBucket: "x-code-chat.firebasestorage.app",
-  messagingSenderId: "819845037951",
-  appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
-};
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
+    authDomain: "x-code-chat.firebaseapp.com",
+    databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "x-code-chat",
+    storageBucket: "x-code-chat.firebasestorage.app",
+    messagingSenderId: "819845037951",
+    appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
 
-/* UI */
-const loginBox  = document.getElementById('loginBox');
-const chatBox   = document.getElementById('chatBox');
-const usersBox  = document.getElementById('usersBox');
-const inpNumber = document.getElementById('inpNumber');
-const inpPin    = document.getElementById('inpPin');
-const btnEnter  = document.getElementById('btnEnter');
-const btnSend   = document.getElementById('btnSend');
-const inpMsg    = document.getElementById('inpMsg');
-const inpTo     = document.getElementById('inpTo');
-const msgsEl    = document.getElementById('msgs');
-const welcomeEl = document.getElementById('welcome');
-const scrollEl  = document.getElementById('scroll');
-const roomName  = document.getElementById('roomName');
-const loginHelp = document.getElementById('loginHelp');
-const adminBar  = document.getElementById('adminBar');
-const btnAdminOn  = document.getElementById('btnAdminOn');
-const btnAdminOff = document.getElementById('btnAdminOff');
-const btnAuto     = document.getElementById('btnAuto');
-const btnGlobal   = document.getElementById('btnGlobalMsg');
-const roomLine  = document.getElementById('roomLine');
-const selRoom   = document.getElementById('selRoom');
-const roomNew   = document.getElementById('roomNewName');
-const roomAdd   = document.getElementById('roomAdd');
-const roomRen   = document.getElementById('roomRename');
-const roomDel   = document.getElementById('roomDelete');
+  // ===== UI refs =====
+  const login    = document.getElementById('login');
+  const chat     = document.getElementById('chat');
+  const admin    = document.getElementById('admin');
+  const usersBox = document.getElementById('users');
+  const btnLogout= document.getElementById('btnLogout');
 
-/* Estado */
-let state = {
-  room: localStorage.getItem('xchat_room') || DEFAULT_ROOM,
-  me:   null, pin:  null, role: null, autoTimer: null, welcomeHidden:false
-};
-roomName.textContent = titleCase(state.room);
+  const inpNum   = document.getElementById('inpNum');
+  const inpPin   = document.getElementById('inpPin');
+  const btnEnter = document.getElementById('btnEnter');
+  const loginHelp= document.getElementById('loginHelp');
+  const loginMsg = document.getElementById('loginMsg');
 
-/* Util */
-function titleCase(s){return s.replace(/[-_]/g,' ').replace(/\b\w/g,m=>m.toUpperCase());}
-function uid(){return Math.random().toString(36).slice(2);}
-function stickScroll(){setTimeout(()=>{scrollEl.scrollTop = scrollEl.scrollHeight;},20);}
-function show(el,on){el.style.display = on ? (el.classList.contains('chat')?'flex':'block') : 'none';}
-function setRole(role){state.role=role;const isAdmin=role==='admin';show(adminBar,isAdmin);show(roomLine,isAdmin);show(usersBox,isAdmin);}
-function saveSession(){localStorage.setItem('xchat_room',state.room);localStorage.setItem('xchat_num',state.me??'');localStorage.setItem('xchat_pin',state.pin??'');localStorage.setItem('xchat_role',state.role??'');}
-function loadSession(){const r=localStorage.getItem('xchat_room')||DEFAULT_ROOM;const n=localStorage.getItem('xchat_num');const p=localStorage.getItem('xchat_pin');const role=localStorage.getItem('xchat_role');state.room=r;roomName.textContent=titleCase(r);if(n&&role){state.me=n;state.pin=p;state.role=role;if(role==='admin'){enterAdminUI();}enterChatUI();attachRealtime();}}
-loadSession();
+  const roomName = document.getElementById('roomName');
+  const scrollEl = document.getElementById('scroll');
+  const msgsEl   = document.getElementById('msgs');
+  const welcome  = document.getElementById('welcome');
+  const inpText  = document.getElementById('inpText');
+  const btnSend  = document.getElementById('btnSend');
+  const btnGlobal= document.getElementById('btnGlobal');
 
-/* Rooms (solo admin) */
-async function refreshRooms(){
-  const snap = await get(ref(db,'roomsMeta'));
-  selRoom.innerHTML='';
-  if(snap.exists()){const meta=snap.val();for(const id of Object.keys(meta)){const opt=document.createElement('option');opt.value=id;opt.textContent=meta[id].name||id;selRoom.appendChild(opt);}}
-  let found=[...selRoom.options].some(o=>o.value===state.room);
-  if(!found){const opt=document.createElement('option');opt.value=state.room;opt.textContent=titleCase(state.room);selRoom.appendChild(opt);}
-  selRoom.value=state.room;
-}
-async function setRoom(id){state.room=id;roomName.textContent=titleCase(id);saveSession();detachRealtime();clearChatUI();attachRealtime();}
-roomAdd.onclick = async ()=>{const name=(roomNew.value||'').trim();if(!name)return;await update(ref(db,'roomsMeta/'+name),{name});roomNew.value='';refreshRooms();};
-roomRen.onclick = async ()=>{const name=(roomNew.value||'').trim();if(!name)return;await update(ref(db,'roomsMeta/'+state.room),{name});refreshRooms();};
-roomDel.onclick = async ()=>{const id=selRoom.value;if(!confirm(`Eliminar sala "${id}"?`))return;await set(ref(db,'roomsMeta/'+id),null);refreshRooms();};
-selRoom.onchange = ()=> setRoom(selRoom.value);
+  // ===== Estado =====
+  let state = {
+    room: localStorage.getItem('xc_room') || DEFAULT_ROOM,
+    me:   localStorage.getItem('xc_me')   || null,
+    role: localStorage.getItem('xc_role') || null,  // 'admin' | 'user'
+    pin:  localStorage.getItem('xc_pin')  || null,
+    subs: { msgsOff:null, usersOff:null }
+  };
+  roomName.textContent = state.room;
 
-/* Login */
-btnEnter.onclick = async ()=>{
-  const num = String((inpNumber.value||'').trim());
-  const pin = String((inpPin.value||'').trim());
-  if(!num){ alert('Introduce tu número'); return; }
-  if(num==='0'){ // admin
-    if(pin!==ADMIN_PASSWORD){ alert('Contraseña incorrecta'); return; }
-    state.me='0'; state.pin=''; setRole('admin'); saveSession(); enterAdminUI(); enterChatUI(); attachRealtime(); refreshRooms(); return;
-  }
-  const uref=ref(db,`rooms/${state.room}/users/${num}`);
-  const snap=await get(uref);
-  if(!snap.exists()){
-    const newPin=(''+Math.floor(1000+Math.random()*9000));
-    await set(uref,{pin:newPin,active:true,createdAt:Date.now()});
-    alert(`Tu PIN es: ${newPin} (guárdalo)`);
-    state.me=num; state.pin=newPin; setRole('user'); saveSession(); enterChatUI(); attachRealtime();
-  }else{
-    const data=snap.val();
-    if(!pin){ alert('PIN faltante. Pídele tu PIN al organizador.'); return; }
-    if(pin!==String(data.pin)){ alert('PIN incorrecto.'); return; }
-    if(data.active===false){ alert('Tu acceso está desactivado por el organizador.'); return; }
-    state.me=num; state.pin=pin; setRole('user'); saveSession(); enterChatUI(); attachRealtime();
-  }
-};
+  function save(){ localStorage.setItem('xc_room', state.room);
+                   localStorage.setItem('xc_me',   state.me||'');
+                   localStorage.setItem('xc_role', state.role||'');
+                   localStorage.setItem('xc_pin',  state.pin||''); }
 
-/* Admin UI */
-function enterAdminUI(){adminBar.querySelector('.pill').textContent='Conectado como admin';btnAdminOn.disabled=true;btnAdminOff.disabled=false;show(usersBox,true);show(roomLine,true);}
-btnAdminOn.onclick = ()=> enterAdminUI();
-btnAdminOff.onclick = ()=>{setRole(null);show(usersBox,false);show(roomLine,false);};
+  function show(el,on){ el.style.display = on ? (el.classList.contains('chat')?'flex':'block') : 'none'; }
+  function stick(){ setTimeout(()=>{ scrollEl.scrollTop = scrollEl.scrollHeight; }, 30); }
 
-/* Chat runtime */
-let msgsOff=null, usersOff=null;
-function detachRealtime(){ if(msgsOff) msgsOff(); msgsOff=null; if(usersOff) usersOff(); usersOff=null; }
-function clearChatUI(){ msgsEl.innerHTML=''; state.welcomeHidden=false; show(welcomeEl,true); }
-function enterChatUI(){ show(chatBox,true); document.getElementById('loginBox').scrollIntoView({block:'start'}); }
-function attachRealtime(){
-  const mref=ref(db,`rooms/${state.room}/messages`);
-  msgsOff=onValue(mref,(snap)=>{
-    msgsEl.innerHTML=''; const list=[];
-    if(snap.exists()){ const v=snap.val(); for(const k of Object.keys(v)) list.push(v[k]); list.sort((a,b)=>(a.ts||0)-(b.ts||0)); }
-    if(list.length>0 && !state.welcomeHidden){ show(welcomeEl,false); state.welcomeHidden=true; }
-    for(const m of list){
-      if(m.to && String(m.to)!==String(state.me) && String(m.from)!==String(state.me) && m.from!=='ORG') continue;
-      const isMe=String(m.from)===String(state.me);
-      const div=document.createElement('div'); div.className='bubble'+(isMe?' me':'')+(m.system?' system':'');
-      div.innerHTML=(m.text||'').replace(/\n/g,'<br>');
-      const meta=document.createElement('div'); meta.className='meta';
-      const t=new Date(m.ts||Date.now());
-      meta.textContent=(m.system?'· Sistema · ':`#${m.from}`)+(m.to?` → @${m.to}`:'')+` · ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
-      div.appendChild(meta); msgsEl.appendChild(div);
+  // ===== Auto re-login (persistente) =====
+  (function boot(){
+    if(state.me && state.role){
+      show(login,false);
+      show(chat,true);
+      btnLogout.style.display='inline-block';
+      if(state.role==='admin') show(admin,true); else show(admin,false);
+      attach();
+    } else {
+      centerLogin();
     }
-    stickScroll();
+  })();
+
+  function centerLogin(){
+    show(login,true); show(chat,false); show(admin,false);
+    btnLogout.style.display='none';
+    setTimeout(()=>{ login.scrollIntoView({block:'center'}); }, 10);
+  }
+
+  // ===== Login =====
+  inpNum.addEventListener('input', ()=>{
+    if(String(inpNum.value).trim()==='0'){
+      inpPin.placeholder = 'Contraseña admin';
+      loginHelp.textContent = 'Acceso admin: usa el número 0 y la contraseña.';
+    }else{
+      inpPin.placeholder = 'Tu PIN (si ya tienes) · Admin: contraseña';
+      loginHelp.innerHTML = 'Acceso con <b>número</b> y <b>PIN</b>. Si es tu primer acceso, el PIN se genera automáticamente.';
+    }
   });
 
-  if(state.role==='admin'){
-    const uref=ref(db,`rooms/${state.room}/users`);
-    usersOff=onValue(uref,(snap)=>{
-      usersBox.innerHTML='<div class="sub" style="margin-bottom:6px">Usuarios (PIN visible solo para admin)</div>';
-      if(!snap.exists()){ usersBox.innerHTML+='<div class="status">Sin usuarios aún.</div>'; return; }
-      const v=snap.val(); const ids=Object.keys(v).sort((a,b)=>Number(a)-Number(b));
-      for(const id of ids){
-        const u=v[id];
-        const row=document.createElement('div'); row.className='userRow';
-        row.innerHTML=`
-          <div>#${id}</div>
-          <div class="status">PIN: <b>${u.pin||'—'}</b> · ${u.active===false?'<span style="color:#ffbebe">Desactivado</span>':'Activo'}</div>
-          <button class="small ghost" data-act="${u.active===false?'activar':'desactivar'}" data-id="${id}">${u.active===false?'Activar':'Desactivar'}</button>
-          <button class="small" data-kick="${id}">Desconectar</button>`;
-        usersBox.appendChild(row);
+  btnEnter.addEventListener('click', async ()=>{
+    loginMsg.textContent='';
+    const code = String((inpNum.value||'').trim());
+    const pin  = String((inpPin.value||'').trim());
+
+    if(!code){ loginMsg.textContent='Introduce tu número.'; return; }
+
+    if(code === '0'){ // admin sin PIN
+      if(pin !== ADMIN_PASSWORD){ loginMsg.textContent='Contraseña admin incorrecta.'; return; }
+      state.me='0'; state.role='admin'; state.pin=''; save();
+      show(login,false); show(chat,true); show(admin,true); btnLogout.style.display='inline-block';
+      attach(); return;
+    }
+
+    const uref = ref(db, `rooms/${state.room}/users/${code}`);
+    const snap = await get(uref);
+    if(!snap.exists()){
+      const newPin = String(Math.floor(1000+Math.random()*9000));
+      await set(uref, { pin:newPin, active:true, createdAt: Date.now() });
+      loginMsg.innerHTML = `Tu PIN es <b>${newPin}</b>. Se ha guardado en este dispositivo.<br>Vuelve a pulsar <b>Entrar</b> para acceder.`;
+      localStorage.setItem('xc_pin', newPin);
+      return;
+    }else{
+      const data = snap.val();
+      if(data.active===false){ loginMsg.textContent='Tu acceso está desactivado por el organizador.'; return; }
+      if(!pin){ loginMsg.textContent='PIN faltante. Pídele tu PIN al organizador.'; return; }
+      if(String(data.pin)!==pin){ loginMsg.textContent='PIN incorrecto.'; return; }
+      state.me = code; state.role='user'; state.pin = pin; save();
+      show(login,false); show(chat,true); show(admin,false); btnLogout.style.display='inline-block';
+      attach();
+    }
+  });
+
+  // ===== Suscripciones =====
+  function detach(){
+    if(state.subs.msgsOff) state.subs.msgsOff();
+    if(state.subs.usersOff) state.subs.usersOff();
+    state.subs.msgsOff = state.subs.usersOff = null;
+  }
+
+  function attach(){
+    detach();
+    // bienvenida persistente hasta primer mensaje visible
+    let hasAny = false;
+
+    // mensajes
+    const mref = ref(db, `rooms/${state.room}/messages`);
+    state.subs.msgsOff = onValue(mref, (snap)=>{
+      msgsEl.innerHTML = '';
+      const arr = [];
+      if(snap.exists()){
+        const v = snap.val();
+        for(const k of Object.keys(v)) arr.push(v[k]);
+        arr.sort((a,b)=>(a.ts||0)-(b.ts||0));
       }
-      usersBox.querySelectorAll('button[data-act]').forEach(btn=>{
-        btn.onclick=async()=>{const id=btn.getAttribute('data-id');const act=btn.getAttribute('data-act');await update(ref(db,`rooms/${state.room}/users/${id}`),{active:(act==='activar')});};
-      });
-      usersBox.querySelectorAll('button[data-kick]').forEach(btn=>{
-        btn.onclick=async()=>{const id=btn.getAttribute('data-kick');await update(ref(db,`rooms/${state.room}/users/${id}`),{lastKicked:Date.now()});alert(`Usuario ${id} marcado como desconectado.`);};
-      });
+      for(const m of arr){
+        // privados: solo ver si es tuyo o dirigido a ti, o sistema
+        if(m.to && String(m.to)!==String(state.me) && String(m.from)!==String(state.me) && m.from!=='ORG') continue;
+        const el = document.createElement('div');
+        const isMe = String(m.from)===String(state.me);
+        el.className = 'msg'+(isMe?' me':'')+(m.system?' system':'');
+        el.innerHTML = (m.text||'').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const t = new Date(m.ts||Date.now());
+        meta.textContent = (m.system?'· Sistema · ':`#${m.from}`)+(m.to?` → @${m.to}`:'')+` · ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
+        el.appendChild(meta);
+        msgsEl.appendChild(el);
+        hasAny = true;
+      }
+      if(hasAny) welcome.style.display='none';
+      stick();
     });
-  }else{ show(usersBox,false); }
-}
 
-/* Enviar */
-btnSend.onclick = async ()=>{
-  const txt=(inpMsg.value||'').trim(); const to=(inpTo.value||'').trim();
-  if(!txt) return;
-  if(state.me!=='0'){
-    const snap=await get(ref(db,`rooms/${state.room}/users/${state.me}`));
-    if(snap.exists() && snap.val().active===false){ alert('No puedes enviar mensajes: estás desactivado.'); return; }
+    // usuarios (solo admin ve PIN y controles)
+    if(state.role==='admin'){
+      const uref = ref(db, `rooms/${state.room}/users`);
+      state.subs.usersOff = onValue(uref, (snap)=>{
+        usersBox.innerHTML = '<div class="sub" style="margin-bottom:6px">Usuarios (PIN visible solo para admin)</div>';
+        if(!snap.exists()){ usersBox.innerHTML += '<div class="status">Sin usuarios aún.</div>'; return; }
+        const v = snap.val();
+        const ids = Object.keys(v).sort((a,b)=>Number(a)-Number(b));
+        for(const id of ids){
+          const u = v[id];
+          const row = document.createElement('div');
+          row.className = 'rowu';
+          row.innerHTML = `
+            <div>#${id}</div>
+            <div class="status">PIN: <b>${u.pin||'—'}</b> · ${u.active===false?'<span style="color:#ffbebe">Desactivado</span>':'Activo'}</div>
+            <button class="ghost" data-act="${u.active===false?'activar':'desactivar'}" data-id="${id}">${u.active===false?'Activar':'Desactivar'}</button>
+            <button class="" data-kick="${id}">Desconectar</button>
+          `;
+          usersBox.appendChild(row);
+        }
+        // eventos
+        usersBox.querySelectorAll('button[data-act]').forEach(btn=>{
+          btn.onclick = async ()=>{
+            const id = btn.getAttribute('data-id');
+            const act = btn.getAttribute('data-act');
+            await update(ref(db, `rooms/${state.room}/users/${id}`), { active: (act==='activar') });
+          };
+        });
+        usersBox.querySelectorAll('button[data-kick]').forEach(btn=>{
+          btn.onclick = async ()=>{
+            const id = btn.getAttribute('data-kick');
+            await update(ref(db, `rooms/${state.room}/users/${id}`), { lastKicked: Date.now() });
+            alert(`Usuario ${id} marcado como desconectado.`);
+          };
+        });
+      });
+    }
   }
-  const m={ id:uid(), from:state.me, to:to?to:null, text:txt, ts:Date.now(), system:false };
-  await set(ref(db,`rooms/${state.room}/messages/${m.id}`),m);
-  inpMsg.value=''; inpTo.value=''; stickScroll();
-};
 
-/* Global (admin) */
-btnGlobal.onclick = async ()=>{
-  if(state.role!=='admin') return;
-  const txt=prompt('Mensaje global (aparecerá para todos):'); if(!txt) return;
-  const m={ id:uid(), from:'ORG', to:null, text:txt, ts:Date.now(), system:true };
-  await set(ref(db,`rooms/${state.room}/messages/${m.id}`),m);
-};
-
-/* Auto ON/OFF */
-btnAuto.onclick = ()=>{
-  if(state.role!=='admin') return;
-  const isOn=!!state.autoTimer;
-  if(isOn){
-    clearInterval(state.autoTimer); state.autoTimer=null; btnAuto.textContent='Mensajes auto: OFF'; alert('Mensajes automáticos desactivados');
-  }else{
-    const ms=AUTO_EVERY_MIN*60*1000;
-    state.autoTimer=setInterval(async()=>{
-      const tips=[
-        'Consejo: usa @número para enviar privado.',
-        'Recuerda ser respetuoso: el chat es parte de la experiencia.',
-        'Si tienes dudas, escribe @0 para contactar al organizador.',
-        'Tip: desliza hacia arriba para revisar mensajes anteriores.'
-      ];
-      const txt=tips[Math.floor(Math.random()*tips.length)];
-      const m={ id:uid(), from:'ORG', text:txt, ts:Date.now(), system:true };
-      await set(ref(db,`rooms/${state.room}/messages/${m.id}`),m);
-    },ms);
-    btnAuto.textContent='Mensajes auto: ON'; alert(`Mensajes automáticos ACTIVADOS cada ${AUTO_EVERY_MIN} min`);
+  // ===== Enviar mensajes =====
+  function parsePrivate(txt){
+    const m = txt.match(/^@(\d+)\s+(.*)$/);
+    if(!m) return null;
+    return { to: parseInt(m[1],10), text: m[2] };
   }
-};
 
-/* UX */
-document.getElementById('inpNumber').addEventListener('input', ()=>{
-  if(String(inpNumber.value).trim()==='0'){
-    inpPin.type='password'; inpPin.placeholder='Contraseña admin';
-    loginHelp.textContent='Acceso admin: usa el número 0 y la contraseña.';
-  }else{
-    inpPin.type='password'; inpPin.placeholder='Tu PIN (si ya tienes)';
-    loginHelp.innerHTML='Acceso con <b>número</b> y <b>PIN</b>. Si es tu primer acceso, el PIN se genera automáticamente.';
-  }
-});
+  btnSend.addEventListener('click', async ()=>{
+    const raw = (inpText.value||'').trim();
+    if(!raw) return;
+    // bloquea si desactivado
+    if(state.role!=='admin'){
+      const u = await get(ref(db, `rooms/${state.room}/users/${state.me}`));
+      if(u.exists() && u.val().active===false){ alert('No puedes enviar mensajes: estás desactivado.'); return; }
+    }
+    const p = parsePrivate(raw);
+    const payload = p
+      ? { id: Date.now()+Math.random().toString(36).slice(2), from: state.me, to: p.to, text: p.text, ts: Date.now(), system:false }
+      : { id: Date.now()+Math.random().toString(36).slice(2), from: state.me, to: null,  text: raw,     ts: Date.now(), system:false };
+    await set(ref(db, `rooms/${state.room}/messages/${payload.id}`), payload);
+    inpText.value=''; stick();
+  });
 
-/* Boot */
-(async function boot(){ try{ await refreshRooms(); }catch(e){} })();
+  // ===== Mensaje global (admin) =====
+  btnGlobal.addEventListener('click', async ()=>{
+    if(state.role!=='admin') return;
+    const txt = prompt('Mensaje global (aparecerá para todos):');
+    if(!txt) return;
+    const m = { id: Date.now()+Math.random().toString(36).slice(2), from:'ORG', to:null, text:txt, ts:Date.now(), system:true };
+    await set(ref(db, `rooms/${state.room}/messages/${m.id}`), m);
+  });
+
+  // ===== Logout =====
+  btnLogout.addEventListener('click', ()=>{
+    localStorage.removeItem('xc_me');
+    localStorage.removeItem('xc_role');
+    localStorage.removeItem('xc_pin');
+    show(chat,false); show(admin,false); centerLogin();
+  });
 </script>
 </body>
 </html>
