@@ -14,7 +14,6 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .header{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .brand{display:flex;align-items:center;gap:10px}
 .logo{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#111;border:1px solid var(--line);overflow:hidden}
-.logo img{width:20px;height:20px;display:block}
 .ttl{font-weight:700;font-size:20px}
 .sub{font-size:13px;color:var(--muted)}
 .btn{appearance:none;border:1px solid #fff;background:#fff;color:#000;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
@@ -26,6 +25,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .eye{cursor:pointer;user-select:none}
 .login{max-width:700px;margin:6svh auto 0;display:flex;flex-direction:column;gap:10px}
 .hint{color:var(--muted);font-size:13px}
+
 .messages{height:calc(100svh - 380px);min-height:300px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
 .msg{max-width:92%;padding:10px 12px;border:1px solid #3a3a3a;border-radius:14px;background:#101010;white-space:pre-wrap;word-break:break-word}
 .msg.me{margin-left:auto;background:#141414;border-color:#555}
@@ -34,8 +34,10 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .msg.sys{opacity:.85;border-style:dashed}
 .composer{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding:10px;background:#080808;border-radius:14px;position:sticky;bottom:0}
 .composer .field{flex:1}
+
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;border:1px solid var(--line);color:#fff;padding:10px 14px;border-radius:12px;display:none;z-index:80}
 .toast.show{display:block}
+
 .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
 .backdrop.show{display:flex!important}
 .modal{background:#101010;border:1px solid var(--line);padding:20px 22px;border-radius:14px;width:min(420px,92vw);text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.35)}
@@ -43,6 +45,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .modal p{margin:0 0 12px 0;color:#ddd}
 .modal .actions{display:flex;gap:8px;justify-content:center}
 kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6px;background:#0a0a0a}
+
 .admin{display:none;gap:10px;flex-direction:column}
 .admin .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .list{border:1px dashed var(--line);border-radius:12px;padding:10px;max-height:220px;overflow:auto}
@@ -53,8 +56,17 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
 .dot.green{background:#00d38f;border-color:#00d38f}
 .dot.orange{background:#ffb020;border-color:#ffb020}
 .dot.red{background:#ff5a5a;border-color:#ff5a5a}
+
 .roomBox{display:flex;gap:8px;align-items:center}
-.roomBox input{min-width:200px}
+.roomBox input{
+  min-width:200px;
+  background:#111;
+  color:#fff;
+  border:1px solid #333;
+  padding:8px 10px;
+  border-radius:8px;
+}
+
 @media (max-width:560px){.messages{height:calc(100svh - 430px)}}
 </style>
 </head>
@@ -63,9 +75,16 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
   <div class="card header">
     <div class="brand">
       <span class="logo" aria-hidden="true">
-        <img alt="X Code Logo" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgc3Ryb2tlPSIjRDBBQTUwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTggOEwxNiAxNkwxNiA4TDggMTYiIHN0cm9rZT0iI0QwQUE1MDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+"/>
+        <!-- Logo inline SVG (corregido) -->
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="#D0A500" stroke-width="2"></circle>
+          <path d="M8 8 L16 16 M16 8 L8 16" stroke="#D0A500" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
       </span>
-      <div><div class="ttl">X Code Chat — Official</div><div class="sub">Sala: <span id="roomHdr">Sala de Prueba</span></div></div>
+      <div>
+        <div class="ttl">X Code Chat — Official</div>
+        <div class="sub">Sala: <span id="roomHdr">Sala de Prueba</span></div>
+      </div>
     </div>
     <button id="logoutBtn" class="btn ghost" style="display:none">Salir</button>
   </div>
@@ -142,6 +161,7 @@ const ENTRY_WHITELIST_PATHS = ["entradas","tickets"]; // se lee desde aquí
 const DEFAULT_ROOM = "Sala de Prueba";
 const ADMIN_PASS = "131215";
 
+/*** App ***/
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -515,4 +535,3 @@ async function pingStatus(){
 </script>
 </body>
 </html>
-
