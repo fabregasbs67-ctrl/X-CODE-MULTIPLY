@@ -1,23 +1,14 @@
 {
   "version": 2,
-  "name": "x-code-multiply",
   "public": true,
   "builds": [
-    { "src": "index_chat.html", "use": "@vercel/static" }
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "index_chat.html", "use": "@vercel/static" },
+    { "src": "index_chat_dev.html", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/", "dest": "index_chat.html" },
-    { "src": "/(.*)", "dest": "index_chat.html" }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-cache" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
-      ]
-    }
+    { "src": "/dev", "dest": "index_chat_dev.html" },
+    { "src": "/chat", "dest": "index_chat.html" },
+    { "src": "/", "dest": "index.html" }
   ]
 }
