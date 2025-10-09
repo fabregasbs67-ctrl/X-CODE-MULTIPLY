@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>X Code Chat — Official</title>
+<title>X Code Chat — Official v2.4.2-prv</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{ --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500; --accent:#00ffbb; --danger:#ff5a5a; }
@@ -26,12 +26,16 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .login{max-width:700px;margin:6svh auto 0;display:flex;flex-direction:column;gap:10px}
 .hint{color:var(--muted);font-size:13px}
 
-.messages{height:calc(100svh - 380px);min-height:300px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
+.messages{height:calc(100svh - 420px);min-height:300px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
 .msg{max-width:92%;padding:10px 12px;border:1px solid #3a3a3a;border-radius:14px;background:#101010;white-space:pre-wrap;word-break:break-word}
 .msg.me{margin-left:auto;background:#141414;border-color:#555}
-.msg .by{font-size:12px;color:#9bd;opacity:.85;margin-bottom:4px}
+.msg .by{font-size:12px;color:#9bd;opacity:.95;margin-bottom:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .msg .meta{margin-top:6px;font-size:11px;color:#9a9a9a}
 .msg.sys{opacity:.85;border-style:dashed}
+.badge{display:inline-block;border:1px solid #3a3a3a;border-radius:999px;padding:2px 8px;font-size:11px}
+.badge.priv{border-color:#8aa0ff;color:#cfe0ff;background:#0d1230}
+.badge.admin{border-color:#D0A500;color:#f6e49c;background:#1a1600}
+
 .composer{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding:10px;background:#080808;border-radius:14px;position:sticky;bottom:0}
 .composer .field{flex:1}
 
@@ -67,7 +71,7 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
   border-radius:8px;
 }
 
-@media (max-width:560px){.messages{height:calc(100svh - 430px)}}
+@media (max-width:560px){.messages{height:calc(100svh - 470px)}}
 </style>
 </head>
 <body>
@@ -75,7 +79,7 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
   <div class="card header">
     <div class="brand">
       <span class="logo" aria-hidden="true">
-        <!-- Logo inline SVG (corregido) -->
+        <!-- SVG logo -->
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
           <circle cx="12" cy="12" r="10" fill="none" stroke="#D0A500" stroke-width="2"></circle>
           <path d="M8 8 L16 16 M16 8 L8 16" stroke="#D0A500" stroke-width="2" stroke-linecap="round"></path>
@@ -95,7 +99,7 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
     <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)"></div>
     <div class="field"><input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN"><span id="togglePin" class="eye">👁️</span></div>
     <div style="display:flex;gap:8px;align-items:center"><button id="loginBtn" class="btn">Entrar</button><div id="loginMsg" class="hint"></div></div>
-    <div class="hint">Privado escribe <kbd>@número</kbd> al inicio (ej. <kbd>@120 hola</kbd>).</div>
+    <div class="hint">Privado escribe <kbd>@número</kbd> al inicio (ej. <kbd>@120 hola</kbd>). Los privados mostrarán una <span class="badge priv">etiqueta</span> clara.</div>
   </div>
 
   <!-- Admin panel (solo #0) -->
@@ -157,7 +161,7 @@ const firebaseConfig = {
 };
 
 /*** Config (editable) ***/
-const ENTRY_WHITELIST_PATHS = ["entradas","tickets"]; // se lee desde aquí
+const ENTRY_WHITELIST_PATHS = ["entradas","tickets"];
 const DEFAULT_ROOM = "Sala de Prueba";
 const ADMIN_PASS = "131215";
 
@@ -291,19 +295,14 @@ let detachMsgs = null, detachUsers = null, usersCache={}, usersTimer=null, statu
 function currentRoomRef(path){ return roomRef(session.room, path); }
 
 function enterChat(isAdmin){
-  // UI
   loginCard.style.display="none";
   chatCard.style.display="block";
   logoutBtn.style.display="inline-flex";
   meIdSpan.textContent = session.num;
 
-  // Admin panel visible solo #0
   if(isAdmin || session.num===0 || session.isAdmin){ showAdmin(); } else { hideAdmin(); }
 
-  // Mensajes
   attachMessages();
-
-  // Focus input
   setTimeout(()=> msgInput?.focus(), 50);
 }
 
@@ -323,17 +322,32 @@ async function doLogout(){
 logoutBtn.onclick = doLogout;
 
 function renderMsg(m){
-  // ocultar tests del admin a usuarios normales
+  // Ocultar tests del admin a usuarios normales
   if(m.sys && session.num!==0) return;
-
-  // privados: solo remitente/destinatario/admin
+  // Privados: solo remitente/destinatario/admin
   if(m.to && !(m.to===session.num || m.from===session.num || session.num===0)) return;
 
   const div=document.createElement("div");
   div.className="msg"+(m.from===session.num?" me":"")+(m.sys?" sys":"");
   const by=document.createElement("div");
   by.className="by";
-  by.textContent = (m.from===0? "Organizador" : `Usuario #${m.from}`) + (m.to? ` → #${m.to}` : "");
+
+  const who = (m.from===0? "Organizador" : `Usuario #${m.from}`);
+  by.textContent = who;
+
+  // Etiqueta clara de privado
+  if(m.to){
+    const priv = document.createElement("span");
+    priv.className = "badge priv";
+    priv.textContent = `(privado para #${m.to})`;
+    by.appendChild(priv);
+  } else if (m.from===0) {
+    const adm = document.createElement("span");
+    adm.className = "badge admin";
+    adm.textContent = "anuncio";
+    by.appendChild(adm);
+  }
+
   const text=document.createElement("div");
   text.textContent = m.text || "";
   const meta=document.createElement("div");
@@ -370,17 +384,14 @@ async function sendMessage(){
 sendBtn.onclick = sendMessage;
 msgInput.onkeydown = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); sendMessage(); }};
 
-/*** ADMIN PANEL ***/
+/*** ADMIN PANEL (igual que estable) ***/
 function showAdmin(){
   adminCard.style.display="flex";
   adminStatus.textContent="Admin activo";
   adminStatus.className="tag ok";
-  // usuarios en tiempo real
   loadUsersRealtime();
-  // indicadores periódicos
   if(!usersTimer){ usersTimer=setInterval(updateUsersAgo, 30000); }
   if(!statusTimer){ statusTimer=setInterval(pingStatus, 10000); }
-  // ping inicial
   setTimeout(pingStatus, 600);
 }
 function hideAdmin(){
@@ -392,7 +403,6 @@ function hideAdmin(){
 }
 
 function updateUsersAgo(){
-  // refresca “conectado hace…”
   [...usersList.querySelectorAll("[data-uid]")].forEach(el=>{
     const uid=el.getAttribute("data-uid");
     const u=usersCache[uid];
@@ -439,14 +449,13 @@ bcastBtn.onclick=async()=>{
   await set(currentRoomRef(`messages/${id}`), { from:0, text:txt, ts:Date.now() });
 };
 
-/*** CAMBIO DE SALA (solo admin visible) ***/
+/*** CAMBIO DE SALA MANUAL ***/
 roomUseBtn.onclick=()=>{
   const newRoom=(roomInput.value||"").trim();
   if(!newRoom) return toast("Escribe un nombre de sala");
   if(newRoom===session.room) return;
   session.room=newRoom;
   roomHdr.textContent=newRoom;
-  // reset suscripciones
   if(detachMsgs){ detachMsgs(); detachMsgs=null; }
   if(detachUsers){ detachUsers(); detachUsers=null; }
   messages.innerHTML="";
@@ -455,7 +464,7 @@ roomUseBtn.onclick=()=>{
   toast(`Sala cambiada a "${newRoom}"`);
 };
 
-/*** BOTÓN TEST DE CONEXIÓN (solo admin) + limpieza automática ***/
+/*** BOTÓN TEST ***/
 async function testOnce(){
   if(session.num!==0) return;
   adminStatus.textContent="Probando…";
@@ -475,22 +484,17 @@ async function testOnce(){
       adminStatus.textContent="Realtime operativo ✅";
       adminStatus.className="tag ok";
       off(r,"value",handler);
-      // limpiar en 3s
       setTimeout(()=> remove(currentRoomRef(`messages/${testId}`)).catch(()=>{}), 3000);
     }
   };
   onValue(r, handler);
-
-  // Enviar el test con ID fijo (para poder eliminarlo)
   await set(currentRoomRef(`messages/${testId}`), msg);
 
-  // Timeout de 4s por si no responde
   setTimeout(async ()=>{
     if(!resolved){
       off(r,"value",handler);
       adminStatus.textContent="Sin respuesta ⚠️";
       adminStatus.className="tag bad";
-      // Cambia mensaje a error y borra a los 10s
       await set(currentRoomRef(`messages/${testId}`), { ...msg, text:`[ERROR ${testId}] No se pudo verificar la conexión`, ts:Date.now(), sys:true }).catch(()=>{});
       setTimeout(()=> remove(currentRoomRef(`messages/${testId}`)).catch(()=>{}), 10000);
     }
@@ -498,7 +502,7 @@ async function testOnce(){
 }
 testBtn.onclick = testOnce;
 
-/*** Indicador de estado Firebase (solo admin) ***/
+/*** Indicador de estado Firebase ***/
 async function pingStatus(){
   if(session.num!==0) return;
   const pingId = "PING_"+Date.now()+"_"+Math.random().toString(36).slice(2,5);
@@ -514,9 +518,7 @@ async function pingStatus(){
     if(found){
       done=true; off(r,"value",handler);
       const ms = performance.now()-start;
-      // color por latencia
       statusDot.className = "dot " + (ms<2000? "green" : "orange");
-      // borrar ping en 3s
       setTimeout(()=> remove(currentRoomRef(`messages/${pingId}`)).catch(()=>{}), 3000);
     }
   };
@@ -527,7 +529,6 @@ async function pingStatus(){
     if(!done){
       off(r,"value",handler);
       statusDot.className = "dot red";
-      // intentamos limpiar si quedó
       remove(currentRoomRef(`messages/${pingId}`)).catch(()=>{});
     }
   }, 3000);
