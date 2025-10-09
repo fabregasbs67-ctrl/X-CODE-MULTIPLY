@@ -26,7 +26,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .eye{cursor:pointer;user-select:none}
 .login{max-width:700px;margin:6svh auto 0;display:flex;flex-direction:column;gap:10px}
 .hint{color:var(--muted);font-size:13px}
-.messages{height:calc(100svh - 360px);min-height:300px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
+.messages{height:calc(100svh - 380px);min-height:300px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
 .msg{max-width:92%;padding:10px 12px;border:1px solid #3a3a3a;border-radius:14px;background:#101010;white-space:pre-wrap;word-break:break-word}
 .msg.me{margin-left:auto;background:#141414;border-color:#555}
 .msg .by{font-size:12px;color:#9bd;opacity:.85;margin-bottom:4px}
@@ -43,13 +43,19 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .modal p{margin:0 0 12px 0;color:#ddd}
 .modal .actions{display:flex;gap:8px;justify-content:center}
 kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6px;background:#0a0a0a}
-.admin{display:none;gap:8px;flex-direction:column}
+.admin{display:none;gap:10px;flex-direction:column}
 .admin .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .list{border:1px dashed var(--line);border-radius:12px;padding:10px;max-height:220px;overflow:auto}
 .tag{display:inline-block;border:1px solid #3a3a3a;border-radius:999px;padding:2px 8px;font-size:12px}
 .ok{color:#00d38f;border-color:#00d38f}
 .bad{color:#ff6a6a;border-color:#ff6a6a}
-@media (max-width:560px){.messages{height:calc(100svh - 400px)}}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid #555;margin-left:6px}
+.dot.green{background:#00d38f;border-color:#00d38f}
+.dot.orange{background:#ffb020;border-color:#ffb020}
+.dot.red{background:#ff5a5a;border-color:#ff5a5a}
+.roomBox{display:flex;gap:8px;align-items:center}
+.roomBox input{min-width:200px}
+@media (max-width:560px){.messages{height:calc(100svh - 430px)}}
 </style>
 </head>
 <body>
@@ -78,8 +84,14 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
     <div class="row">
       <div class="sub" style="font-weight:600">Panel del organizador</div>
       <span id="adminStatus" class="tag">—</span>
+      <span id="statusDot" class="dot" title="Estado Firebase"></span>
       <button id="testBtn" class="btn sm">🔄 Probar conexión</button>
       <button id="bcastBtn" class="btn sm ghost">Mensaje global</button>
+    </div>
+    <div class="row roomBox">
+      <div class="sub">Sala actual:</div>
+      <input id="roomInput" class="field" placeholder="Nombre de sala…"/>
+      <button id="roomUseBtn" class="btn sm">Usar sala</button>
     </div>
     <div class="row">
       <div class="sub">Usuarios conectados: <b id="countConn">0</b></div>
@@ -112,7 +124,7 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, get, set, update, onValue, off, push } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getDatabase, ref, get, set, update, onValue, off, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
 /*** Firebase real del proyecto ***/
 const firebaseConfig = {
@@ -125,10 +137,10 @@ const firebaseConfig = {
   appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
 };
 
-/*** Config ***/
+/*** Config (editable) ***/
+const ENTRY_WHITELIST_PATHS = ["entradas","tickets"]; // se lee desde aquí
 const DEFAULT_ROOM = "Sala de Prueba";
 const ADMIN_PASS = "131215";
-const ENTRY_WHITELIST_PATHS = ["entradas","tickets"];
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -142,18 +154,27 @@ const messages=$("#messages"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn");
 const meIdSpan=$("#meId");
 const toastEl=$("#toast");
 const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
-const adminCard=$("#adminCard"), usersList=$("#usersList"), countConn=$("#countConn"), bcastBtn=$("#bcastBtn"), testBtn=$("#testBtn"), adminStatus=$("#adminStatus");
+const adminCard=$("#adminCard"), usersList=$("#usersList"), countConn=$("#countConn"), bcastBtn=$("#bcastBtn"), testBtn=$("#testBtn"), adminStatus=$("#adminStatus"), statusDot=$("#statusDot");
+const roomInput=$("#roomInput"), roomUseBtn=$("#roomUseBtn");
 
 const toast = (t,ms=2400)=>{ toastEl.textContent=t; toastEl.classList.add("show"); clearTimeout(window.__t); window.__t=setTimeout(()=>toastEl.classList.remove("show"),ms); };
 togglePin.onclick = ()=> pinInput.type = (pinInput.type==="password" ? "text" : "password");
 
 const roomRef = (room, path)=> ref(db, `rooms/${room}/${path}`);
-const currentRoomRef = (path)=> roomRef(DEFAULT_ROOM, path);
+let session = { room: DEFAULT_ROOM, num:null, isAdmin:false };
+roomHdr.textContent = session.room;
+roomInput.value = session.room;
+
 const hhmm = (ts)=> new Date(ts||Date.now()).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
 const newPIN = ()=> String(Math.floor(1000+Math.random()*9000));
-
-let session = { room: DEFAULT_ROOM, num:null };
-roomHdr.textContent = DEFAULT_ROOM;
+const timeAgo = (ts)=>{
+  if(!ts) return "—";
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s<60) return `${s}s`;
+  const m = Math.floor(s/60);
+  if(m<60) return `${m}m`;
+  const h = Math.floor(m/60); return `${h}h`;
+};
 
 /*** Modal PIN ***/
 function showGeneratedPin(pin){
@@ -184,8 +205,8 @@ async function isEntryAllowed(n){
 }
 
 /*** Normaliza users/{n}/{n} -> users/{n} ***/
-async function normalizeUserNode(n){
-  const base = `rooms/${DEFAULT_ROOM}/users/${n}`;
+async function normalizeUserNode(room,n){
+  const base = `rooms/${room}/users/${n}`;
   const uRef = ref(db, base);
   const nestedRef = ref(db, `${base}/${n}`);
   const uSnap = await get(uRef);
@@ -214,16 +235,18 @@ async function doLogin(){
     if(n===0){
       const pass=prompt("Contraseña de organizador:");
       if(pass!==ADMIN_PASS) throw new Error("Contraseña incorrecta.");
-      session.num=0; enterChat(true); return;
+      session.num=0; session.isAdmin=true;
+      toast("Acceso como organizador confirmado");
+      enterChat(true); return;
     }
 
     const allowed = await isEntryAllowed(n);
     if(!allowed) throw new Error("Tu número de entrada no está en la lista oficial.");
 
-    let data = await normalizeUserNode(n);
+    let data = await normalizeUserNode(session.room, n);
     if(!data || !data.pin){
       const pin=newPIN();
-      await set(currentRoomRef(`users/${n}`), { pin, active:true, connected:false, created:Date.now(), updated:Date.now() });
+      await set(roomRef(session.room,`users/${n}`), { pin, active:true, connected:false, created:Date.now(), updated:Date.now() });
       showGeneratedPin(pin);
       loginBtn.disabled=false; return;
     }
@@ -231,8 +254,9 @@ async function doLogin(){
     if(!pTyped){ throw new Error("Introduce tu PIN"); }
     if(String(data.pin)!==String(pTyped)) throw new Error("PIN incorrecto");
 
-    await update(currentRoomRef(`users/${n}`), { connected:true, updated:Date.now() });
-    session.num=n; enterChat(false);
+    await update(roomRef(session.room,`users/${n}`), { connected:true, updated:Date.now() });
+    session.num=n; session.isAdmin=false;
+    enterChat(false);
   }catch(err){ toast(err.message||"No se pudo iniciar sesión"); }
   finally{ loginBtn.disabled=false; }
 }
@@ -242,7 +266,9 @@ numInput.onkeydown = e=>{ if(e.key==="Enter") doLogin(); };
 pinInput.onkeydown = e=>{ if(e.key==="Enter") doLogin(); };
 
 /*** CHAT ***/
-let detachMsgs = null, detachUsers = null;
+let detachMsgs = null, detachUsers = null, usersCache={}, usersTimer=null, statusTimer=null;
+
+function currentRoomRef(path){ return roomRef(session.room, path); }
 
 function enterChat(isAdmin){
   // UI
@@ -252,7 +278,7 @@ function enterChat(isAdmin){
   meIdSpan.textContent = session.num;
 
   // Admin panel visible solo #0
-  if(isAdmin){ showAdmin(); } else { hideAdmin(); }
+  if(isAdmin || session.num===0 || session.isAdmin){ showAdmin(); } else { hideAdmin(); }
 
   // Mensajes
   attachMessages();
@@ -265,11 +291,14 @@ async function doLogout(){
   try{ if(session.num>0){ await update(currentRoomRef(`users/${session.num}`), { connected:false, updated:Date.now() }); } }catch{}
   if(detachMsgs){ detachMsgs(); detachMsgs=null; }
   if(detachUsers){ detachUsers(); detachUsers=null; }
+  if(usersTimer){ clearInterval(usersTimer); usersTimer=null; }
+  if(statusTimer){ clearInterval(statusTimer); statusTimer=null; }
   chatCard.style.display="none"; logoutBtn.style.display="none";
   hideAdmin();
   loginCard.style.display="flex";
   messages.innerHTML=""; msgInput.value="";
-  session={ room: DEFAULT_ROOM, num:null };
+  session={ room: DEFAULT_ROOM, num:null, isAdmin:false };
+  roomHdr.textContent=session.room; roomInput.value=session.room;
 }
 logoutBtn.onclick = doLogout;
 
@@ -277,7 +306,7 @@ function renderMsg(m){
   // ocultar tests del admin a usuarios normales
   if(m.sys && session.num!==0) return;
 
-  // privados: solo visibles para remitente o destinatario
+  // privados: solo remitente/destinatario/admin
   if(m.to && !(m.to===session.num || m.from===session.num || session.num===0)) return;
 
   const div=document.createElement("div");
@@ -326,13 +355,32 @@ function showAdmin(){
   adminCard.style.display="flex";
   adminStatus.textContent="Admin activo";
   adminStatus.className="tag ok";
+  // usuarios en tiempo real
   loadUsersRealtime();
+  // indicadores periódicos
+  if(!usersTimer){ usersTimer=setInterval(updateUsersAgo, 30000); }
+  if(!statusTimer){ statusTimer=setInterval(pingStatus, 10000); }
+  // ping inicial
+  setTimeout(pingStatus, 600);
 }
 function hideAdmin(){
   adminCard.style.display="none";
   adminStatus.textContent="—";
   adminStatus.className="tag";
+  statusDot.className="dot";
   if(detachUsers){ detachUsers(); detachUsers=null; }
+}
+
+function updateUsersAgo(){
+  // refresca “conectado hace…”
+  [...usersList.querySelectorAll("[data-uid]")].forEach(el=>{
+    const uid=el.getAttribute("data-uid");
+    const u=usersCache[uid];
+    if(u){
+      const ago=el.querySelector(".ago");
+      if(ago) ago.textContent = "hace " + timeAgo(u.updated || u.created || Date.now());
+    }
+  });
 }
 
 function loadUsersRealtime(){
@@ -341,16 +389,20 @@ function loadUsersRealtime(){
   const handler=(snap)=>{
     usersList.innerHTML="";
     const users=snap.val()||{};
+    usersCache=users;
     let connected=0;
     Object.keys(users).sort((a,b)=>Number(a)-Number(b)).forEach(k=>{
       const u=users[k]||{};
-      const row=document.createElement("div");
-      const badge = document.createElement("span");
-      badge.className="tag "+(u.connected?"ok":"bad");
-      badge.textContent = u.connected?"conectado":"desconectado";
       if(u.connected) connected++;
-      row.innerHTML = `<b>#${k}</b> · PIN <span class="tag">${u.pin||"—"}</span> `;
-      row.appendChild(badge);
+      const row=document.createElement("div");
+      row.setAttribute("data-uid",k);
+      row.style.padding="6px 8px";
+      row.style.border="1px dashed var(--line)";
+      row.style.borderRadius="10px";
+      row.style.margin="4px 0";
+      const badge = `<span class="tag ${u.connected?"ok":"bad"}">${u.connected?"conectado":"desconectado"}</span>`;
+      const agoTxt = `hace ${timeAgo(u.updated || u.created || Date.now())}`;
+      row.innerHTML = `<b>#${k}</b> · PIN <span class="tag">${u.pin||"—"}</span> ${badge}<div class="sub ago">${agoTxt}</div>`;
       usersList.appendChild(row);
     });
     countConn.textContent=connected;
@@ -367,46 +419,100 @@ bcastBtn.onclick=async()=>{
   await set(currentRoomRef(`messages/${id}`), { from:0, text:txt, ts:Date.now() });
 };
 
-/*** BOTÓN TEST DE CONEXIÓN (solo admin) ***/
-testBtn.onclick=async()=>{
+/*** CAMBIO DE SALA (solo admin visible) ***/
+roomUseBtn.onclick=()=>{
+  const newRoom=(roomInput.value||"").trim();
+  if(!newRoom) return toast("Escribe un nombre de sala");
+  if(newRoom===session.room) return;
+  session.room=newRoom;
+  roomHdr.textContent=newRoom;
+  // reset suscripciones
+  if(detachMsgs){ detachMsgs(); detachMsgs=null; }
+  if(detachUsers){ detachUsers(); detachUsers=null; }
+  messages.innerHTML="";
+  attachMessages();
+  if(session.num===0) { loadUsersRealtime(); }
+  toast(`Sala cambiada a "${newRoom}"`);
+};
+
+/*** BOTÓN TEST DE CONEXIÓN (solo admin) + limpieza automática ***/
+async function testOnce(){
   if(session.num!==0) return;
   adminStatus.textContent="Probando…";
   adminStatus.className="tag";
 
   const testId = "TEST_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);
-  const msg = { from:0, text:`[TEST ${testId}] Realtime check`, ts:Date.now(), sys:true };
-
-  // Escucha temporal para verificar que el listener de mensajes recibe el eco
-  const r=currentRoomRef("messages");
+  const msg = { from:0, text:`[TEST ${testId}] Verificando conexión`, ts:Date.now(), sys:true };
   let resolved=false;
+  const r=currentRoomRef("messages");
+
   const handler=(snap)=>{
     if(resolved) return;
     const val=snap.val()||{};
-    const found = Object.values(val).some(m=> m && m.sys && typeof m.text==="string" && m.text.includes(testId));
+    const found = Object.entries(val).find(([k,m])=> m && m.sys && typeof m.text==="string" && m.text.includes(testId));
     if(found){
       resolved=true;
       adminStatus.textContent="Realtime operativo ✅";
       adminStatus.className="tag ok";
       off(r,"value",handler);
-      // Limpieza del test (opcional)
-      // no borramos para mantener histórico; si quieres borrar, añade aquí lógica para remove()
+      // limpiar en 3s
+      setTimeout(()=> remove(currentRoomRef(`messages/${testId}`)).catch(()=>{}), 3000);
     }
   };
   onValue(r, handler);
 
-  // Enviar el test
+  // Enviar el test con ID fijo (para poder eliminarlo)
   await set(currentRoomRef(`messages/${testId}`), msg);
 
   // Timeout de 4s por si no responde
-  setTimeout(()=>{
+  setTimeout(async ()=>{
     if(!resolved){
       off(r,"value",handler);
       adminStatus.textContent="Sin respuesta ⚠️";
       adminStatus.className="tag bad";
-      toast("El listener no devolvió el mensaje de test. Revisa conexión/reglas.");
+      // Cambia mensaje a error y borra a los 10s
+      await set(currentRoomRef(`messages/${testId}`), { ...msg, text:`[ERROR ${testId}] No se pudo verificar la conexión`, ts:Date.now(), sys:true }).catch(()=>{});
+      setTimeout(()=> remove(currentRoomRef(`messages/${testId}`)).catch(()=>{}), 10000);
     }
   }, 4000);
-};
+}
+testBtn.onclick = testOnce;
+
+/*** Indicador de estado Firebase (solo admin) ***/
+async function pingStatus(){
+  if(session.num!==0) return;
+  const pingId = "PING_"+Date.now()+"_"+Math.random().toString(36).slice(2,5);
+  const msg = { from:0, text:`[PING ${pingId}]`, ts:Date.now(), sys:true };
+  const start = performance.now();
+  let done=false;
+
+  const r=currentRoomRef("messages");
+  const handler=(snap)=>{
+    if(done) return;
+    const val=snap.val()||{};
+    const found = Object.values(val).some(m=> m && m.sys && typeof m.text==="string" && m.text.includes(pingId));
+    if(found){
+      done=true; off(r,"value",handler);
+      const ms = performance.now()-start;
+      // color por latencia
+      statusDot.className = "dot " + (ms<2000? "green" : "orange");
+      // borrar ping en 3s
+      setTimeout(()=> remove(currentRoomRef(`messages/${pingId}`)).catch(()=>{}), 3000);
+    }
+  };
+  onValue(r, handler);
+  await set(currentRoomRef(`messages/${pingId}`), msg);
+
+  setTimeout(()=>{
+    if(!done){
+      off(r,"value",handler);
+      statusDot.className = "dot red";
+      // intentamos limpiar si quedó
+      remove(currentRoomRef(`messages/${pingId}`)).catch(()=>{});
+    }
+  }, 3000);
+}
 </script>
 </body>
 </html>
+
