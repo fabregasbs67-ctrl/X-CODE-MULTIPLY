@@ -18,7 +18,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .sub{font-size:13px;color:var(--muted)}
 .btn{appearance:none;border:1px solid #fff;background:#fff;color:#000;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
 .btn.ghost{background:transparent;color:#fff}
-.btn.danger{border-color:var(--danger);color:var(--danger);background:transparent}
+.btn.danger{border-color:var(--danger);color:#var(--danger);background:transparent}
 .btn.sm{padding:8px 10px;font-size:13px;border-radius:10px}
 .field{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px;background:#0a0a0a}
 .field input{flex:1;background:transparent;border:none;outline:none;color:var(--fg);font-size:16px}
@@ -26,7 +26,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .login{max-width:700px;margin:6svh auto 0;display:flex;flex-direction:column;gap:10px}
 .hint{color:var(--muted);font-size:13px}
 
-.messages{height:calc(100svh - 380px);min-height:300px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
+.messages{height:calc(100svh - 420px);min-height:300px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
 .msg{max-width:92%;padding:10px 12px;border:1px solid #3a3a3a;border-radius:14px;background:#101010;white-space:pre-wrap;word-break:break-word}
 .msg.me{margin-left:auto;background:#141414;border-color:#555}
 .msg .by{font-size:12px;color:#9bd;opacity:.85;margin-bottom:4px}
@@ -66,8 +66,11 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
   padding:8px 10px;
   border-radius:8px;
 }
+.roomBox select{
+  padding:8px 10px; min-width:220px; background:#111; color:#fff; border:1px solid #333; border-radius:8px;
+}
 
-@media (max-width:560px){.messages{height:calc(100svh - 430px)}}
+@media (max-width:560px){.messages{height:calc(100svh - 470px)}}
 </style>
 </head>
 <body>
@@ -75,7 +78,7 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
   <div class="card header">
     <div class="brand">
       <span class="logo" aria-hidden="true">
-        <!-- Logo inline SVG (corregido) -->
+        <!-- Logo inline SVG -->
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
           <circle cx="12" cy="12" r="10" fill="none" stroke="#D0A500" stroke-width="2"></circle>
           <path d="M8 8 L16 16 M16 8 L8 16" stroke="#D0A500" stroke-width="2" stroke-linecap="round"></path>
@@ -107,11 +110,21 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
       <button id="testBtn" class="btn sm">🔄 Probar conexión</button>
       <button id="bcastBtn" class="btn sm ghost">Mensaje global</button>
     </div>
+
+    <!-- Gestión de salas -->
     <div class="row roomBox">
-      <div class="sub">Sala actual:</div>
-      <input id="roomInput" class="field" placeholder="Nombre de sala…"/>
-      <button id="roomUseBtn" class="btn sm">Usar sala</button>
+      <div class="sub">Salas:</div>
+      <select id="roomSelect"></select>
+      <button id="btnUseRoom" class="btn sm">Usar</button>
     </div>
+
+    <div class="row roomBox">
+      <input id="roomNameNew" class="field" placeholder="Nuevo nombre de sala…"/>
+      <button id="btnAddRoom" class="btn sm">Añadir</button>
+      <button id="btnRenRoom" class="btn sm ghost">Renombrar</button>
+      <button id="btnDelRoom" class="btn sm danger">Eliminar</button>
+    </div>
+
     <div class="row">
       <div class="sub">Usuarios conectados: <b id="countConn">0</b></div>
     </div>
@@ -174,8 +187,15 @@ const messages=$("#messages"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn");
 const meIdSpan=$("#meId");
 const toastEl=$("#toast");
 const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
+
 const adminCard=$("#adminCard"), usersList=$("#usersList"), countConn=$("#countConn"), bcastBtn=$("#bcastBtn"), testBtn=$("#testBtn"), adminStatus=$("#adminStatus"), statusDot=$("#statusDot");
-const roomInput=$("#roomInput"), roomUseBtn=$("#roomUseBtn");
+
+const roomSelect = $("#roomSelect");
+const btnUseRoom = $("#btnUseRoom");
+const roomNameNew = $("#roomNameNew");
+const btnAddRoom = $("#btnAddRoom");
+const btnRenRoom = $("#btnRenRoom");
+const btnDelRoom = $("#btnDelRoom");
 
 const toast = (t,ms=2400)=>{ toastEl.textContent=t; toastEl.classList.add("show"); clearTimeout(window.__t); window.__t=setTimeout(()=>toastEl.classList.remove("show"),ms); };
 togglePin.onclick = ()=> pinInput.type = (pinInput.type==="password" ? "text" : "password");
@@ -183,7 +203,6 @@ togglePin.onclick = ()=> pinInput.type = (pinInput.type==="password" ? "text" : 
 const roomRef = (room, path)=> ref(db, `rooms/${room}/${path}`);
 let session = { room: DEFAULT_ROOM, num:null, isAdmin:false };
 roomHdr.textContent = session.room;
-roomInput.value = session.room;
 
 const hhmm = (ts)=> new Date(ts||Date.now()).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
 const newPIN = ()=> String(Math.floor(1000+Math.random()*9000));
@@ -241,6 +260,30 @@ async function normalizeUserNode(room,n){
     }
   }
   return uSnap.exists()? uSnap.val() : null;
+}
+
+/*** Rooms index ***/
+const roomsIndexRef = ref(db, "rooms_index");
+async function ensureRoomIndex(roomName){
+  const s=await get(roomsIndexRef); const list=s.exists()?s.val():{};
+  if(!list[roomName]){ list[roomName]=true; await set(roomsIndexRef, list); }
+  fillRooms(list);
+}
+function fillRooms(obj){
+  roomSelect.innerHTML="";
+  const names=Object.keys(obj||{}).sort((a,b)=>a.localeCompare(b));
+  names.forEach(name=>{
+    const opt=document.createElement("option");
+    opt.value=name; opt.textContent=name;
+    if(name===session.room) opt.selected=true;
+    roomSelect.appendChild(opt);
+  });
+}
+async function loadRooms(){
+  const s=await get(roomsIndexRef); let list=s.exists()?s.val():{};
+  if(!list[DEFAULT_ROOM]) list[DEFAULT_ROOM]=true;
+  await set(roomsIndexRef, list);
+  fillRooms(list);
 }
 
 /*** LOGIN ***/
@@ -318,7 +361,7 @@ async function doLogout(){
   loginCard.style.display="flex";
   messages.innerHTML=""; msgInput.value="";
   session={ room: DEFAULT_ROOM, num:null, isAdmin:false };
-  roomHdr.textContent=session.room; roomInput.value=session.room;
+  roomHdr.textContent=session.room;
 }
 logoutBtn.onclick = doLogout;
 
@@ -375,6 +418,8 @@ function showAdmin(){
   adminCard.style.display="flex";
   adminStatus.textContent="Admin activo";
   adminStatus.className="tag ok";
+  // Salas
+  ensureRoomIndex(session.room).then(loadRooms);
   // usuarios en tiempo real
   loadUsersRealtime();
   // indicadores periódicos
@@ -439,20 +484,116 @@ bcastBtn.onclick=async()=>{
   await set(currentRoomRef(`messages/${id}`), { from:0, text:txt, ts:Date.now() });
 };
 
-/*** CAMBIO DE SALA (solo admin visible) ***/
-roomUseBtn.onclick=()=>{
-  const newRoom=(roomInput.value||"").trim();
-  if(!newRoom) return toast("Escribe un nombre de sala");
-  if(newRoom===session.room) return;
-  session.room=newRoom;
-  roomHdr.textContent=newRoom;
-  // reset suscripciones
+/*** GESTIÓN DE SALAS ***/
+// Usar sala seleccionada
+btnUseRoom.onclick = async ()=>{
+  const r = roomSelect.value;
+  if(!r || r === session.room) return;
+  session.room = r;
+  roomHdr.textContent = r;
+  // reset subs
   if(detachMsgs){ detachMsgs(); detachMsgs=null; }
   if(detachUsers){ detachUsers(); detachUsers=null; }
   messages.innerHTML="";
   attachMessages();
-  if(session.num===0) { loadUsersRealtime(); }
-  toast(`Sala cambiada a "${newRoom}"`);
+  if(session.num===0){ loadUsersRealtime(); }
+  toast(`Sala cambiada a "${r}"`);
+};
+
+// Índice central
+const roomsIndexRef = ref(db, "rooms_index");
+
+// Cargar índice y llenar selector
+async function ensureRoomIndex(roomName){
+  const s = await get(roomsIndexRef);
+  const list = s.exists()? s.val() : {};
+  if(!list[roomName]){ list[roomName]=true; await set(roomsIndexRef, list); }
+  fillRooms(list);
+}
+function fillRooms(obj){
+  roomSelect.innerHTML="";
+  const names = Object.keys(obj || {}).sort((a,b)=>a.localeCompare(b));
+  names.forEach(name=>{
+    const opt = document.createElement("option");
+    opt.value = name; opt.textContent = name;
+    if(name === session.room) opt.selected = true;
+    roomSelect.appendChild(opt);
+  });
+}
+async function loadRooms(){
+  const s = await get(roomsIndexRef);
+  let list = s.exists()? s.val() : {};
+  if(!list[DEFAULT_ROOM]) list[DEFAULT_ROOM]=true;
+  await set(roomsIndexRef, list);
+  fillRooms(list);
+}
+
+// Añadir sala
+btnAddRoom.onclick = async ()=>{
+  const n = (roomNameNew.value || "").trim();
+  if(!n) return toast("Escribe un nombre de sala");
+  const s = await get(roomsIndexRef);
+  const list = s.exists()? s.val() : {};
+  if(list[n]) return toast("Esa sala ya existe");
+  list[n] = true;
+  await set(roomsIndexRef, list);
+  fillRooms(list);
+  roomNameNew.value = "";
+  toast(`Sala "${n}" creada`);
+};
+
+// Renombrar sala
+btnRenRoom.onclick = async ()=>{
+  const newName = (roomNameNew.value || "").trim();
+  const oldName = roomSelect.value;
+  if(!newName) return toast("Escribe el nuevo nombre");
+  if(!oldName) return toast("Selecciona una sala");
+  if(newName === oldName) return toast("El nombre es el mismo");
+
+  const s = await get(roomsIndexRef);
+  const list = s.exists()? s.val() : {};
+  if(list[newName]) return toast("Ya existe una sala con ese nombre");
+
+  const oldSnap = await get(roomRef(oldName, ""));
+  if(oldSnap.exists()){
+    await set(roomRef(newName, ""), oldSnap.val());
+  } else {
+    await set(roomRef(newName, ""), { });
+  }
+  await set(roomRef(oldName, ""), null);
+  delete list[oldName];
+  list[newName] = true;
+  await set(roomsIndexRef, list);
+
+  session.room = newName;
+  roomHdr.textContent = newName;
+  messages.innerHTML = "";
+  attachMessages();
+  loadRooms();
+  if(session.num===0){ loadUsersRealtime(); }
+  roomNameNew.value = "";
+  toast(`Sala renombrada a "${newName}"`);
+};
+
+// Eliminar sala
+btnDelRoom.onclick = async ()=>{
+  const r = roomSelect.value;
+  if(!r) return toast("Selecciona una sala");
+  if(!confirm(`¿Eliminar la sala "${r}"? Esta acción es irreversible.`)) return;
+
+  const s = await get(roomsIndexRef);
+  const list = s.exists()? s.val() : {};
+  delete list[r];
+  await set(roomsIndexRef, list);
+  await set(roomRef(r, ""), null);
+
+  session.room = DEFAULT_ROOM;
+  roomHdr.textContent = DEFAULT_ROOM;
+  messages.innerHTML = "";
+  attachMessages();
+  loadRooms();
+  if(session.num===0){ loadUsersRealtime(); }
+  toast(`Sala "${r}" eliminada`);
 };
 
 /*** BOTÓN TEST DE CONEXIÓN (solo admin) + limpieza automática ***/
@@ -475,22 +616,18 @@ async function testOnce(){
       adminStatus.textContent="Realtime operativo ✅";
       adminStatus.className="tag ok";
       off(r,"value",handler);
-      // limpiar en 3s
       setTimeout(()=> remove(currentRoomRef(`messages/${testId}`)).catch(()=>{}), 3000);
     }
   };
   onValue(r, handler);
 
-  // Enviar el test con ID fijo (para poder eliminarlo)
   await set(currentRoomRef(`messages/${testId}`), msg);
 
-  // Timeout de 4s por si no responde
   setTimeout(async ()=>{
     if(!resolved){
       off(r,"value",handler);
       adminStatus.textContent="Sin respuesta ⚠️";
       adminStatus.className="tag bad";
-      // Cambia mensaje a error y borra a los 10s
       await set(currentRoomRef(`messages/${testId}`), { ...msg, text:`[ERROR ${testId}] No se pudo verificar la conexión`, ts:Date.now(), sys:true }).catch(()=>{});
       setTimeout(()=> remove(currentRoomRef(`messages/${testId}`)).catch(()=>{}), 10000);
     }
@@ -514,9 +651,7 @@ async function pingStatus(){
     if(found){
       done=true; off(r,"value",handler);
       const ms = performance.now()-start;
-      // color por latencia
       statusDot.className = "dot " + (ms<2000? "green" : "orange");
-      // borrar ping en 3s
       setTimeout(()=> remove(currentRoomRef(`messages/${pingId}`)).catch(()=>{}), 3000);
     }
   };
@@ -527,7 +662,6 @@ async function pingStatus(){
     if(!done){
       off(r,"value",handler);
       statusDot.className = "dot red";
-      // intentamos limpiar si quedó
       remove(currentRoomRef(`messages/${pingId}`)).catch(()=>{});
     }
   }, 3000);
