@@ -1,312 +1,281 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>X Code Chat — Official</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
-  --chip:#1a1a1a; --chipb:#0e0e0e;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Roboto,Arial,sans-serif}
-.wrap{max-width:960px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:12px;min-height:100svh}
-.card{background:#0b0b0b;border:1px solid var(--line);border-radius:16px;padding:14px}
-.header{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.brand{display:flex;align-items:center;gap:10px}
-.logo{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#111;border:1px solid var(--line);}
-.ttl{font-weight:700;font-size:20px}
-.sub{font-size:13px;color:var(--muted)}
-.btn{appearance:none;border:1px solid #fff;background:#fff;color:#000;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
-.btn.ghost{background:transparent;color:#fff}
-.btn.sm{padding:8px 10px;font-size:13px;border-radius:10px}
-.field{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px;background:#0a0a0a}
-.field input{flex:1;background:transparent;border:none;outline:none;color:var(--fg);font-size:16px}
-.eye{cursor:pointer;user-select:none}
-.login{max-width:720px;margin:6svh auto 0;display:flex;flex-direction:column;gap:10px}
-.hint{color:var(--muted);font-size:13px}
-.messages{height:calc(100svh - 300px);min-height:300px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
-.bubble{max-width:86%;padding:10px 12px;border:1px solid #3a3a3a;border-radius:14px;background:#0f0f0f;white-space:pre-wrap;word-break:break-word}
-.me{align-self:flex-end;background:#141414;border-color:#555}
-.system{border-style:dashed;color:#e8e8e8}
-.meta{margin-top:6px;font-size:11px;color:#9a9a9a}
-.composer{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding:10px;background:#080808;border-radius:14px}
-.composer .field{flex:1}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;border:1px solid var(--line);color:#fff;padding:10px 14px;border-radius:12px;display:none;z-index:80}
-.toast.show{display:block}
-.admin{display:none;gap:8px;flex-direction:column}
-.chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.userRow{display:grid;grid-template-columns:88px 1fr auto auto;gap:8px;align-items:center;border-top:1px dashed var(--line);padding:8px 0;font-size:13px}
-.badge{display:inline-block;border:1px solid #3a3a3a;border-radius:999px;padding:2px 8px}
-/* Modal */
-.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
-.modal{background:#101010;border:1px solid var(--line);padding:18px;border-radius:14px;width:min(440px,92vw)}
-.modal h3{margin:0 0 8px 0;color:var(--gold)}
-.modal p{margin:0 0 12px 0;color:#ddd}
-.modal .actions{display:flex;gap:8px;justify-content:flex-end}
-/* Selector salas visible */
-select.roomSel{appearance:none;background:#1d1d1d;color:#fff;border:1px solid #3a3a3a;border-radius:10px;padding:8px 10px}
-.statusDot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
-@media (max-width:560px){.messages{height:calc(100svh - 340px)}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>X Code Chat — Official</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000;
+      --fg: #fff;
+      --muted: #cfcfcf;
+      --line: #2a2a2a;
+      --gold: #DAA500;
+      --chip: #1a1a1a;
+      --chipB: #0e0e0e;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Inter", system-ui, Arial, sans-serif;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 100vh;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0a0a0a;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .brand svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
+
+    .room {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .card {
+      background: #101010;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    input, button, select {
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #0f0f0f;
+      color: var(--fg);
+      padding: 8px;
+      font-family: inherit;
+    }
+
+    button {
+      background: #fff;
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    .admin-panel {
+      background: #0f0f0f;
+      border: 1px solid var(--line);
+      padding: 10px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .msg {
+      background: #181818;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 6px;
+    }
+
+    .msg small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .status {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .status.online { background: #00d166; }
+    .status.offline { background: #ff4444; }
+    .status.warn { background: #ffbb33; }
+
+    select {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 600px) {
+      .wrap { padding: 10px; }
+    }
+  </style>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js"></script>
 </head>
 <body>
-<div class="wrap">
-  <div class="card header">
-    <div class="brand">
-      <span class="logo" aria-hidden="true">
-        <!-- Inline SVG Logo -->
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="10" stroke="#D0A500" stroke-width="2"/>
-          <path d="M8 8L16 16M16 8L8 16" stroke="#D0A500" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </span>
-      <div>
-        <div id="titleLine" class="ttl">X Code Chat — Official</div>
-        <div class="sub">Sala: <span id="roomHdr">Sala de Prueba</span></div>
+  <div class="wrap">
+    <div class="header">
+      <div class="brand">
+        <!-- Logo inline SVG -->
+        <svg viewBox="0 0 24 24"><path d="M12 2L15 8H9L12 2ZM12 22L9 16H15L12 22ZM2 12L8 15V9L2 12ZM22 12L16 9V15L22 12Z"/></svg>
+        X Code Chat — Official
       </div>
+      <div class="room">Sala: <span id="roomName">Cargando...</span></div>
     </div>
-    <button id="logoutTop" class="btn ghost" style="display:none">Salir</button>
-  </div>
 
-  <!-- Login -->
-  <div id="loginCard" class="card login">
-    <div class="hint">Acceso con <b>número</b> y <b>PIN</b>. La primera vez se genera tu PIN y se muestra, <b>solo si tu entrada está activa</b>. Usuario 0 (organizador) usa contraseña.</div>
-    <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)"></div>
-    <div class="field">
-      <input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN (o contraseña admin)">
-      <span id="togglePin" class="eye" title="Mostrar/ocultar PIN">👁️</span>
+    <div id="loginCard" class="card">
+      <p>Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial, podrás acceder al chat.</p>
+      <input id="userNum" type="number" placeholder="Tu número (ej. 5)" />
+      <input id="userPin" type="password" placeholder="Tu PIN" />
+      <button id="btnLogin">Entrar</button>
+      <p style="font-size:12px;color:gray">Usuario <b>0</b> es organizador.</p>
     </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button id="loginBtn" class="btn">Entrar</button>
-      <div id="loginMsg" class="hint"></div>
-    </div>
-  </div>
 
-  <!-- Chat -->
-  <div id="chatCard" class="card" style="display:none">
-    <div class="chips" id="adminChips" style="display:none">
-      <span class="chip"><span id="connDot" class="statusDot" style="background:#f33"></span><span id="connText">Firebase: desconectado</span></span>
-      <select id="roomSelect" class="roomSel"></select>
-      <button id="btnUseRoom" class="btn sm">Usar sala</button>
-      <button id="btnAddRoom" class="btn sm ghost">Añadir sala</button>
-      <button id="btnRenRoom" class="btn sm ghost">Renombrar sala</button>
-      <button id="btnDelRoom" class="btn sm" style="background:transparent;border-color:#ff4d4d;color:#ff4d4d">Eliminar sala</button>
-      <button id="broadcastBtn" class="btn sm">Mensaje global</button>
-      <button id="probeBtn" class="btn sm ghost">Probar conexión</button>
-    </div>
-    <div id="messages" class="messages">
-      <div id="welcomeBox" class="bubble system">👋 Bienvenido. Aún no hay mensajes. Este aviso desaparecerá en cuanto se publique alguno.</div>
-    </div>
-    <div class="composer" style="margin-top:10px">
-      <div class="field"><input id="msgInput" type="text" placeholder="Escribe un mensaje… · Privado con @número (ej. @120 hola)" autocomplete="off" maxlength="400"></div>
-      <button id="sendBtn" class="btn">Enviar</button>
-    </div>
-    <div class="hint">Público por defecto · Privado con <b>@número</b> · Remitente visible: <span id="whoami">-</span></div>
-  </div>
-</div>
+    <div id="chatCard" class="card" style="display:none;">
+      <div id="adminPanel" class="admin-panel" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <b>Panel del organizador</b>
+          <span id="statusFirebase"><span class="status warn"></span> Verificando...</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button id="btnTest">Probar conexión</button>
+          <button id="btnGlobalMsg">Mensaje global</button>
+        </div>
+        <div>
+          <label><b>Seleccionar sala:</b></label>
+          <select id="roomSelect"></select>
+        </div>
+        <div id="usersList"></div>
+      </div>
 
-<div id="toast" class="toast"></div>
-
-<!-- Modal PIN -->
-<div id="pinBack" class="backdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
-    <h3>🔐 Tu PIN</h3>
-    <p id="pinText">Tu PIN es 0000. Guárdalo.</p>
-    <div class="actions">
-      <button id="pinOk" class="btn">Entendido</button>
+      <div id="messages"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <input id="msgInput" placeholder="Mensaje..." style="flex:1;" />
+        <button id="btnSend">Enviar</button>
+      </div>
+      <p style="font-size:12px;color:gray;">Remitente visible: <b id="senderLabel"></b></p>
     </div>
   </div>
-</div>
 
-<!-- Modal Admin password -->
-<div id="adminBack" class="backdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
-    <h3>Acceso organizador</h3>
-    <div class="field"><input id="inpAdminPass" type="password" placeholder="Contraseña" autocomplete="off"></div>
-    <div class="actions">
-      <button id="adminCancel" class="btn ghost">Cancelar</button>
-      <button id="adminOk" class="btn">Entrar</button>
-    </div>
-    <div class="hint">El organizador es el <b>número 0</b>. No usa PIN, solo contraseña.</div>
-  </div>
-</div>
+  <script type="module">
+    // 🧩 Config Firebase
+    const firebaseConfig = {
+      databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app/"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+    let userNum, userPin, room = "Sala de Prueba";
+    const loginCard = document.getElementById("loginCard");
+    const chatCard = document.getElementById("chatCard");
+    const senderLabel = document.getElementById("senderLabel");
+    const roomName = document.getElementById("roomName");
 
-// Config Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
-  authDomain: "x-code-chat.firebaseapp.com",
-  databaseURL: "https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "x-code-chat",
-  storageBucket: "x-code-chat.firebasestorage.app",
-  messagingSenderId: "819845037951",
-  appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
-};
+    // Login
+    document.getElementById("btnLogin").onclick = async () => {
+      userNum = document.getElementById("userNum").value.trim();
+      userPin = document.getElementById("userPin").value.trim();
 
-const ADMIN_PASS = "131215";
-const DEFAULT_ROOM = "Sala de Prueba";
-const WHITELIST_REQUIRED = true;
+      if (!userNum) return alert("Introduce tu número.");
 
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
+      const entryRef = db.ref("entradas/" + userNum + "/estado");
+      const snap = await entryRef.get();
+      if (!snap.exists() || snap.val() !== "activa") {
+        alert("Entrada no válida o inactiva.");
+        return;
+      }
 
-// DOM helpers
-const $ = (q)=>document.querySelector(q);
-const loginCard=$("#loginCard"), chatCard=$("#chatCard"), roomHdr=$("#roomHdr"), logoutTop=$("#logoutTop");
-const numInput=$("#numInput"), pinInput=$("#pinInput"), loginBtn=$("#loginBtn"), togglePin=$("#togglePin"), loginMsg=$("#loginMsg");
-const messages=$("#messages"), welcomeBox=$("#welcomeBox"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn"), whoami=$("#whoami");
-const toastEl=$("#toast");
-const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
-const adminBack=$("#adminBack"), inpAdminPass=$("#inpAdminPass"), adminOk=$("#adminOk"), adminCancel=$("#adminCancel");
-const adminChips=$("#adminChips"), roomSelect=$("#roomSelect"), btnUseRoom=$("#btnUseRoom"), btnAddRoom=$("#btnAddRoom"), btnRenRoom=$("#btnRenRoom"), btnDelRoom=$("#btnDelRoom"), broadcastBtn=$("#broadcastBtn"), probeBtn=$("#probeBtn");
-const toast = (t,ms=2500)=>{ toastEl.textContent=t; toastEl.classList.add("show"); clearTimeout(window.__t); window.__t=setTimeout(()=>toastEl.classList.remove("show"),ms); };
-togglePin.addEventListener("click", ()=> pinInput.type = (pinInput.type==="password"?"text":"password"));
+      loginCard.style.display = "none";
+      chatCard.style.display = "block";
+      senderLabel.textContent = "Usuario #" + userNum;
+      roomName.textContent = room;
 
-const hhmm = (ts)=>{ const d=new Date(ts||Date.now()); return d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); };
-const newPIN = ()=> String(Math.floor(1000+Math.random()*9000));
+      if (userNum === "0") document.getElementById("adminPanel").style.display = "block";
 
-let session = { room: DEFAULT_ROOM, num:null, role:"guest" };
-roomHdr.textContent=DEFAULT_ROOM;
-whoami.textContent="-";
+      listenMessages();
+    };
 
-// Refs
-const roomRef = (room, path)=> ref(db, `rooms/${room}/${path}`);
-const currentRoomRef = (path)=> roomRef(session.room, path);
-const roomsIndexRef = ref(db, "rooms_index");
-const roomsMetaRef = ref(db, "roomsMeta");
-async function ensureRoomIndex(roomName){
-  const s=await get(roomsIndexRef); const list=s.exists()?s.val():{};
-  if(!list[roomName]){ list[roomName]=true; await set(roomsIndexRef, list); }
-  fillRooms(list);
-}
-function fillRooms(obj){
-  roomSelect.innerHTML="";
-  Object.keys(obj||{}).sort().forEach(k=>{
-    const o=document.createElement("option"); o.value=k; o.textContent=k;
-    if(k===session.room) o.selected=true;
-    roomSelect.appendChild(o);
-  });
-}
-async function loadRooms(){
-  const s=await get(roomsIndexRef); const list=s.exists()?s.val():{};
-  if(!list[DEFAULT_ROOM]) list[DEFAULT_ROOM]=true;
-  await set(roomsIndexRef, list);
-  fillRooms(list);
-}
+    // Enviar mensaje
+    document.getElementById("btnSend").onclick = () => {
+      const txt = document.getElementById("msgInput").value.trim();
+      if (!txt) return;
+      const ref = db.ref("rooms/" + room + "/messages").push();
+      ref.set({
+        sender: userNum,
+        text: txt,
+        time: new Date().toLocaleTimeString()
+      });
+      document.getElementById("msgInput").value = "";
+    };
 
-// Login
-loginBtn.addEventListener("click", doLogin);
-numInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter") doLogin(); });
-pinInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter") doLogin(); });
-
-function isAdmin(){ return session.num===0 && session.role==="admin"; }
-
-async function doLogin(){
-  loginMsg.textContent="";
-  const nStr=(numInput.value||"").trim();
-  if(!/^\d+$/.test(nStr)){ toast("Número inválido"); return; }
-  const n=Number(nStr); const pTyped=(pinInput.value||"").trim();
-  loginBtn.disabled=true;
-  try{
-    if(n===0){
-      adminBack.style.display="flex"; inpAdminPass.focus();
-      adminOk.onclick=async()=>{
-        if(inpAdminPass.value===ADMIN_PASS){
-          adminBack.style.display="none";
-          session={room:DEFAULT_ROOM,num:0,role:"admin"};
-          await ensureRoomIndex(session.room);
-          enterApp(); showAdmin();
-        }else toast("Contraseña admin incorrecta");
-      };
-      adminCancel.onclick=()=>adminBack.style.display="none";
-      return;
+    // Escuchar mensajes
+    function listenMessages() {
+      const ref = db.ref("rooms/" + room + "/messages");
+      ref.on("child_added", snap => {
+        const d = snap.val();
+        const div = document.createElement("div");
+        div.className = "msg";
+        div.innerHTML = `<b>Usuario #${d.sender}</b><br>${d.text}<small>${d.time}</small>`;
+        document.getElementById("messages").appendChild(div);
+      });
     }
-    if(WHITELIST_REQUIRED){
-      loginMsg.textContent="Verificando entrada…";
-      const ent=await get(ref(db, `entradas/${n}`));
-      const ok = ent.exists() && ( (ent.val().estado||"").toString().toLowerCase().startsWith("activa") || ent.val().active===true );
-      if(!ok){ toast("Tu número de entrada no está en la lista oficial."); loginBtn.disabled=false; loginMsg.textContent=""; return; }
-    }
-    const uRef=currentRoomRef(`users/${n}`);
-    const s=await get(uRef);
-    if(!s.exists()){
-      loginMsg.textContent="Generando PIN…";
-      const pin=newPIN();
-      await set(uRef,{pin,active:true,connected:false,created:Date.now(),updated:Date.now()});
-      pinText.textContent=`Tu PIN es ${pin}. Se ha copiado al portapapeles.`; try{ await navigator.clipboard.writeText(pin);}catch{}
-      pinBack.style.display="flex"; pinOk.onclick=()=>{pinBack.style.display="none"; toast("Introduce tu PIN y pulsa Entrar");};
-      loginMsg.textContent=""; loginBtn.disabled=false; return;
-    }
-    const data=s.val();
-    if(!pTyped){ toast("Introduce tu PIN"); loginBtn.disabled=false; return; }
-    if(String(pTyped)!==String(data.pin)){ toast("PIN incorrecto"); loginBtn.disabled=false; return; }
-    await update(uRef,{connected:true,updated:Date.now()});
-    session={room:DEFAULT_ROOM,num:n,role:"user"}; await ensureRoomIndex(session.room); enterApp();
-  }catch(e){ console.error(e); toast("Error en el inicio de sesión"); }
-  finally{ loginBtn.disabled=false; }
-}
 
-function enterApp(){
-  loginCard.style.display="none"; chatCard.style.display="block"; logoutTop.style.display="inline-flex";
-  whoami.textContent="#"+session.num; attachMessages(true);
-  if(isAdmin()) showAdmin(); else hideAdmin();
-}
+    // Actualizar lista de salas (solo organizador)
+    const roomSelect = document.getElementById("roomSelect");
+    const roomMetaRef = db.ref("roomsMeta");
+    roomMetaRef.on("value", snap => {
+      roomSelect.innerHTML = "";
+      snap.forEach(child => {
+        const opt = document.createElement("option");
+        opt.value = child.key;
+        opt.textContent = child.key;
+        roomSelect.appendChild(opt);
+      });
+    });
 
-async function doLogout(){
-  try{ if(session.num>0) await update(currentRoomRef(`users/${session.num}`),{connected:false,updated:Date.now()}); }catch{}
-  chatCard.style.display="none"; logoutTop.style.display="none"; loginCard.style.display="flex";
-  messages.innerHTML=""; msgInput.value=""; whoami.textContent="-"; session={room:DEFAULT_ROOM,num:null,role:"guest"};
-}
-logoutTop.addEventListener("click", doLogout);
+    roomSelect.onchange = () => {
+      room = roomSelect.value;
+      roomName.textContent = room;
+      document.getElementById("messages").innerHTML = "";
+      listenMessages();
+    };
 
-// Chat
-let unsubAttached=null;
-function attachMessages(reset=false){
-  if(reset && typeof unsubAttached==='function'){unsubAttached();unsubAttached=null;}
-  const r=currentRoomRef("messages"); const handler=(snap)=>{
-    messages.innerHTML=""; const v=snap.val()||{}; const arr=Object.values(v).sort((a,b)=>(a.ts||0)-(b.ts||0));
-    if(arr.length===0){ messages.appendChild(welcomeBox.cloneNode(true)); }
-    arr.forEach(m=>renderMsg(m)); messages.scrollTop=messages.scrollHeight;
-  };
-  onValue(r,handler); unsubAttached=()=>onValue(r,()=>{});
-}
-function renderMsg(m){
-  if(m.to && !(isAdmin()||m.from===session.num||m.to===session.num)) return;
-  const w=document.createElement("div"); w.style.display="flex"; w.style.justifyContent=(m.from===session.num||m.from===0)?"flex-end":"flex-start";
-  const b=document.createElement("div"); b.className="bubble"+(m.system?" system":(m.from===session.num||m.from===0?" me":""));
-  b.textContent=m.text||""; const meta=document.createElement("div"); meta.className="meta";
-  meta.textContent=(m.to?`#${m.from} → #${m.to}`:`#${m.from}`)+" · "+(m.time||hhmm(m.ts));
-  b.appendChild(meta); w.appendChild(b); messages.appendChild(w);
-}
-sendBtn.addEventListener("click",sendMsg);
-msgInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter"){e.preventDefault();sendMsg();}});
-async function sendMsg(){
-  const raw=(msgInput.value||"").trim(); if(!raw) return;
-  let p={from:isAdmin()?0:session.num,text:raw,ts:Date.now(),time:hhmm(Date.now())};
-  const m=raw.match(/^@(\d+)\s+(.+)/); if(m){p.to=Number(m[1]);p.text=m[2];}
-  const id=Date.now()+"_"+Math.random().toString(36).slice(2,8); await set(currentRoomRef(`messages/${id}`),p); msgInput.value="";
-}
-
-// Admin
-function showAdmin(){ if(!isAdmin()) return; const t=$("#titleLine"); if(t && !t.textContent.includes("· Admin")) t.textContent+=" · Admin"; adminChips.style.display="flex"; loadRooms(); }
-function hideAdmin(){ adminChips.style.display="none"; }
-btnUseRoom.addEventListener("click", async()=>{ const r=roomSelect.value; if(!r||r===session.room)return; session.room=r; roomHdr.textContent=r; messages.innerHTML=""; attachMessages(true); });
-btnAddRoom.addEventListener("click", async()=>{ const n=prompt("Nombre de la nueva sala"); if(!n) return; const s=await get(roomsIndexRef); const list=s.exists()?s.val():{}; list[n]=true; await set(roomsIndexRef,list); fillRooms(list); await set(roomRef(n,"messages"),{}); await update(roomsMetaRef,{[`${n}/name`]:n,[`${n}/updatedAt`]:Date.now()}); });
-btnRenRoom.addEventListener("click", async()=>{ const old=roomSelect.value; if(!old)return; const n=prompt("Nuevo nombre",old)||""; if(!n||n===old)return; const s=await get(roomsIndexRef); const list=s.exists()?s.val():{}; delete list[old]; list[n]=true; await set(roomsIndexRef,list); const oldSnap=await get(roomRef(old,"")); if(oldSnap.exists()) await set(roomRef(n,""),oldSnap.val()); await set(roomRef(old,""),null); session.room=n; roomHdr.textContent=n; fillRooms(list); messages.innerHTML=""; attachMessages(true); await update(roomsMetaRef,{[`${n}/name`]:n,[`${n}/updatedAt`]:Date.now()}); });
-btnDelRoom.addEventListener("click", async()=>{ const r=roomSelect.value; if(!r)return; if(!confirm(`Eliminar sala "${r}"?`))return; const s=await get(roomsIndexRef); const list=s.exists()?s.val():{}; delete list[r]; await set(roomsIndexRef,list); await set(roomRef(r,""),null); session.room=DEFAULT_ROOM; roomHdr.textContent=DEFAULT_ROOM; messages.innerHTML=""; attachMessages(true); await loadRooms(); });
-broadcastBtn.addEventListener("click", async()=>{ const txt=prompt("Mensaje global"); if(!txt)return; const id=Date.now()+"_"+Math.random().toString(36).slice(2,8); await set(currentRoomRef(`messages/${id}`),{from:0,text:txt,ts:Date.now(),time:hhmm(Date.now())}); });
-probeBtn.addEventListener("click", async()=>{ const id="probe_"+Date.now(); await set(currentRoomRef(`messages/${id}`),{from:0,text:"🔧 Test de conexión (se limpia en 5s)…",ts:Date.now(),time:hhmm(Date.now())}); setTimeout(()=>set(currentRoomRef(`messages/${id}`),null),5000); });
-
-(async function init(){ await ensureRoomIndex(DEFAULT_ROOM); })();
-</script>
+    // Botón test conexión (admin)
+    document.getElementById("btnTest").onclick = () => {
+      alert("Conexión Firebase OK ✅");
+    };
+  </script>
 </body>
 </html>
