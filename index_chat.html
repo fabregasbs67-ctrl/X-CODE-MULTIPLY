@@ -6,11 +6,8 @@
 <title>X Code Chat — Official</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
+:root{ --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500; --accent:#00ffbb; }
+*{box-sizing:border-box} html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Roboto,Arial,sans-serif}
 .wrap{max-width:920px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:12px;min-height:100svh}
 .card{background:#0b0b0b;border:1px solid var(--line);border-radius:16px;padding:14px}
@@ -22,20 +19,28 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .sub{font-size:13px;color:var(--muted)}
 .btn{appearance:none;border:1px solid #fff;background:#fff;color:#000;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
 .btn.ghost{background:transparent;color:#fff}
-.btn.sm{padding:8px 10px;font-size:13px;border-radius:10px}
 .field{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px;background:#0a0a0a}
 .field input{flex:1;background:transparent;border:none;outline:none;color:var(--fg);font-size:16px}
 .eye{cursor:pointer;user-select:none}
 .login{max-width:700px;margin:6svh auto 0;display:flex;flex-direction:column;gap:10px}
 .hint{color:var(--muted);font-size:13px}
+.messages{height:calc(100svh - 280px);min-height:300px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
+.msg{max-width:92%;padding:10px 12px;border:1px solid #3a3a3a;border-radius:14px;background:#101010;white-space:pre-wrap;word-break:break-word}
+.msg.me{margin-left:auto;background:#141414;border-color:#555}
+.msg .by{font-size:12px;color:#9bd;opacity:.85;margin-bottom:4px}
+.msg .meta{margin-top:6px;font-size:11px;color:#9a9a9a}
+.composer{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding:10px;background:#080808;border-radius:14px}
+.composer .field{flex:1}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;border:1px solid var(--line);color:#fff;padding:10px 14px;border-radius:12px;display:none;z-index:80}
+.toast.show{display:block}
 .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
 .backdrop.show{display:flex!important}
 .modal{background:#101010;border:1px solid var(--line);padding:20px 22px;border-radius:14px;width:min(420px,92vw);text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.35)}
 .modal h3{margin:0 0 8px 0;color:var(--gold)}
 .modal p{margin:0 0 12px 0;color:#ddd}
 .modal .actions{display:flex;gap:8px;justify-content:center}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;border:1px solid var(--line);color:#fff;padding:10px 14px;border-radius:12px;display:none;z-index:80}
-.toast.show{display:block}
+kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6px;background:#0a0a0a}
+@media (max-width:560px){.messages{height:calc(100svh - 320px)}}
 </style>
 </head>
 <body>
@@ -43,35 +48,50 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
   <div class="card header">
     <div class="brand">
       <span class="logo" aria-hidden="true">
-        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgc3Ryb2tlPSIjRDBBQTUwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTggOEwxNiAxNkwxNiA4TDggMTYiIHN0cm9rZT0iI0QwQUE1MDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+" alt="logo"/>
+        <img alt="X Code Logo" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgc3Ryb2tlPSIjRDBBQTUwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTggOEwxNiAxNkwxNiA4TDggMTYiIHN0cm9rZT0iI0QwQUE1MDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+"/>
       </span>
       <div><div class="ttl">X Code Chat — Official</div><div class="sub">Sala: <span id="roomHdr">Sala de Prueba</span></div></div>
     </div>
+    <button id="logoutBtn" class="btn ghost" style="display:none">Salir</button>
   </div>
 
+  <!-- Login -->
   <div id="loginCard" class="card login">
-    <div class="hint">Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial, la primera vez se genera tu PIN y se muestra.</div>
-    <div class="field"><input id="numInput" type="number" placeholder="Tu número"></div>
-    <div class="field"><input id="pinInput" type="password" placeholder="Tu PIN"><span id="togglePin" class="eye">👁️</span></div>
-    <div><button id="loginBtn" class="btn">Entrar</button></div>
+    <div class="hint">Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial, la primera vez se genera tu PIN y se muestra. Usuario <b>0</b> es organizador.</div>
+    <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)"></div>
+    <div class="field"><input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN"><span id="togglePin" class="eye">👁️</span></div>
+    <div style="display:flex;gap:8px;align-items:center"><button id="loginBtn" class="btn">Entrar</button><div id="loginMsg" class="hint"></div></div>
+    <div class="hint">Privado escribe <kbd>@número</kbd> al inicio (ej. <kbd>@120 hola</kbd>).</div>
+  </div>
+
+  <!-- Chat -->
+  <div id="chatCard" class="card" style="display:none">
+    <div id="messages" class="messages"></div>
+    <div class="composer" style="margin-top:10px">
+      <div class="field"><input id="msgInput" type="text" placeholder="Mensaje…  ·  Privado con @número" autocomplete="off" maxlength="400"></div>
+      <button id="sendBtn" class="btn">Enviar</button>
+    </div>
+    <div class="hint">Remitente visible: <b>Usuario #<span id="meId">?</span></b></div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
+<!-- Modal PIN -->
 <div id="pinBack" class="backdrop" aria-hidden="true">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true">
     <h3>🔐 Tu PIN</h3>
-    <p id="pinText" style="font-size:1.4em;font-weight:800;color:#00ffbb">0000</p>
+    <p id="pinText" style="font-size:1.6em;font-weight:800;color:var(--accent)">0000</p>
     <small style="opacity:.8">Se ha copiado al portapapeles</small>
-    <div class="actions"><button id="pinOk" class="btn">Entendido</button></div>
+    <div class="actions" style="margin-top:12px"><button id="pinOk" class="btn">Entendido</button></div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getDatabase, ref, get, set, update, onValue, off } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
+// Firebase real
 const firebaseConfig = {
   apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
   authDomain: "x-code-chat.firebaseapp.com",
@@ -82,77 +102,184 @@ const firebaseConfig = {
   appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
 };
 
+// Config
+const DEFAULT_ROOM = "Sala de Prueba";
+const ADMIN_PASS = "131215";
+const ENTRY_WHITELIST_PATHS = ["entradas","tickets"];
+
+// App
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const $ = q => document.querySelector(q);
-const toastEl = $("#toast");
-const toast = (t,ms=2500)=>{toastEl.textContent=t;toastEl.classList.add("show");clearTimeout(window._t);window._t=setTimeout(()=>toastEl.classList.remove("show"),ms);};
 
-function showGeneratedPin(pin) {
-  const modal = document.getElementById("pinBack");
-  const textEl = document.getElementById("pinText");
-  const okBtn = document.getElementById("pinOk");
-  if (!modal || !textEl || !okBtn) {
-    console.error("❌ Modal PIN no encontrado");
-    toast("Error al mostrar el PIN. Recarga la página.");
-    return;
-  }
-  textEl.textContent = pin;
-  modal.style.display = "flex";
-  modal.classList.add("show");
-  modal.setAttribute("aria-hidden","false");
+// DOM
+const $ = (q)=>document.querySelector(q);
+const roomHdr=$("#roomHdr");
+const loginCard=$("#loginCard"), chatCard=$("#chatCard"), logoutBtn=$("#logoutBtn");
+const numInput=$("#numInput"), pinInput=$("#pinInput"), loginBtn=$("#loginBtn"), togglePin=$("#togglePin");
+const messages=$("#messages"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn");
+const meIdSpan=$("#meId");
+const toastEl=$("#toast");
+const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
+
+const toast = (t,ms=2400)=>{ toastEl.textContent=t; toastEl.classList.add("show"); clearTimeout(window.__t); window.__t=setTimeout(()=>toastEl.classList.remove("show"),ms); };
+togglePin.onclick = ()=> pinInput.type = (pinInput.type==="password" ? "text" : "password");
+
+const roomRef = (room, path)=> ref(db, `rooms/${room}/${path}`);
+const currentRoomRef = (path)=> roomRef(DEFAULT_ROOM, path);
+const hhmm = (ts)=> new Date(ts||Date.now()).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+const newPIN = ()=> String(Math.floor(1000+Math.random()*9000));
+
+let session = { room: DEFAULT_ROOM, num:null };
+roomHdr.textContent = DEFAULT_ROOM;
+
+// Modal PIN
+function showGeneratedPin(pin){
+  pinText.textContent = pin;
+  pinBack.style.display="flex";
+  pinBack.classList.add("show");
+  pinBack.setAttribute("aria-hidden","false");
   navigator.clipboard.writeText(pin).catch(()=>{});
-  okBtn.onclick = () => {
-    modal.classList.remove("show");
-    modal.style.display = "none";
-    modal.setAttribute("aria-hidden","true");
+  pinOk.onclick = ()=>{
+    pinBack.classList.remove("show");
+    pinBack.style.display="none";
+    pinBack.setAttribute("aria-hidden","true");
     toast("Introduce tu PIN y pulsa Entrar");
   };
 }
 
+// Whitelist
 async function isEntryAllowed(n){
-  const paths=["entradas","tickets"];
-  for(const base of paths){
-    const s=await get(ref(db,`${base}/${n}`));
+  for(const base of ENTRY_WHITELIST_PATHS){
+    const s=await get(ref(db, `${base}/${n}`));
     if(s.exists()){
       const d=s.val()||{};
-      const estado=(d.estado?String(d.estado).toLowerCase():null);
+      const estado = d.estado? String(d.estado).toLowerCase() : null;
       if(estado==="activa"||estado==="activo"||d.active===true||d.active==="true") return true;
     }
   }
   return false;
 }
 
-const numInput=$("#numInput"), pinInput=$("#pinInput"), loginBtn=$("#loginBtn"), togglePin=$("#togglePin");
-togglePin.onclick=()=>pinInput.type=pinInput.type==="password"?"text":"password";
-
-async function doLogin(){
-  const n=Number(numInput.value||0);
-  const p=(pinInput.value||"").trim();
-  if(!n){toast("Introduce tu número");return;}
-  loginBtn.disabled=true;
-  try{
-    const allowed=await isEntryAllowed(n);
-    if(!allowed) throw new Error("Tu número no está en la lista oficial.");
-    const uRef=ref(db,`rooms/Sala de Prueba/users/${n}`);
-    const snap=await get(uRef);
-    let data=snap.exists()?snap.val():null;
-    if(!data||!data.pin){
-      const newPin=String(Math.floor(1000+Math.random()*9000));
-      await set(uRef,{pin:newPin,active:true,created:Date.now()});
-      showGeneratedPin(newPin);
-      loginBtn.disabled=false;return;
+// Normaliza users/{n}/{n} -> users/{n}
+async function normalizeUserNode(n){
+  const base = `rooms/${DEFAULT_ROOM}/users/${n}`;
+  const uRef = ref(db, base);
+  const nestedRef = ref(db, `${base}/${n}`);
+  const uSnap = await get(uRef);
+  const nestedSnap = await get(nestedRef);
+  if(nestedSnap.exists()){
+    const nested = nestedSnap.val();
+    const already = uSnap.exists()? uSnap.val() : null;
+    if(!already || !already.pin){
+      await set(uRef, nested);
+      await set(nestedRef, null);
+      return (await get(uRef)).val();
     }
-    if(p!==String(data.pin)) throw new Error("PIN incorrecto");
-    await update(uRef,{connected:true,updated:Date.now()});
-    toast("Inicio de sesión correcto");
-  }catch(e){toast(e.message||"Error");}
-  finally{loginBtn.disabled=false;}
+  }
+  return uSnap.exists()? uSnap.val() : null;
 }
 
-loginBtn.onclick=doLogin;
-pinInput.onkeydown=e=>{if(e.key==="Enter")doLogin();};
-numInput.onkeydown=e=>{if(e.key==="Enter")doLogin();};
+// Login
+async function doLogin(){
+  const nStr=(numInput.value||"").trim();
+  if(!/^\d+$/.test(nStr)){ toast("Introduce tu número"); return; }
+  const n=Number(nStr);
+  const pTyped=(pinInput.value||"").trim();
+
+  loginBtn.disabled=true;
+  try{
+    if(n===0){
+      const pass=prompt("Contraseña de organizador:");
+      if(pass!==ADMIN_PASS) throw new Error("Contraseña incorrecta.");
+      session.num=0; enterChat(); return;
+    }
+
+    const allowed = await isEntryAllowed(n);
+    if(!allowed) throw new Error("Tu número de entrada no está en la lista oficial.");
+
+    let data = await normalizeUserNode(n);
+    if(!data || !data.pin){
+      const pin=newPIN();
+      await set(currentRoomRef(`users/${n}`), { pin, active:true, connected:false, created:Date.now(), updated:Date.now() });
+      showGeneratedPin(pin);
+      loginBtn.disabled=false; return;
+    }
+
+    if(!pTyped){ throw new Error("Introduce tu PIN"); }
+    if(String(data.pin)!==String(pTyped)) throw new Error("PIN incorrecto");
+
+    await update(currentRoomRef(`users/${n}`), { connected:true, updated:Date.now() });
+    session.num=n; enterChat();
+  }catch(err){ toast(err.message||"No se pudo iniciar sesión"); }
+  finally{ loginBtn.disabled=false; }
+}
+
+loginBtn.onclick = doLogin;
+numInput.onkeydown = e=>{ if(e.key==="Enter") doLogin(); };
+pinInput.onkeydown = e=>{ if(e.key==="Enter") doLogin(); };
+
+// Chat
+let detach = null;
+function enterChat(){
+  loginCard.style.display="none";
+  chatCard.style.display="block";
+  logoutBtn.style.display="inline-flex";
+  meIdSpan.textContent = session.num;
+  attachMessages();
+}
+
+async function doLogout(){
+  try{ if(session.num>0){ await update(currentRoomRef(`users/${session.num}`), { connected:false, updated:Date.now() }); } }catch{}
+  if(detach){ detach(); detach=null; }
+  chatCard.style.display="none"; logoutBtn.style.display="none";
+  loginCard.style.display="flex";
+  messages.innerHTML=""; msgInput.value="";
+  session={ room: DEFAULT_ROOM, num:null };
+}
+logoutBtn.onclick = doLogout;
+
+function renderMsg(m){
+  if(m.to && !(m.to===session.num || m.from===session.num)) return;
+  const div=document.createElement("div");
+  div.className="msg"+(m.from===session.num?" me":"");
+  const by=document.createElement("div");
+  by.className="by";
+  by.textContent = (m.from===0? "Organizador" : `Usuario #${m.from}`) + (m.to? ` → #${m.to}` : "");
+  const text=document.createElement("div");
+  text.textContent = m.text || "";
+  const meta=document.createElement("div");
+  meta.className="meta";
+  meta.textContent = hhmm(m.ts) || "";
+  div.appendChild(by); div.appendChild(text); div.appendChild(meta);
+  messages.appendChild(div);
+}
+
+function attachMessages(){
+  if(detach){ detach(); detach=null; }
+  const r = currentRoomRef("messages");
+  const handler = (snap)=>{
+    messages.innerHTML="";
+    const val=snap.val()||{};
+    const arr=Object.values(val).sort((a,b)=>(a.ts||0)-(b.ts||0));
+    arr.forEach(renderMsg);
+    messages.scrollTop = messages.scrollHeight;
+  };
+  onValue(r, handler);
+  detach = ()=> off(r, "value", handler);
+}
+
+async function sendMessage(){
+  const raw=(msgInput.value||"").trim(); if(!raw) return;
+  const id=Date.now()+"_"+Math.random().toString(36).slice(2,8);
+  let payload={ from: session.num, text: raw, ts: Date.now() };
+  const m = raw.match(/^@(\d+)\s+(.+)/);
+  if(m){ payload.to = Number(m[1]); payload.text = m[2]; }
+  await set(currentRoomRef(`messages/${id}`), payload);
+  msgInput.value="";
+}
+
+sendBtn.onclick = sendMessage;
+msgInput.onkeydown = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); sendMessage(); }};
 </script>
 </body>
 </html>
