@@ -28,131 +28,50 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .eye{cursor:pointer;user-select:none}
 .login{max-width:700px;margin:6svh auto 0;display:flex;flex-direction:column;gap:10px}
 .hint{color:var(--muted);font-size:13px}
-.messages{height:calc(100svh - 280px);min-height:300px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
-.bubble{max-width:86%;padding:10px 12px;border:1px solid #3a3a3a;border-radius:14px;background:#0f0f0f;white-space:pre-wrap;word-break:break-word}
-.me{align-self:flex-end;background:#141414;border-color:#555}
-.system{border-style:dashed;color:#e8e8e8}
-.meta{margin-top:6px;font-size:11px;color:#9a9a9a}
-.composer{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding:10px;background:#080808;border-radius:14px}
-.composer .field{flex:1}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;border:1px solid var(--line);color:#fff;padding:10px 14px;border-radius:12px;display:none;z-index:80}
-.toast.show{display:block}
-/* Admin minimal */
-.admin{display:none;gap:8px}
-.admin .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.userRow{display:grid;grid-template-columns:88px 1fr auto auto;gap:8px;align-items:center;border-top:1px dashed var(--line);padding:8px 0;font-size:13px}
-.badge{display:inline-block;border:1px solid #3a3a3a;border-radius:999px;padding:2px 8px}
-/* Backdrop modal PIN/Admin */
 .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
 .backdrop.show{display:flex!important}
 .modal{background:#101010;border:1px solid var(--line);padding:20px 22px;border-radius:14px;width:min(420px,92vw);text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.35)}
 .modal h3{margin:0 0 8px 0;color:var(--gold)}
 .modal p{margin:0 0 12px 0;color:#ddd}
 .modal .actions{display:flex;gap:8px;justify-content:center}
-@keyframes fadeIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
-.modal{animation:fadeIn .22s ease}
-@media (max-width:560px){.messages{height:calc(100svh - 320px)}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;border:1px solid var(--line);color:#fff;padding:10px 14px;border-radius:12px;display:none;z-index:80}
+.toast.show{display:block}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <!-- ENCABEZADO -->
   <div class="card header">
     <div class="brand">
       <span class="logo" aria-hidden="true">
-        <img id="logo" alt="X Code Logo"
-             src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIHN0cm9rZT0iI0QwQUE1MDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNOCA4TDE2IDE2TTE2IDhMOCAxNiIgc3Ryb2tlPSIjRDBBQTUwMCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+">
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgc3Ryb2tlPSIjRDBBQTUwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTggOEwxNiAxNkwxNiA4TDggMTYiIHN0cm9rZT0iI0QwQUE1MDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+" alt="logo"/>
       </span>
-      <div>
-        <div id="titleLine" class="ttl">X Code Chat — Official</div>
-        <div class="sub">Sala: <span id="roomHdr">Sala de Prueba</span></div>
-      </div>
+      <div><div class="ttl">X Code Chat — Official</div><div class="sub">Sala: <span id="roomHdr">Sala de Prueba</span></div></div>
     </div>
-    <button id="logoutTop" class="btn ghost" style="display:none">Salir</button>
   </div>
 
-  <!-- Login -->
   <div id="loginCard" class="card login">
-    <div class="hint">Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial, la primera vez se genera tu PIN y se muestra. <span style="opacity:.6">Usuario 0 (organizador) usa solo contraseña.</span></div>
-    <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)"></div>
-    <div class="field">
-      <input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN (o contraseña admin)">
-      <span id="togglePin" class="eye" title="Mostrar/ocultar PIN">👁️</span>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button id="loginBtn" class="btn">Entrar</button>
-      <div id="loginMsg" class="hint"></div>
-    </div>
-  </div>
-
-  <!-- Chat -->
-  <div id="chatCard" class="card" style="display:none">
-    <div id="messages" class="messages">
-      <div id="welcomeBox" class="bubble system">👋 Bienvenido. Aún no hay mensajes. Este aviso desaparecerá en cuanto se publique alguno.</div>
-    </div>
-    <div class="composer" style="margin-top:10px">
-      <div class="field"><input id="msgInput" type="text" placeholder="Escribe un mensaje… · Privado con @número (ej. @120 hola)" autocomplete="off" maxlength="400"></div>
-      <button id="sendBtn" class="btn">Enviar</button>
-    </div>
-    <div class="hint">Público por defecto · Privado con <b>@número</b></div>
-  </div>
-
-  <!-- Admin (solo #0) -->
-  <div id="adminCard" class="card admin">
-    <!-- Gestión de salas -->
-    <div class="row">
-      <select id="roomSelect" class="field" style="max-width:260px;padding:0">
-        <option value="Sala de Prueba">Sala de Prueba</option>
-      </select>
-      <input id="roomNameNew" class="field" placeholder="Nuevo nombre de sala…">
-      <button id="btnUseRoom" class="btn sm">Usar</button>
-      <button id="btnAddRoom" class="btn sm ghost">Añadir</button>
-      <button id="btnRenRoom" class="btn sm ghost">Renombrar</button>
-      <button id="btnDelRoom" class="btn sm" style="background:transparent;border-color:#ff4d4d;color:#ff4d4d">Eliminar</button>
-    </div>
-    <!-- Acciones mensajes -->
-    <div class="row" style="margin-top:8px">
-      <button id="broadcastBtn" class="btn sm">Mensaje global</button>
-      <button id="autoBtn" class="btn sm ghost">Mensajes auto: <b id="autoState">OFF</b></button>
-    </div>
-    <!-- Usuarios -->
-    <div class="row" style="margin-top:6px"><div class="sub" style="font-weight:600">Usuarios (PIN visible solo admin)</div></div>
-    <div id="usersList"></div>
+    <div class="hint">Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial, la primera vez se genera tu PIN y se muestra.</div>
+    <div class="field"><input id="numInput" type="number" placeholder="Tu número"></div>
+    <div class="field"><input id="pinInput" type="password" placeholder="Tu PIN"><span id="togglePin" class="eye">👁️</span></div>
+    <div><button id="loginBtn" class="btn">Entrar</button></div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
-<!-- Modal PIN -->
 <div id="pinBack" class="backdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
+  <div class="modal">
     <h3>🔐 Tu PIN</h3>
     <p id="pinText" style="font-size:1.4em;font-weight:800;color:#00ffbb">0000</p>
     <small style="opacity:.8">Se ha copiado al portapapeles</small>
-    <div class="actions" style="margin-top:12px">
-      <button id="pinOk" class="btn">Entendido</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Admin password -->
-<div id="adminBack" class="backdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
-    <h3>Acceso organizador</h3>
-    <div class="field"><input id="inpAdminPass" type="password" placeholder="Contraseña" autocomplete="off"></div>
-    <div class="actions">
-      <button id="adminCancel" class="btn ghost">Cancelar</button>
-      <button id="adminOk" class="btn">Entrar</button>
-    </div>
-    <div class="hint">El organizador es el <b>número 0</b>. No usa PIN, solo contraseña.</div>
+    <div class="actions"><button id="pinOk" class="btn">Entendido</button></div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, get, set, update, onValue, off } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
-// Config Firebase (tus credenciales reales)
 const firebaseConfig = {
   apiKey: "AIzaSyD66wsrvZmQmzmp0htKmrxCbFwOmeijqiQ",
   authDomain: "x-code-chat.firebaseapp.com",
@@ -163,345 +82,77 @@ const firebaseConfig = {
   appId: "1:819845037951:web:f0fe8971356afb2f66a44a"
 };
 
-// ===== Ajustes de app =====
-const ADMIN_PASS = "131215";
-const DEFAULT_ROOM = "Sala de Prueba";
-// Ruta de lista blanca de entradas (permitidos). Se probarán en orden.
-const ENTRY_WHITELIST_PATHS = ["entradas", "tickets"];
-
 const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
+const db = getDatabase(app);
+const $ = q => document.querySelector(q);
+const toastEl = $("#toast");
+const toast = (t,ms=2500)=>{toastEl.textContent=t;toastEl.classList.add("show");clearTimeout(window._t);window._t=setTimeout(()=>toastEl.classList.remove("show"),ms);};
 
-// DOM
-const $ = (q)=>document.querySelector(q);
-const loginCard=$("#loginCard"), chatCard=$("#chatCard"), adminCard=$("#adminCard");
-const roomHdr=$("#roomHdr");
-const logoutTop=$("#logoutTop");
-const numInput=$("#numInput"), pinInput=$("#pinInput"), loginBtn=$("#loginBtn"), togglePin=$("#togglePin");
-const messages=$("#messages"), welcomeBox=$("#welcomeBox"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn");
-const toastEl=document.querySelector("#toast");
-const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
-const adminBack=$("#adminBack"), inpAdminPass=$("#inpAdminPass"), adminOk=$("#adminOk"), adminCancel=$("#adminCancel");
-// Admin: salas
-const roomSelect=$("#roomSelect"), roomNameNew=$("#roomNameNew");
-const btnUseRoom=$("#btnUseRoom"), btnAddRoom=$("#btnAddRoom"), btnRenRoom=$("#btnRenRoom"), btnDelRoom=$("#btnDelRoom");
-// Admin: mensajes/estado
-const broadcastBtn=$("#broadcastBtn"), autoBtn=$("#autoBtn"), autoState=$("#autoState");
-const usersList=$("#usersList");
-
-const toast = (t,ms=2500)=>{ toastEl.textContent=t; toastEl.classList.add("show"); clearTimeout(window.__t); window.__t=setTimeout(()=>toastEl.classList.remove("show"),ms); };
-
-// Estado
-let session = { room: DEFAULT_ROOM, num:null, role:"guest" };
-roomHdr.textContent=DEFAULT_ROOM;
-
-togglePin.addEventListener("click", ()=> pinInput.type = (pinInput.type==="password"?"text":"password"));
-
-// Helpers
-const roomRef = (room, path)=> ref(db, `rooms/${room}/${path}`);
-const currentRoomRef = (path)=> roomRef(session.room, path);
-const hhmm = (ts)=>{ const d=new Date(ts||Date.now()); return d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); };
-const newPIN = ()=> String(Math.floor(1000+Math.random()*9000));
-
-function isAdmin(){ return session.num===0 && session.role==="admin"; }
-
-// Persistencia ligera
-const LS = {
-  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} },
-  get(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch{ return null; } }
-};
-
-// Rooms index
-const roomsIndexRef = ref(db, "rooms_index");
-async function ensureIndex(roomName){
-  const s=await get(roomsIndexRef); const list=s.exists()?s.val():{};
-  if(!list[roomName]){ list[roomName]=true; await set(roomsIndexRef, list); }
-  fillRooms(list);
-}
-function fillRooms(obj){
-  roomSelect.innerHTML="";
-  Object.keys(obj||{}).sort().forEach(k=>{
-    const o=document.createElement("option"); o.value=k; o.textContent=k;
-    if(k===session.room) o.selected=true;
-    roomSelect.appendChild(o);
-  });
+function showGeneratedPin(pin) {
+  const modal = document.getElementById("pinBack");
+  const textEl = document.getElementById("pinText");
+  const okBtn = document.getElementById("pinOk");
+  if (!modal || !textEl || !okBtn) {
+    console.error("❌ Modal PIN no encontrado");
+    toast("Error al mostrar el PIN. Recarga la página.");
+    return;
+  }
+  textEl.textContent = pin;
+  modal.style.display = "flex";
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden","false");
+  navigator.clipboard.writeText(pin).catch(()=>{});
+  okBtn.onclick = () => {
+    modal.classList.remove("show");
+    modal.style.display = "none";
+    modal.setAttribute("aria-hidden","true");
+    toast("Introduce tu PIN y pulsa Entrar");
+  };
 }
 
-// ====== Modal helper (mostrar PIN) ======
-function showGeneratedPin(pin){
-  try{
-    pinText.textContent = pin;
-    pinBack.classList.add("show");
-    pinBack.setAttribute("aria-hidden","false");
-    navigator.clipboard.writeText(pin).catch(()=>{});
-    pinOk.onclick = ()=>{
-      pinBack.classList.remove("show");
-      pinBack.setAttribute("aria-hidden","true");
-      toast("Introduce tu PIN y pulsa Entrar");
-    };
-  }catch(e){ console.warn("PIN modal error", e); }
-}
-
-// ====== WHITELIST de entradas (Google Sheets → Firebase) ======
 async function isEntryAllowed(n){
-  for(const base of ENTRY_WHITELIST_PATHS){
-    const s = await get(ref(db, `${base}/${n}`));
+  const paths=["entradas","tickets"];
+  for(const base of paths){
+    const s=await get(ref(db,`${base}/${n}`));
     if(s.exists()){
-      const d = s.val() || {};
-      // Acepta estado "activa" o "activo" (case-insensitive), o active:true
-      const estado = (d.estado ? String(d.estado).toLowerCase() : null);
-      const ok = (estado === "activa" || estado === "activo" || d.active === true || d.active === "true");
-      return !!ok;
+      const d=s.val()||{};
+      const estado=(d.estado?String(d.estado).toLowerCase():null);
+      if(estado==="activa"||estado==="activo"||d.active===true||d.active==="true") return true;
     }
   }
   return false;
 }
 
-// LOGIN
-loginBtn.addEventListener("click", doLogin);
-numInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter") doLogin(); });
-pinInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter") doLogin(); });
-
-let loginCooldown = 0;
-function cooldown(ms=1200){
-  const now = Date.now();
-  if(now - loginCooldown < ms) return true;
-  loginCooldown = now; return false;
-}
+const numInput=$("#numInput"), pinInput=$("#pinInput"), loginBtn=$("#loginBtn"), togglePin=$("#togglePin");
+togglePin.onclick=()=>pinInput.type=pinInput.type==="password"?"text":"password";
 
 async function doLogin(){
-  if(cooldown()) return;
-  const nStr = (numInput.value||"").trim();
-  if(nStr===""){ toast("Introduce tu número"); return; }
-  if(!/^\d+$/.test(nStr)){ toast("Número inválido"); return; }
-  const n = Number(nStr);
-  const pTyped = (pinInput.value||"").trim();
-
+  const n=Number(numInput.value||0);
+  const p=(pinInput.value||"").trim();
+  if(!n){toast("Introduce tu número");return;}
   loginBtn.disabled=true;
-
   try{
-    if(n===0){
-      // Organizador: pedir contraseña en modal (no PIN)
-      adminBack.classList.add("show");
-      adminBack.setAttribute("aria-hidden","false");
-      inpAdminPass.focus();
-      adminOk.onclick = async ()=>{
-        if(inpAdminPass.value===ADMIN_PASS){
-          adminBack.classList.remove("show");
-          adminBack.setAttribute("aria-hidden","true");
-          session={ room:DEFAULT_ROOM, num:0, role:"admin" };
-          LS.set("xcode.session", session);
-          await ensureIndex(session.room);
-          enterApp(); showAdmin();
-        }else{
-          toast("Contraseña admin incorrecta");
-        }
-      };
-      adminCancel.onclick = ()=>{
-        adminBack.classList.remove("show");
-        adminBack.setAttribute("aria-hidden","true");
-      };
-      return;
+    const allowed=await isEntryAllowed(n);
+    if(!allowed) throw new Error("Tu número no está en la lista oficial.");
+    const uRef=ref(db,`rooms/Sala de Prueba/users/${n}`);
+    const snap=await get(uRef);
+    let data=snap.exists()?snap.val():null;
+    if(!data||!data.pin){
+      const newPin=String(Math.floor(1000+Math.random()*9000));
+      await set(uRef,{pin:newPin,active:true,created:Date.now()});
+      showGeneratedPin(newPin);
+      loginBtn.disabled=false;return;
     }
-
-    // 1) Validar que el número de entrada existe en la lista blanca
-    const allowed = await isEntryAllowed(n);
-    if(!allowed){ throw new Error("Tu número de entrada no está en la lista oficial o está inactivo."); }
-
-    // 2) Usuario normal: comprobar nodo y PIN
-    const uRef = currentRoomRef(`users/${n}`);
-    const snap = await get(uRef);
-    let data = snap.exists()? snap.val() : null;
-
-    if(!data || !data.pin){
-      // Primera vez o nodo incompleto → generar PIN y mostrar modal
-      const pin = newPIN();
-      await set(uRef, { pin, active:true, admin:false, connected:false, created: Date.now(), updated: Date.now() });
-      showGeneratedPin(pin);
-      loginBtn.disabled=false;
-      return; // el usuario debe introducir el PIN para completar login
-    }
-
-    // 3) Verificar PIN
-    const realPIN = String(data.pin);
-    if(!pTyped){ throw new Error("Introduce tu PIN"); }
-    if(String(pTyped)!==realPIN){ throw new Error("PIN incorrecto"); }
-
-    await update(uRef, { connected:true, updated:Date.now() });
-    session={ room:DEFAULT_ROOM, num:n, role:"user" };
-    LS.set("xcode.session", session);
-    await ensureIndex(session.room);
-    enterApp();
-  }catch(err){
-    toast(err.message||"No se pudo iniciar sesión");
-  }finally{
-    loginBtn.disabled=false;
-  }
+    if(p!==String(data.pin)) throw new Error("PIN incorrecto");
+    await update(uRef,{connected:true,updated:Date.now()});
+    toast("Inicio de sesión correcto");
+  }catch(e){toast(e.message||"Error");}
+  finally{loginBtn.disabled=false;}
 }
 
-function enterApp(){
-  loginCard.style.display="none"; chatCard.style.display="block"; logoutTop.style.display="inline-flex";
-  attachMessages(true);
-  if(isAdmin()) showAdmin(); else hideAdmin();
-}
-
-// LOGOUT
-async function doLogout(){
-  try{ if(session.num>0){ await update(currentRoomRef(`users/${session.num}`), { connected:false, updated:Date.now() }); } }catch{}
-  // Reset UI
-  chatCard.style.display="none"; logoutTop.style.display="none";
-  loginCard.style.display="flex";
-  messages.innerHTML=""; msgInput.value="";
-  session={ room:DEFAULT_ROOM, num:null, role:"guest" };
-  LS.set("xcode.session", session);
-}
-logoutTop.addEventListener("click", doLogout);
-
-// CHAT
-let unsub = null;
-function attachMessages(reset=false){
-  if(reset && unsub){ unsub(); unsub=null; }
-  const refPath = currentRoomRef("messages");
-  const handler = (snap)=>{
-    messages.innerHTML="";
-    const val=snap.val()||{};
-    const arr=Object.values(val).sort((a,b)=>(a.ts||0)-(b.ts||0));
-    if(arr.length===0){ messages.appendChild(welcomeBox.cloneNode(true)); }
-    arr.forEach(m=> renderMsg(m));
-    messages.scrollTop = messages.scrollHeight;
-  };
-  onValue(refPath, handler);
-  unsub = ()=> off(refPath, "value", handler);
-}
-
-function renderMsg(m){
-  if(m.to && !(isAdmin() || m.from===session.num || m.to===session.num)) return;
-  const wrap=document.createElement("div");
-  wrap.style.display="flex"; wrap.style.justifyContent=(m.from===session.num||m.from===0)?"flex-end":"flex-start";
-  const b=document.createElement("div"); b.className="bubble"+(m.system?" system":(m.from===session.num||m.from===0?" me":""));
-  b.textContent=m.text||"";
-  const meta=document.createElement("div"); meta.className="meta";
-  meta.textContent=(m.to?`#${m.from} → #${m.to}`:`#${m.from}`)+" · "+(m.time||hhmm(m.ts));
-  b.appendChild(meta);
-  wrap.appendChild(b); messages.appendChild(wrap);
-}
-
-sendBtn.addEventListener("click", sendMsg);
-msgInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter"){ e.preventDefault(); sendMsg(); }});
-
-async function sendMsg(){
-  const raw=(msgInput.value||"").trim(); if(!raw) return;
-  if(raw.length>400){ toast("El mensaje es demasiado largo"); return; }
-  let payload={ from:isAdmin()?0:session.num, text:raw, ts:Date.now(), time:hhmm(Date.now()) };
-  const m = raw.match(/^@(\d+)\s+(.+)/);
-  if(m){ payload.to=Number(m[1]); payload.text=m[2]; }
-  const id=Date.now()+"_"+Math.random().toString(36).slice(2,8);
-  await set(currentRoomRef(`messages/${id}`), payload);
-  msgInput.value="";
-}
-
-// ADMIN (panel minimal + salas)
-function showAdmin(){
-  const t=document.getElementById("titleLine");
-  if(t && !t.textContent.includes("· Admin")) t.textContent += " · Admin";
-  adminCard.style.display="grid";
-  loadUsers(); loadAutoFlag(); loadRooms();
-}
-function hideAdmin(){ adminCard.style.display="none"; }
-
-function loadUsers(){
-  onValue(currentRoomRef("users"), (snap)=>{
-    usersList.innerHTML="";
-    const users=snap.val()||{};
-    Object.keys(users).sort((a,b)=>Number(a)-Number(b)).forEach(k=>{
-      if(k==="0") return;
-      const u=users[k];
-      const row=document.createElement("div"); row.className="userRow";
-      const c1=document.createElement("div"); c1.textContent="#"+k; row.appendChild(c1);
-      const c2=document.createElement("div"); c2.innerHTML=`PIN <span class="badge">${u.pin||"-"}</span> · <span class="badge">${u.active?"Activo":"Inactivo"}</span>`; row.appendChild(c2);
-      const btnA=document.createElement("button"); btnA.className="btn sm ghost"; btnA.textContent=u.active?"Desactivar":"Activar";
-      btnA.onclick=async()=>{ await update(currentRoomRef("users/"+k), { active:!u.active }); };
-      row.appendChild(btnA);
-      const btnK=document.createElement("button"); btnK.className="btn sm"; btnK.textContent="Desconectar";
-      btnK.onclick=async()=>{ await update(currentRoomRef("users/"+k), { connected:false }); };
-      row.appendChild(btnK);
-      usersList.appendChild(row);
-    });
-  });
-}
-
-function loadAutoFlag(){
-  onValue(currentRoomRef("state/autoMsgs"), (s)=>{
-    const on = !!s.val();
-    autoState.textContent = on?"ON":"OFF";
-  });
-}
-autoBtn.addEventListener("click", async()=>{
-  const s=await get(currentRoomRef("state/autoMsgs"));
-  await set(currentRoomRef("state/autoMsgs"), !s.val());
-});
-
-broadcastBtn.addEventListener("click", async()=>{
-  const txt = prompt("Mensaje global"); if(!txt) return;
-  const id=Date.now()+"_"+Math.random().toString(36).slice(2,8);
-  await set(currentRoomRef(`messages/${id}`), { from:0, text:txt, ts:Date.now(), time:hhmm(Date.now()) });
-});
-
-// SALAS — añadir / usar / renombrar / eliminar
-async function loadRooms(){
-  const s=await get(roomsIndexRef); const list=s.exists()?s.val():{};
-  if(!list[DEFAULT_ROOM]) list[DEFAULT_ROOM]=true;
-  await set(roomsIndexRef, list);
-  fillRooms(list);
-}
-btnUseRoom.addEventListener("click", async()=>{
-  const r=roomSelect.value; if(!r || r===session.room) return;
-  session.room=r; roomHdr.textContent=r;
-  LS.set("xcode.session", session);
-  messages.innerHTML="";
-  attachMessages(true);
-  loadUsers(); loadAutoFlag();
-});
-btnAddRoom.addEventListener("click", async()=>{
-  const n=(roomNameNew.value||"").trim(); if(!n) return;
-  const s=await get(roomsIndexRef); const list=s.exists()?s.val():{}; list[n]=true;
-  await set(roomsIndexRef, list); fillRooms(list); roomNameNew.value="";
-});
-btnRenRoom.addEventListener("click", async()=>{
-  const n=(roomNameNew.value||"").trim(); if(!n) return;
-  const old=roomSelect.value; if(!old || old===n) return;
-  const s=await get(roomsIndexRef); const list=s.exists()?s.val():{};
-  delete list[old]; list[n]=true; await set(roomsIndexRef, list);
-  // Copiar datos sala vieja a nueva (shallow)
-  const oldSnap = await get(roomRef(old,"")); if(oldSnap.exists()){ await set(roomRef(n,""), oldSnap.val()); }
-  // Borrar vieja
-  await set(roomRef(old,""), null);
-  session.room=n; roomHdr.textContent=n;
-  LS.set("xcode.session", session);
-  messages.innerHTML="";
-  attachMessages(true);
-  loadRooms(); loadUsers(); loadAutoFlag();
-});
-btnDelRoom.addEventListener("click", async()=>{
-  const r=roomSelect.value; if(!r) return;
-  if(!confirm(`Eliminar sala "${r}"?`)) return;
-  const s=await get(roomsIndexRef); const list=s.exists()?s.val():{}; delete list[r];
-  await set(roomsIndexRef, list);
-  await set(roomRef(r,""), null);
-  session.room=DEFAULT_ROOM; roomHdr.textContent=DEFAULT_ROOM;
-  LS.set("xcode.session", session);
-  messages.innerHTML="";
-  attachMessages(true);
-  loadRooms(); loadUsers(); loadAutoFlag();
-});
-
-// INIT
-(async function init(){
-  // Restaurar sesión simple (número y sala)
-  const prev = LS.get("xcode.session");
-  if(prev && prev.room){ session.room = prev.room; roomHdr.textContent=prev.room; }
-  await ensureIndex(DEFAULT_ROOM);
-})();
+loginBtn.onclick=doLogin;
+pinInput.onkeydown=e=>{if(e.key==="Enter")doLogin();};
+numInput.onkeydown=e=>{if(e.key==="Enter")doLogin();};
 </script>
 </body>
 </html>
