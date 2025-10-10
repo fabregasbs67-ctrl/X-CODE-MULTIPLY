@@ -1,11 +1,11 @@
 # 🚀 X-Code Chat — Registro de Mejoras (Entorno DEV)
 
-## 🧠 Objetivo
+##  Objetivo
 Este documento registra todas las **mejoras, correcciones y pruebas** realizadas en el entorno de desarrollo (`dev-chat.x-code.es`), antes de su validación final para producción.
 
 ---
 
-## 🧩 Mejora 1 — Ajuste visual general del chat
+##  Mejora 1 — Ajuste visual general del chat
 **Estado:** ✅ Implementado  
 **Fecha:** [Pendiente de commit]
 
@@ -18,7 +18,7 @@ Este documento registra todas las **mejoras, correcciones y pruebas** realizadas
 
 ---
 
-## 🧩 Mejora 2 — Notificación visual de mensajes
+##  Mejora 2 — Notificación visual de mensajes
 **Estado:** ⚙️ En desarrollo
 
 ### Descripción:
@@ -32,7 +32,7 @@ Este documento registra todas las **mejoras, correcciones y pruebas** realizadas
 
 ---
 
-## 🧩 Mejora 3 — Panel de organizador
+##  Mejora 3 — Panel de organizador
 **Estado:** 🧪 En pruebas
 
 ### Descripción:
@@ -46,7 +46,7 @@ Este documento registra todas las **mejoras, correcciones y pruebas** realizadas
 
 ---
 
-## 🧩 Mejora 4 — Proporción entre lista de usuarios y área del chat
+##  Mejora 4 — Proporción entre lista de usuarios y área del chat
 **Estado:** 🧩 Implementado (en pruebas)
 
 ### Descripción:
@@ -55,7 +55,7 @@ Este documento registra todas las **mejoras, correcciones y pruebas** realizadas
 
 ---
 
-## 🧩 Mejora 5 — Gestión de usuarios activos/inactivos
+##  Mejora 5 — Gestión de usuarios activos/inactivos
 **Estado:** 🧪 En desarrollo
 
 ### Descripción:
@@ -64,7 +64,7 @@ Este documento registra todas las **mejoras, correcciones y pruebas** realizadas
 
 ---
 
-## 🧩 Mejora 6 — Persistencia de sesión
+##  Mejora 6 — Persistencia de sesión
 **Estado:** ⚠️ Pendiente de corrección
 
 ### Descripción:
@@ -81,5 +81,5 @@ Este documento registra todas las **mejoras, correcciones y pruebas** realizadas
 
 ---
 
-✍️ **Desarrollador:** Fabio de Pina  
+ **Desarrollador:** Fabio de Pina  
 📅 **Última actualización:** _(10/10/2025)_
