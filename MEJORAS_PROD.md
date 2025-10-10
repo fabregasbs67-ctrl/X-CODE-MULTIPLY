@@ -5,7 +5,7 @@ Registro de todas las funciones y mejoras **validadas en DEV** y aprobadas para 
 
 ---
 
-## ✅ Mejoras implementadas
+##  Mejoras implementadas
 
 | Nº | Descripción | Estado | Fecha | Observaciones |
 |----|--------------|---------|--------|----------------|
@@ -16,7 +16,7 @@ Registro de todas las funciones y mejoras **validadas en DEV** y aprobadas para 
 
 ---
 
-## 📋 Protocolo de migración
+##  Protocolo de migración
 1. Confirmar que la versión `index_chat_dev.html` funciona correctamente.  
 2. Copiar el archivo → `index_chat.html` (producción).  
 3. Subir commit con mensaje:  
@@ -24,5 +24,5 @@ Registro de todas las funciones y mejoras **validadas en DEV** y aprobadas para 
 
 ---
 
-✍️ **Desarrollador:** X-Code Systems  
-📅 **Última actualización:** _(agregar fecha del último despliegue)_
+ **Desarrollador:** X-Code Systems  
+ **Última actualización:** _(10/10/2025)_
