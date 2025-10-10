@@ -56,3 +56,26 @@ Cada entorno usa su propio **proyecto de Firebase**:
 | **PROD** | `x-code-chat` | `https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app` |
 
 ✅ Ambos comparten estructura de datos:
+
+---
+
+## 🔹 Estilo visual
+- Diseño **negro y dorado**, inspirado en la versión “X-Code Chat — Official”.  
+- Interfaz **responsiva** y minimalista.  
+- Mantiene coherencia estética entre entornos Dev y Prod.
+
+---
+
+## 🔹 Mantenimiento
+- Cada commit en Dev se despliega automáticamente en `https://dev-chat.x-code.es`.
+- La rama de producción se actualiza solo tras validación final.
+- Se recomienda crear **backups locales** de los archivos HTML y configuraciones Firebase antes de cada deploy.
+
+---
+
+## 🔹 Créditos
+**Proyecto:** X-Code Chat  
+**Desarrollador principal:** Fabio de PINA 
+**Infraestructura:** Firebase + GitHub + Vercel  
+**Diseño:** Identidad visual X-Code Official  
+
