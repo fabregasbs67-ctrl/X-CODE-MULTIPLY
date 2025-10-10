@@ -81,5 +81,5 @@ Este documento registra todas las **mejoras, correcciones y pruebas** realizadas
 
 ---
 
-✍️ **Desarrollador:** X-Code Systems  
-📅 **Última actualización:** _(agregar fecha actual del commit)_
+✍️ **Desarrollador:** Fabio de Pina  
+📅 **Última actualización:** _(10/10/2025)_
