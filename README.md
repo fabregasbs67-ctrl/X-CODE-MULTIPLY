@@ -1,4 +1,4 @@
-# 🧭 X-Code Chat — Estructura General
+#  X-Code Chat — Estructura General
 
 ## 📌 Descripción  
 Este proyecto gestiona el ecosistema de **X-Code Chat**, incluyendo:
