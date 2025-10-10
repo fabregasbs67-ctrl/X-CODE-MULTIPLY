@@ -75,7 +75,7 @@ Cada entorno usa su propio **proyecto de Firebase**:
 
 ## 🔹 Créditos
 **Proyecto:** X-Code Chat  
-**Desarrollador principal:** Fabio de PINA 
+**Desarrollador principal:** Fabio de Pina
 **Infraestructura:** Firebase + GitHub + Vercel  
 **Diseño:** Identidad visual X-Code Official  
 
