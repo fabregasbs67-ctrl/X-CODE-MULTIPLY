@@ -30,3 +30,5 @@ Registro de todas las funciones y mejoras **validadas en DEV** y aprobadas para 
 - [MEJORAS_DEV.md](./MEJORAS_DEV.md) — Registro de cambios y pruebas en entorno Dev.  
 - [MEJORAS_PROD.md](./MEJORAS_PROD.md) — Registro de validaciones en Producción.
 
+ 
+
