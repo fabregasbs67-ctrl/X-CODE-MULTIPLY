@@ -1,6 +1,6 @@
 #  X-Code Chat — Estructura General
 
-## 📌 Descripción  
+##  Descripción  
 Este proyecto gestiona el ecosistema de **X-Code Chat**, incluyendo:
 - Entorno de desarrollo (Dev) → pruebas, mejoras y validaciones.  
 - Entorno de producción (Prod) → versión oficial pública y estable.  
@@ -8,7 +8,7 @@ Este proyecto gestiona el ecosistema de **X-Code Chat**, incluyendo:
 
 ---
 
-## 🔹 Estructura de entornos
+##  Estructura de entornos
 
 | Entorno | Dominio | Propósito |
 |----------|----------|-----------|
@@ -17,7 +17,7 @@ Este proyecto gestiona el ecosistema de **X-Code Chat**, incluyendo:
 
 ---
 
-## 🔹 Archivos principales
+##  Archivos principales
 
 | Archivo | Descripción |
 |----------|--------------|
@@ -29,7 +29,7 @@ Este proyecto gestiona el ecosistema de **X-Code Chat**, incluyendo:
 
 ---
 
-## 🔹 Flujo de trabajo
+##  Flujo de trabajo
 
 1. **Desarrollo inicial**
    - Se actualiza y prueba el código en `index_chat_dev.html`.
@@ -46,7 +46,7 @@ Este proyecto gestiona el ecosistema de **X-Code Chat**, incluyendo:
 
 ---
 
-## 🔹 Integración con Firebase
+##  Integración con Firebase
 
 Cada entorno usa su propio **proyecto de Firebase**:
 
@@ -55,25 +55,25 @@ Cada entorno usa su propio **proyecto de Firebase**:
 | **DEV** | `x-code-chat-dev` | `https://x-code-chat-dev-default-rtdb.europe-west1.firebasedatabase.app` |
 | **PROD** | `x-code-chat` | `https://x-code-chat-default-rtdb.europe-west1.firebasedatabase.app` |
 
-✅ Ambos comparten estructura de datos:
+ Ambos comparten estructura de datos:
 
 ---
 
-## 🔹 Estilo visual
+##  Estilo visual
 - Diseño **negro y dorado**, inspirado en la versión “X-Code Chat — Official”.  
 - Interfaz **responsiva** y minimalista.  
 - Mantiene coherencia estética entre entornos Dev y Prod.
 
 ---
 
-## 🔹 Mantenimiento
+##  Mantenimiento
 - Cada commit en Dev se despliega automáticamente en `https://dev-chat.x-code.es`.
 - La rama de producción se actualiza solo tras validación final.
 - Se recomienda crear **backups locales** de los archivos HTML y configuraciones Firebase antes de cada deploy.
 
 ---
 
-## 🔹 Créditos
+##  Créditos
 **Proyecto:** X-Code Chat  
 **Desarrollador principal:** Fabio de Pina
 **Infraestructura:** Firebase + GitHub + Vercel  
