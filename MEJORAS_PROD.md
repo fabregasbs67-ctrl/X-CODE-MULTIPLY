@@ -1,6 +1,6 @@
 # 🏁 X-Code Chat — Registro de Implementaciones (Producción)
 
-## 🧠 Objetivo
+##  Objetivo
 Registro de todas las funciones y mejoras **validadas en DEV** y aprobadas para producción.
 
 ---
@@ -24,5 +24,9 @@ Registro de todas las funciones y mejoras **validadas en DEV** y aprobadas para 
 
 ---
 
- **Desarrollador:** X-Code Systems  
+ **Desarrollador:** Fabio de Pina  
  **Última actualización:** _(10/10/2025)_
+ ## 📚 Documentación adicional
+- [MEJORAS_DEV.md](./MEJORAS_DEV.md) — Registro de cambios y pruebas en entorno Dev.  
+- [MEJORAS_PROD.md](./MEJORAS_PROD.md) — Registro de validaciones en Producción.
+
