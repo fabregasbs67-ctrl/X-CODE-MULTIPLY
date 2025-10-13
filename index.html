@@ -6,11 +6,7 @@
 <title>X Code Chat — Official (DEV)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-/* ====== Tema ====== */
-:root{
-  --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a;
-  --gold:#D0A500; --accent:#00ffbb; --danger:#ff5a5a;
-}
+:root{ --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500; --accent:#00ffbb; --danger:#ff5a5a; }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Roboto,Arial,sans-serif}
@@ -31,7 +27,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .login{max-width:700px;margin:6svh auto 0;display:flex;flex-direction:column;gap:10px}
 .hint{color:var(--muted);font-size:13px}
 
-/* ====== Chat ====== */
+/* Panel + Chat */
 .chatGrid{display:flex;gap:12px;align-items:flex-start}
 .adminPane{display:none;flex:0 0 320px;gap:12px;flex-direction:column}
 .adminTabs{display:flex;gap:6px}
@@ -47,9 +43,9 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid #555;margin-left:6px}
 .dot.green{background:#00d38f;border-color:#00d38f}
 .dot.orange{background:#ffb020;border-color:#ffb020}
-.dot.red{background:#ff5a5a;border-color:#ff5a5a}
+.dot.red{background:#ff5a5a}
 
-/* Área del chat con scroll interno */
+/* Chat con scroll interno */
 .chatCard{flex:1 1 auto;display:flex;flex-direction:column;gap:10px}
 .messages{flex:1 1 auto;min-height:320px;max-height:60svh;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;background:#0f0f0f}
 .msg{max-width:92%;padding:10px 12px;border:1px solid #3a3a3a;border-radius:14px;background:#101010;white-space:pre-wrap;word-break:break-word}
@@ -71,13 +67,8 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,R
 .modal .actions{display:flex;gap:8px;justify-content:center}
 kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6px;background:#0a0a0a}
 
-@media (max-width:820px){
-  .chatGrid{flex-direction:column}
-  .adminPane{width:100%}
-}
-@media (max-width:560px){
-  .messages{max-height:56svh}
-}
+@media (max-width:820px){ .chatGrid{flex-direction:column} .adminPane{width:100%} }
+@media (max-width:560px){ .messages{max-height:56svh} }
 </style>
 </head>
 <body>
@@ -162,7 +153,7 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
 
 <div id="toast" class="toast"></div>
 
-<!-- Modal PIN -->
+<!-- Modal PIN (primera vez) -->
 <div id="pinBack" class="backdrop" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true">
     <h3>🔐 Tu PIN</h3>
@@ -177,11 +168,8 @@ kbd{font-family:monospace;border:1px solid #333;border-radius:6px;padding:1px 6p
    Firebase (DEV)
 -------------------------------------------------------------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import {
-  getDatabase, ref, get, set, update, onValue, off, remove
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getDatabase, ref, get, set, update, onValue, off, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
-/*** Firebase CONFIG DEV ***/
 const firebaseConfig = {
   apiKey: "AIzaSyDtA7FlHCN6GaibDINRF6AF2uuLoPbgpK4",
   authDomain: "x-code-chat-dev.firebaseapp.com",
@@ -209,7 +197,7 @@ const toastEl=$("#toast");
 const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
 const adminPane=$("#adminPane"), statusDot=$("#statusDot");
 
-/* Admin panes */
+/* Admin UI */
 const tabRooms=$("#tabRooms"), tabUsers=$("#tabUsers");
 const panelRooms=$("#panelRooms"), panelUsers=$("#panelUsers");
 
@@ -230,12 +218,16 @@ const ENTRY_WHITELIST_PATHS = ["entradas","tickets"];
 const DEFAULT_ROOM = "Sala de Prueba";
 const ADMIN_PASS = "131215";
 
-/* Sesión */
+/* Persistencias locales */
+const LS_LAST_ROOM = "xcode:lastRoom";     // última sala elegida por organizador
+const LS_SESSION   = "xcode:session";      // sesión persistente (num,pin,room,isAdmin)
+
+/* Sesión en memoria */
 let session = { room: DEFAULT_ROOM, num:null, isAdmin:false };
 roomHdr.textContent=session.room;
 roomInput.value=session.room;
 
-/* Handlers para unsubscribe */
+/* Unsub handlers y timers */
 let detachMsgs=null, detachUsers=null, usersCache={}, usersTimer=null, statusTimer=null;
 
 /* --------------------------------------------------------------------
@@ -248,10 +240,27 @@ const newPIN = ()=> String(Math.floor(1000+Math.random()*9000));
 const roomRef = (room, path) => ref(db, `rooms/${room}/${path}`);
 const currentRoomRef = path => roomRef(session.room, path);
 
-/* Persistencia local de sala (organizador) */
-const LS_LAST_ROOM_KEY = "xcode:lastRoom";
-const saveLastRoom = r => { try{ localStorage.setItem(LS_LAST_ROOM_KEY, r); }catch{} }
-const loadLastRoom = () => { try{ return localStorage.getItem(LS_LAST_ROOM_KEY) || DEFAULT_ROOM; }catch{ return DEFAULT_ROOM } }
+/* Persistencia sala organizador */
+const saveLastRoom = r => { try{ localStorage.setItem(LS_LAST_ROOM, r); }catch{} }
+const loadLastRoom = () => { try{ return localStorage.getItem(LS_LAST_ROOM) || DEFAULT_ROOM; }catch{ return DEFAULT_ROOM } }
+
+/* Persistencia sesión */
+function saveSession(){
+  try{
+    const payload = { num:session.num, pin:pinInput.value||"", room:session.room, isAdmin:!!session.isAdmin };
+    localStorage.setItem(LS_SESSION, JSON.stringify(payload));
+  }catch{}
+}
+function clearSession(){
+  try{ localStorage.removeItem(LS_SESSION); }catch{}
+}
+function loadSession(){
+  try{
+    const raw = localStorage.getItem(LS_SESSION);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch{ return null; }
+}
 
 /* --------------------------------------------------------------------
    Lista blanca de entradas
@@ -306,12 +315,13 @@ async function doLogin(){
       if(pass!==ADMIN_PASS) throw new Error("Contraseña incorrecta.");
       session.num=0; session.isAdmin=true;
 
-      /* Cargar última sala usada por organizador (localStorage) */
+      /* Cargar última sala usada por organizador */
       const last = loadLastRoom();
       session.room = last || DEFAULT_ROOM;
       roomHdr.textContent=session.room; roomInput.value=session.room;
 
-      enterChat(true); 
+      enterChat(true);
+      saveSession(); // guarda sesión admin sin volver a pedir pass al refrescar
       return;
     }
 
@@ -332,10 +342,10 @@ async function doLogin(){
     await update(roomRef(session.room,`users/${n}`), { connected:true, updated:Date.now() });
     session.num=n; session.isAdmin=false;
     enterChat(false);
+    saveSession(); // guarda num/pin/room para restaurar sesión
   }catch(err){ toast(err.message||"No se pudo iniciar sesión"); }
   finally{ loginBtn.disabled=false; }
 }
-
 loginBtn.onclick = doLogin;
 numInput.onkeydown = e=>{ if(e.key==="Enter") doLogin(); };
 pinInput.onkeydown = e=>{ if(e.key==="Enter") doLogin(); };
@@ -363,10 +373,9 @@ function enterChat(isAdmin){
   logoutBtn.style.display="inline-flex";
   meIdSpan.textContent=session.num;
 
-  /* Admin UI */
-  if(isAdmin || session.num===0){ 
-    adminPane.style.display="flex"; 
-    reloadRooms(); 
+  if(isAdmin || session.num===0){
+    adminPane.style.display="flex";
+    reloadRooms();
     loadUsersRealtime();
     if(!usersTimer) usersTimer=setInterval(updateUsersAgo, 30000);
     if(!statusTimer) statusTimer=setInterval(pingStatusOnce, 10000);
@@ -385,6 +394,7 @@ async function doLogout(){
   if(detachUsers){ detachUsers(); detachUsers=null; }
   if(usersTimer){ clearInterval(usersTimer); usersTimer=null; }
   if(statusTimer){ clearInterval(statusTimer); statusTimer=null; }
+  clearSession();
   mainGrid.style.display="none"; logoutBtn.style.display="none";
   adminPane.style.display="none";
   loginCard.style.display="flex";
@@ -398,10 +408,7 @@ logoutBtn.onclick = doLogout;
    MENSAJES
 -------------------------------------------------------------------- */
 function renderMsg(m){
-  /* No mostrar sys a no-admin */
   if(m.sys && session.num!==0) return;
-
-  /* Visibilidad privada */
   if(m.to && !(m.to===session.num || m.from===session.num || session.num===0)) return;
 
   const div=document.createElement("div");
@@ -520,7 +527,6 @@ async function reloadRooms(){
     box.querySelector('[data-act=rename]').onclick=async()=>{
       const newName = prompt("Nuevo nombre para la sala:", name);
       if(!newName || newName===name) return;
-      /* evitar duplicados */
       const exists = await get(roomMetaRef(newName));
       if(exists.exists()){ toast("Ya existe una sala con ese nombre"); return; }
       if(!confirm(`Renombrar "${name}" a "${newName}"?`)) return;
@@ -557,6 +563,7 @@ roomUseBtn.onclick=()=>{
   saveLastRoom(newRoom); /* persistir elección del organizador */
   attachMessages();
   if(session.num===0) { loadUsersRealtime(); }
+  saveSession(); /* actualizar la sala guardada en la sesión */
   toast(`Sala cambiada a "${newRoom}"`);
 };
 
@@ -659,16 +666,53 @@ btnDeleteUser.onclick = async ()=>{
 };
 
 /* --------------------------------------------------------------------
+   Restauración automática de sesión al cargar
+-------------------------------------------------------------------- */
+async function tryRestoreSession(){
+  const saved = loadSession();
+  if(!saved) return; // no hay sesión
+  try{
+    // Cargar sala persistida (si existe)
+    session.room = saved.room || loadLastRoom() || DEFAULT_ROOM;
+    roomHdr.textContent=session.room;
+    roomInput.value=session.room;
+
+    // ADMIN restaurado
+    if(saved.isAdmin && String(saved.num)==="0"){
+      session.num = 0; session.isAdmin = true;
+      enterChat(true);
+      return;
+    }
+
+    // Usuario normal: revalidar que sigue permitido y que el PIN coincide
+    const allowed = await isEntryAllowed(saved.num);
+    if(!allowed){ clearSession(); return; }
+
+    const data = await normalizeUserNode(session.room, saved.num);
+    if(!data || String(data.pin)!==String(saved.pin)){ clearSession(); return; }
+
+    await update(roomRef(session.room,`users/${saved.num}`), { connected:true, updated:Date.now() });
+    session.num = Number(saved.num); session.isAdmin = false;
+    // Rellenar inputs por si el usuario abre el panel
+    numInput.value = saved.num;
+    pinInput.value = saved.pin;
+    enterChat(false); // entra directo sin pedir PIN
+  }catch{
+    // si falla, limpiamos para no bloquear el login manual
+    clearSession();
+  }
+}
+
+/* --------------------------------------------------------------------
    INIT
 -------------------------------------------------------------------- */
 function sessionLoad(){
-  /* En DEV, al cargar no auto-logeamos; solo pre-cargamos sala última para #0 */
+  // precargar última sala en header/inputs
   const last = loadLastRoom();
   if(last){ session.room = last; roomHdr.textContent=last; roomInput.value=last; }
 }
 sessionLoad();
+tryRestoreSession();
 </script>
 </body>
 </html>
-
-
