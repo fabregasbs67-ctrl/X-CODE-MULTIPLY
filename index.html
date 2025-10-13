@@ -19,59 +19,42 @@
     display:flex; flex-direction:column; overflow:hidden;
   }
 
-  /* CABECERA */
   .header{
     flex-shrink:0; padding:12px 14px; background:#111;
     border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between;
   }
   .brand{display:flex; gap:10px; align-items:center}
-  .logo{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#111;border:1px solid var(--line);overflow:hidden}
   .ttl{font-weight:700;font-size:18px}
   .sub{font-size:12px;color:#9aa}
   .dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid #555;margin-left:6px}
   .dot.green{background:#00d38f;border-color:#00d38f}
-
   .btn{appearance:none;border:1px solid #fff;background:#fff;color:#000;border-radius:10px;padding:8px 12px;font-weight:600;cursor:pointer}
   .btn.ghost{background:transparent;color:#fff;border-color:#555}
   .btn.sm{padding:6px 8px;font-size:13px}
-
   .main{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
 
-  /* LOGIN */
   .card{background:#0b0b0b;border:1px solid var(--line);border-radius:16px;padding:14px}
   #loginCard{max-width:700px;margin:12px auto 0;display:flex;flex-direction:column;gap:10px}
   .field{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px;background:#0a0a0a}
   .field input{flex:1;background:transparent;border:none;outline:none;color:var(--fg);font-size:16px}
 
-  /* ADMIN */
-  #adminCard{display:none;gap:12px;flex-direction:column;margin:12px; }
+  #adminCard{display:none;gap:12px;flex-direction:column;margin:12px;}
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .tag{display:inline-block;border:1px solid #3a3a3a;border-radius:999px;padding:2px 8px;font-size:12px}
-  .ok{color:#00d38f;border-color:#00d38f} .bad{color:#ff6a6a;border-color:#ff6a6a}
   .list{border:1px dashed var(--line);border-radius:12px;padding:10px;max-height:220px;overflow:auto}
-  .roomBox input,.smallInput{min-width:200px;background:#111;color:#fff;border:1px solid #333;padding:8px 10px;border-radius:8px}
+  .smallInput{min-width:200px;background:#111;color:#fff;border:1px solid #333;padding:8px 10px;border-radius:8px}
 
-  /* CHAT */
   #chatCard{display:none; flex:1 1 auto; min-height:0; padding:12px}
   .chatShell{display:flex; flex-direction:column; height:100%; gap:10px}
-  #messages{
-    flex:1 1 auto; min-height:0;
-    overflow:auto; padding:14px; display:flex; flex-direction:column; gap:10px;
-    border:1px solid var(--line); border-radius:14px; background:#0f0f0f;
-  }
+  #messages{flex:1 1 auto; min-height:0; overflow:auto; padding:14px; display:flex; flex-direction:column; gap:10px; border:1px solid var(--line); border-radius:14px; background:#0f0f0f;}
   .msg{max-width:88%;padding:10px 12px;border:1px solid #3a3a3a;border-radius:14px;background:#101010;white-space:pre-wrap;word-break:break-word}
   .msg.me{margin-left:auto;background:#141414;border-color:#555}
-  .msg .by{font-size:12px;color:#9bd;opacity:.85;margin-bottom:4px}
+  .msg .by{font-size:12px;color:#9bd;margin-bottom:4px}
   .msg .meta{margin-top:6px;font-size:11px;color:#9a9a9a}
 
   .composer{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding:10px;background:#080808;border-radius:14px;flex-shrink:0}
   .composer .field{flex:1}
   .composer input{color:#fff}
-
-  .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
-  .backdrop.show{display:flex}
-  .modal{background:#101010;border:1px solid var(--line);padding:20px 22px;border-radius:14px;width:min(420px,92vw);text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.35)}
-  .modal h3{margin:0 0 8px 0;color:var(--gold)}
 
   @media (max-width:560px){ .ttl{font-size:16px} }
 </style>
@@ -80,9 +63,6 @@
 
   <div class="header">
     <div class="brand">
-      <span class="logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="10" fill="none" stroke="#D0A500" stroke-width="2"/><path d="M8 8 L16 16 M16 8 L8 16" stroke="#D0A500" stroke-width="2" stroke-linecap="round"/></svg>
-      </span>
       <div>
         <div class="ttl">X Code Chat — Official (DEV)</div>
         <div class="sub">Sala: <b id="roomHdr">Sala de Prueba 3</b></div>
@@ -96,60 +76,39 @@
   </div>
 
   <div class="main">
+    <!-- LOGIN -->
     <div id="loginCard" class="card">
-      <div class="sub">Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial, la primera vez se genera tu PIN y se muestra. Usuario <b>0</b> es organizador.</div>
-      <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)"></div>
-      <div class="field"><input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN"></div>
-      <div class="row"><button id="loginBtn" class="btn">Entrar</button><div id="loginMsg" class="sub"></div></div>
-      <div class="sub">Privado escribe <code>@número</code> al inicio (ej. <code>@120 hola</code>).</div>
+      <div class="sub">Acceso con <b>número</b> y <b>PIN</b>. Usuario <b>0</b> es organizador.</div>
+      <div class="field"><input id="numInput" type="number" placeholder="Tu número"></div>
+      <div class="field"><input id="pinInput" type="password" placeholder="Tu PIN"></div>
+      <div class="row"><button id="loginBtn" class="btn">Entrar</button></div>
     </div>
 
+    <!-- ADMIN PANEL -->
     <div id="adminCard" class="card">
+      <div class="sub" style="font-weight:600">Panel del organizador</div>
       <div class="row">
-        <div class="sub" style="font-weight:600">Panel del organizador</div>
-        <span id="adminStatus" class="tag">—</span>
-        <span id="statusPing" class="dot"></span>
-        <button id="btnPing" class="btn sm">🔄 Probar</button>
-        <button id="btnBcast" class="btn sm ghost">Mensaje global</button>
-      </div>
-      <div class="row roomBox">
-        <div class="sub">Sala actual:</div>
-        <input id="roomInput" class="smallInput" placeholder="Nombre de sala…"/>
-        <button id="roomUseBtn" class="btn sm">Usar</button>
-        <button id="btnReloadRooms" class="btn sm ghost">Recargar salas</button>
-      </div>
-      <div class="row">
-        <input id="newRoomName" class="smallInput" placeholder="Nueva sala…"/>
-        <button id="btnCreateRoom" class="btn sm">Crear sala</button>
+        <input id="roomInput" class="smallInput" placeholder="Nombre de sala"/>
+        <button id="roomUseBtn" class="btn sm">Cambiar sala</button>
       </div>
       <div id="roomsGrid" class="list"></div>
-      <div class="row" style="margin-top:6px">
-        <input id="userNumber" class="smallInput" type="number" placeholder="Número usuario"/>
-        <button id="btnActivateUser" class="btn sm">Activar</button>
-        <button id="btnDeactivateUser" class="btn sm" style="border-color:var(--danger);color:var(--danger);background:transparent">Desactivar</button>
-        <div class="sub">Conectados: <b id="countConn">0</b></div>
-      </div>
-      <div id="usersList" class="list"></div>
     </div>
 
+    <!-- CHAT -->
     <div id="chatCard" class="card">
       <div class="chatShell">
         <div id="messages"></div>
         <div class="composer">
-          <div class="field"><input id="msgInput" type="text" placeholder="Mensaje…  ·  Privado con @número" autocomplete="off" maxlength="400"></div>
+          <div class="field"><input id="msgInput" type="text" placeholder="Mensaje…"/></div>
           <button id="sendBtn" class="btn">Enviar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div id="pinBack" class="backdrop" aria-hidden="true">
-    <div class="modal"><h3>🔐 Tu PIN</h3><p id="pinText" style="font-size:1.6em;font-weight:800;color:var(--accent)">0000</p><small style="opacity:.8">Se ha copiado al portapapeles</small><div class="row" style="justify-content:center;margin-top:10px"><button id="pinOk" class="btn">Entendido</button></div></div>
-  </div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, get, set, update, onValue, off, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "TU_API_KEY_DEV",
@@ -160,65 +119,84 @@ const firebaseConfig = {
   messagingSenderId: "TU_SENDER_ID_DEV",
   appId: "TU_APP_ID_DEV"
 };
-
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
 const $ = q => document.querySelector(q);
 const loginBtn=$("#loginBtn"), numInput=$("#numInput"), pinInput=$("#pinInput");
-const loginCard=$("#loginCard"), chatCard=$("#chatCard"), logoutBtn=$("#logoutBtn");
-const roomHdr=$("#roomHdr"), userUnder=$("#userUnder");
-const messages=$("#messages"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn");
+const loginCard=$("#loginCard"), chatCard=$("#chatCard"), adminCard=$("#adminCard");
+const logoutBtn=$("#logoutBtn"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn");
+const roomHdr=$("#roomHdr"), userUnder=$("#userUnder"), messages=$("#messages"), roomInput=$("#roomInput"), roomUseBtn=$("#roomUseBtn");
 
-const DEFAULT_ROOM = localStorage.getItem("xcode:lastRoom") || "Sala de Prueba 3";
-let session={room:DEFAULT_ROOM,num:null,isAdmin:false};
-roomHdr.textContent=DEFAULT_ROOM;
-userUnder.textContent="Usuario #?";
+let session={room:localStorage.getItem("xcode:lastRoom")||"Sala de Prueba 3",num:null,isAdmin:false};
+roomHdr.textContent=session.room;
 
-const toast = t => console.log("[toast]",t);
-const genPIN=()=>String(Math.floor(1000+Math.random()*9000));
-const hhmm = ts=>new Date(ts||Date.now()).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+function saveRoom(r){
+  session.room=r; roomHdr.textContent=r;
+  localStorage.setItem("xcode:lastRoom",r);
+}
+
+function enterChat(admin){
+  loginCard.style.display="none";
+  logoutBtn.style.display="inline-flex";
+  if(admin){ adminCard.style.display="flex"; chatCard.style.display="none"; }
+  else{ adminCard.style.display="none"; chatCard.style.display="block"; attachMessages(); }
+  userUnder.textContent=`Usuario #${session.num}`;
+}
 
 async function doLogin(){
-  const nStr=(numInput.value||"").trim(); if(!/^\d+$/.test(nStr)) return toast("Introduce tu número");
-  const n=Number(nStr), p=(pinInput.value||"").trim();
-  if(n===0){ session.num=0; session.isAdmin=true; enterChat(true); return; }
-  const uRef=ref(db,`rooms/${session.room}/users/${n}`);
-  const uSnap=await get(uRef);
-  if(!uSnap.exists()){
-    const pin=genPIN(); await set(uRef,{pin,active:true,connected:false,created:Date.now()});
-    navigator.clipboard.writeText(pin); alert("Tu PIN: "+pin); return;
-  }
-  const data=uSnap.val();
-  if(!p){alert("Introduce tu PIN");return;}
-  if(String(data.pin)!==p){alert("PIN incorrecto");return;}
-  await update(uRef,{connected:true,updated:Date.now()});
-  session.num=n; enterChat(false);
+  const num=parseInt(numInput.value.trim());
+  const pin=pinInput.value.trim();
+  if(isNaN(num)) return alert("Introduce tu número");
+  if(num===0){ session.num=0; session.isAdmin=true; enterChat(true); return; }
+  const uRef=ref(db,`rooms/${session.room}/users/${num}`);
+  const snap=await get(uRef);
+  if(!snap.exists()) return alert("Tu entrada no está activa");
+  const data=snap.val();
+  if(!pin) return alert("Introduce tu PIN");
+  if(String(data.pin)!==pin) return alert("PIN incorrecto");
+  session.num=num;
+  enterChat(false);
 }
+
 loginBtn.onclick=doLogin;
 numInput.onkeydown=e=>{if(e.key==="Enter")doLogin()};
 pinInput.onkeydown=e=>{if(e.key==="Enter")doLogin()};
 
-function enterChat(isAdmin){
-  loginCard.style.display="none"; chatCard.style.display="block"; logoutBtn.style.display="inline-flex";
-  userUnder.textContent=`Usuario #${session.num}`;
-  attachMessages();
+logoutBtn.onclick=()=>{
+  session={room:localStorage.getItem("xcode:lastRoom")||"Sala de Prueba 3",num:null,isAdmin:false};
+  adminCard.style.display="none"; chatCard.style.display="none";
+  loginCard.style.display="flex"; logoutBtn.style.display="none";
+  numInput.value=""; pinInput.value=""; userUnder.textContent="Usuario #?";
 }
+
+roomUseBtn.onclick=()=>{
+  const newRoom=roomInput.value.trim();
+  if(!newRoom) return alert("Introduce el nombre de la sala");
+  saveRoom(newRoom);
+  alert("Sala actualizada a: "+newRoom);
+}
+
 async function sendMessage(){
-  const raw=(msgInput.value||"").trim(); if(!raw)return;
-  const id=Date.now()+"_"+Math.random().toString(36).slice(2,8);
-  const payload={from:session.num,text:raw,ts:Date.now()};
+  const text=msgInput.value.trim(); if(!text)return;
+  const id=Date.now();
+  const payload={from:session.num,text,ts:Date.now()};
   await set(ref(db,`rooms/${session.room}/messages/${id}`),payload);
   msgInput.value="";
 }
+
 sendBtn.onclick=sendMessage;
 msgInput.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();sendMessage();}};
+
 function attachMessages(){
-  onValue(ref(db,`rooms/${session.room}/messages`),snap=>{
-    messages.innerHTML=""; const val=snap.val()||{};
-    Object.values(val).sort((a,b)=>a.ts-b.ts).forEach(m=>{
-      const div=document.createElement("div"); div.className="msg"+(m.from===session.num?" me":"");
-      div.innerHTML=`<div class='by'>Usuario #${m.from}</div><div>${m.text}</div><div class='meta'>${hhmm(m.ts)}</div>`;
+  const refMsgs=ref(db,`rooms/${session.room}/messages`);
+  onValue(refMsgs,snap=>{
+    messages.innerHTML="";
+    const data=snap.val()||{};
+    Object.values(data).sort((a,b)=>a.ts-b.ts).forEach(m=>{
+      const div=document.createElement("div");
+      div.className="msg"+(m.from===session.num?" me":"");
+      div.innerHTML=`<div class='by'>Usuario #${m.from}</div><div>${m.text}</div><div class='meta'>${new Date(m.ts).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</div>`;
       messages.appendChild(div);
     });
     messages.scrollTop=messages.scrollHeight;
@@ -227,4 +205,3 @@ function attachMessages(){
 </script>
 </body>
 </html>
-
