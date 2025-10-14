@@ -172,6 +172,8 @@
         <div>
           <div class="ttl">X Code Chat — Official (DEV)</div>
           <div class="sub">Sala: <b id="roomHdr">Sala de Prueba</b></div>
+          <!-- ✅ NUEVO: usuario visible SOLO con sesión (Opción A) -->
+          <div class="sub" id="userUnder" style="display:none">Usuario #?</div>
         </div>
       </div>
       <div class="row">
@@ -308,6 +310,9 @@
         btnDeactivateUser=$("#btnDeactivateUser"), btnDeleteUser=$("#btnDeleteUser"),
         usersList=$("#usersList"), countConn=$("#countConn");
 
+  /* ✅ NUEVO: referencia al “Usuario #X” del header */
+  const userUnder = $("#userUnder");
+
   /* ===== Helpers ===== */
   const toast=(t,ms=2400)=>{ toastEl.textContent=t; toastEl.classList.add("show"); clearTimeout(window.__t); window.__t=setTimeout(()=>toastEl.classList.remove("show"),ms); };
   togglePin.onclick=()=> pinInput.type = (pinInput.type==="password" ? "text" : "password");
@@ -429,6 +434,10 @@
     logoutBtn.style.display="inline-flex";
     meIdSpan.textContent=session.num;
 
+    // ✅ Mostrar “Usuario #X” solo en sesión iniciada (Opción A)
+    userUnder.textContent = `Usuario #${session.num}`;
+    userUnder.style.display = "block";
+
     // Persistimos/mostramos sala
     roomHdr.textContent=session.room; roomInput.value=session.room; saveLastRoom(session.room);
 
@@ -469,6 +478,10 @@
 
     // Reflejar sala al volver a login
     roomHdr.textContent=session.room; roomInput.value=session.room;
+
+    // ✅ Opción A: ocultar el “Usuario #” al cerrar sesión
+    userUnder.textContent = "Usuario #?";
+    userUnder.style.display = "none";
   }
   logoutBtn.onclick=doLogout;
 
@@ -669,13 +682,22 @@
       roomHdr.textContent=session.room; roomInput.value=session.room;
 
       if(s.isAdmin && String(s.num)==="0"){
-        session.num=0; session.isAdmin=true; enterChat(true); return;
+        session.num=0; session.isAdmin=true;
+        // ✅ mostrar usuario en header al restaurar
+        userUnder.textContent = `Usuario #${session.num}`;
+        userUnder.style.display = "block";
+        enterChat(true); return;
       }
       if(!await isEntryAllowed(s.num)) return clearSession();
       const data=await normalizeUserNode(session.room, s.num);
       if(!data || String(data.pin)!==String(s.pin)) return clearSession();
       await update(roomRef(session.room,`users/${s.num}`),{connected:true,updated:Date.now()});
       session.num=Number(s.num); session.isAdmin=false; numInput.value=s.num; pinInput.value=s.pin;
+
+      // ✅ mostrar usuario en header al restaurar
+      userUnder.textContent = `Usuario #${session.num}`;
+      userUnder.style.display = "block";
+
       enterChat(false);
     }catch{ clearSession(); }
   }
@@ -683,3 +705,4 @@
   </script>
 </body>
 </html>
+
