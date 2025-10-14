@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <!-- Importante para móviles: notch + zoom correcto -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>X Code Chat — Official (DEV)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -14,6 +13,8 @@
   :root{
     --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
     --accent:#00ffbb; --danger:#ff5a5a;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   /* =========================
@@ -22,39 +23,40 @@
   ==========================*/
   *{ box-sizing:border-box; }
   html,body{ height:100%; }
+  html{ overflow:hidden; } /* evita scroll global */
   body{
     margin:0; color:var(--fg); background:var(--bg);
     font-family:Inter,system-ui,Roboto,Arial,sans-serif;
 
-    /* App-like height + evitar scroll global */
-    height:100dvh;                 /* iOS/Android modernos */
-    min-height:100svh;             /* fallback moderno */
-    overflow:hidden;               /* evita que se mueva toda la página */
-
+    /* Layout tipo app estable en móviles */
+    height:100dvh;              /* iOS/Android moderno estable */
+    min-height:100svh;
+    overflow:hidden;            /* no desplazamientos del documento */
     display:flex; flex-direction:column;
-    -webkit-tap-highlight-color: transparent;
+
+    /* seguridad para notch y barra home */
+    padding-top: calc(var(--safe-top));
+    padding-bottom: calc(var(--safe-bottom));
+    overflow-x:hidden;          /* quita espacio lateral derecho */
   }
 
-  /* Contenedor principal a alto completo
-     Safe-area: evita que se “corte” el header bajo el notch */
+  /* Contenedor principal a alto completo */
   .wrap{
     max-width:980px; width:100%;
-    margin:0 auto;
-    padding:12px;
-
-    /* Safe area para iOS notch (evita header cortado) */
-    padding-top: max(12px, env(safe-area-inset-top));
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-
+    margin:0 auto; padding:12px;
     display:flex; flex-direction:column; gap:12px;
-    flex:1 1 auto; min-height:0; /* clave para scroll interno */
+
+    flex:1 1 auto; min-height:0;        /* clave para scroll interno */
   }
 
   /* =========================
      COMPONENTES GENERALES
   ==========================*/
   .card{ background:#0b0b0b; border:1px solid var(--line); border-radius:16px; padding:14px }
-  .header{ display:flex; align-items:center; justify-content:space-between; gap:10px }
+  .header{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    flex:0 0 auto;        /* NO se encoge, evita que se “coma” */
+  }
   .brand{ display:flex; align-items:center; gap:10px }
   .logo{ width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:#111; border:1px solid var(--line) }
   .ttl{ font-weight:700; font-size:18px }            /* compacto */
@@ -72,7 +74,7 @@
   .toast{
     position:fixed; left:50%; transform:translateX(-50%); bottom:12px;
     background:#111; border:1px solid var(--line); color:#fff;
-    padding:8px 12px; border-radius:10px; display:none; z-index:80; font-size:13px
+    padding:8px 12px; border-radius:10px; display:none; z-index:9999; font-size:13px
   }
   .toast.show{ display:block }
 
@@ -109,7 +111,7 @@
   .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555; margin-left:6px }
   .dot.green{ background:#00d38f; border-color:#00d38f }
   .dot.orange{ background:#ffb020; border-color:#ffb020 }
-  .dot.red{ background:#ff5a5a }
+  .dot.red{ background:#ff5a5a; border-color:#ff5a5a }
 
   /* =========================
      CHAT (derecha)
@@ -127,11 +129,10 @@
     border:1px solid var(--line); border-radius:12px;
     background:#0f0f0f;
     display:flex; flex-direction:column; gap:8px;
+    scrollbar-width:thin; scrollbar-color:#555 #0f0f0f;
 
-    /* iOS/Android: scroll fluido y sin rubber-band global */
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    touch-action: pan-y;
+    /* cuando aparece teclado en iOS, reservamos espacio para evitar “bote” */
+    padding-bottom: calc(12px + var(--kb-gap, 0px));
   }
   .messages::-webkit-scrollbar{ width:6px }
   .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px }
@@ -146,7 +147,8 @@
   .composer{
     display:flex; gap:6px; align-items:center;
     border-top:1px solid var(--line); padding:6px; background:#080808;
-    border-radius:12px
+    border-radius:12px;
+    flex:0 0 auto; /* no se encoge */
   }
   .composer .field{ flex:1 }
 
@@ -161,7 +163,7 @@
   .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:1000; padding:16px }
   .backdrop.show{ display:flex!important }
   .modal{ background:#101010; border:1px solid var(--line); padding:18px 20px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35) }
-  .modal h3{ margin:0 0 8px 0; color:var(--gold) }
+  .modal h3{ margin:0 0 8px 0; color:#D0A500 }
   .modal p{ margin:0 0 10px 0; color:#ddd }
   .modal .actions{ display:flex; gap:8px; justify-content:center }
   kbd{ font-family:monospace; border:1px solid #333; border-radius:6px; padding:1px 6px; background:#0a0a0a }
@@ -327,7 +329,7 @@
   const newPIN=()=> String(Math.floor(1000+Math.random()*9000));
   const timeAgo=(ts)=>{ if(!ts) return "—"; const s=Math.floor((Date.now()-ts)/1000); if(s<60) return `${s}s`; const m=Math.floor(s/60); if(m<60) return `${m}m`; return `${Math.floor(m/60)}h`; };
   const roomRef=(room,path)=> ref(db, `rooms/${room}/${path}`);
-  const currentRoomRef=(path)=> ref(db, `rooms/${session.room}/${path}`);
+  const currentRoomRef=(path)=> roomRef(session.room, path);
 
   /* Estado y suscripciones */
   let session={ room: DEFAULT_ROOM, num:null, isAdmin:false };
@@ -363,11 +365,14 @@
         roomHdr.textContent = room;
         roomInput.value     = room;
         saveLastRoom(room);
+        // Si estamos en chat, recargamos mensajes a la nueva sala global
+        if(mainGrid.style.display==="flex"){ attachMessages(); }
       }
     });
   }
   async function setGlobalRoom(roomName){
-    try{ await set(ref(db,'settings/currentRoom'), roomName); } catch{}
+    try{ await set(ref(db,'settings/currentRoom'), roomName); }
+    catch{}
   }
 
   /* ===== Tabs admin ===== */
@@ -606,6 +611,7 @@
         if(session.room===name){
           session.room=newName; roomHdr.textContent=newName; roomInput.value=newName; saveLastRoom(newName);
           attachMessages(); loadUsersRealtime(); saveSession();
+          // si el que renombra es admin y esa es la sala actual, actualizar global
           if(session.isAdmin || session.num===0) { await setGlobalRoom(newName); }
         }
         toast("Sala renombrada"); reloadRooms();
@@ -735,6 +741,50 @@
     }catch{ clearSession(); }
   }
   tryRestoreSession();
+
+  /* =========================
+     iOS/Safari: teclado y viewport estables
+     - Evita que toda la página “salte”
+     - Mantiene scroll SOLO en .messages
+  ==========================*/
+  (function mobileStability(){
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const root = document.documentElement;
+
+    // bloquea scroll global por gesto, salvo dentro de .messages
+    document.addEventListener('touchmove', (e)=>{
+      const inMessages = e.target.closest('.messages');
+      const inInput = e.target.closest('input,textarea,button');
+      if(!inMessages && !inInput){
+        e.preventDefault();
+      }
+    }, { passive:false });
+
+    // Ajusta padding inferior de mensajes según teclado visible (visualViewport)
+    if(window.visualViewport){
+      const onVV = () => {
+        const vh = window.visualViewport.height || 0;
+        const kb = Math.max(0, window.innerHeight - vh);
+        // margen para que no tape el último mensaje
+        root.style.setProperty('--kb-gap', kb>0 ? (kb + 8) + 'px' : '0px');
+      };
+      window.visualViewport.addEventListener('resize', onVV);
+      window.visualViewport.addEventListener('scroll', onVV);
+      onVV();
+    }
+
+    // Al enfocar input, mantén scroll al final y evita saltos
+    const msgInputEl = document.getElementById('msgInput');
+    if(msgInputEl){
+      msgInputEl.addEventListener('focus', ()=>{
+        setTimeout(()=>{
+          window.scrollTo(0,0);
+          const messagesEl = document.getElementById('messages');
+          if(messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+        }, 50);
+      });
+    }
+  })();
   </script>
 </body>
 </html>
