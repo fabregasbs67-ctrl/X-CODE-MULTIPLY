@@ -7,153 +7,164 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-  /* =========================
-     PALETA Y TOKENS
-  ==========================*/
+  /* =========================================================
+     PALETA / TOKENS
+  ==========================================================*/
   :root{
-    --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
-    --accent:#00ffbb; --danger:#ff5a5a;
+    --bg:#000; --surface:#0b0b0b; --panel:#0f0f0f;
+    --fg:#fff; --muted:#cfcfcf; --line:#262626; --gold:#D0A500;
+    --ok:#00d38f; --warn:#ffb020; --bad:#ff5a5a;
   }
 
-  /* =========================
-     RESET + BASE "APP"
-     - bloquea scroll global
-     - el scroll sucede SOLO en .messages
-  ==========================*/
-  *{ box-sizing:border-box; }
-  html,body{
-    height:100%;
-    width:100%;
-    overflow-x:hidden;            /* ✅ sin scroll lateral */
-  }
+  /* =========================================================
+     RESET + LAYOUT BASE TIPO APP (sin scroll global)
+  ==========================================================*/
+  *{ box-sizing:border-box }
+  html,body{ height:100% }
   body{
     margin:0; color:var(--fg); background:var(--bg);
     font-family:Inter,system-ui,Roboto,Arial,sans-serif;
+
+    /* App-like: el único scroll permitido es el de .messages */
     height:100svh; min-height:100svh;
-    overflow:hidden;              /* ✅ bloquea scroll global vertical */
+    overflow:hidden;
+
     display:flex; flex-direction:column;
   }
 
-  /* Contenedor principal de alto completo, sin márgenes laterales */
+  /* Contenedor principal */
   .wrap{
-    width:100%;
-    max-width:none;               /* ✅ ocupa todo el ancho */
-    margin:0; padding:0;          /* ✅ sin padding lateral */
+    width:100%; max-width:980px;
+    margin:0 auto; padding:10px 12px;
     display:flex; flex-direction:column; gap:10px;
-    flex:1 1 auto; min-height:0;  /* permite overflow de hijos */
+
+    /* Para que los hijos puedan hacer overflow:auto */
+    flex:1 1 auto; min-height:0;
   }
 
-  /* =========================
-     COMPONENTES GENERALES
-  ==========================*/
-  .card{ background:#0b0b0b; border:1px solid var(--line); border-radius:14px; padding:12px; }
-  .header{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; }
+  /* =========================================================
+     COMPONENTES
+  ==========================================================*/
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px;
+  }
+
+  /* ---------- HEADER (compacto) ---------- */
+  .header{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:10px 12px;            /* compacto */
+  }
   .brand{ display:flex; align-items:center; gap:10px }
-  .logo{ width:22px; height:22px; border-radius:50%; display:grid; place-items:center; background:#111; border:1px solid var(--line) }
-  .ttl{ font-weight:700; font-size:18px; line-height:1 }
-  .sub{ font-size:12px; color:var(--muted) }
+  .logo{ width:24px; height:24px; display:grid; place-items:center; border-radius:50%;
+         background:#101010; border:1px solid var(--line) }
+  .ttl{ font-weight:700; font-size:18px; line-height:1.1 }
+  .sub{ font-size:13px; color:var(--muted) }
   .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
-  .btn{ appearance:none; border:1px solid #fff; background:#fff; color:#000; border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer }
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555 }
+  .dot.green{ background:var(--ok); border-color:var(--ok) }
+  .dot.orange{ background:var(--warn); border-color:var(--warn) }
+  .dot.red{ background:var(--bad); border-color:var(--bad) }
+
+  .btn{
+    appearance:none; cursor:pointer;
+    border:1px solid #fff; color:#000; background:#fff;
+    padding:8px 12px; font-weight:600; border-radius:10px;  /* compacto */
+  }
   .btn.ghost{ background:transparent; color:#fff }
-  .btn.danger{ border-color:var(--danger); color:var(--danger); background:transparent }
-  .btn.sm{ padding:6px 10px; font-size:12px; border-radius:9px }
-  .field{ display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:10px; padding:8px; background:#0a0a0a }
-  .field input,.field select{ flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:15px }
-  .eye{ cursor:pointer; user-select:none }
-  .hint{ color:var(--muted); font-size:12px }
+  .btn.danger{ background:transparent; color:var(--bad); border-color:var(--bad) }
+  .btn.sm{ padding:6px 9px; font-size:13px; border-radius:9px }
+
+  .field{
+    display:flex; align-items:center; gap:8px;
+    background:#0a0a0a; border:1px solid var(--line);
+    border-radius:12px; padding:8px 10px;
+  }
+  .field input,.field select{
+    flex:1; border:none; outline:none; background:transparent;
+    color:var(--fg); font-size:16px;
+  }
 
   .toast{
     position:fixed; left:50%; transform:translateX(-50%); bottom:14px;
-    background:#111; border:1px solid var(--line); color:#fff;
-    padding:10px 14px; border-radius:12px; display:none; z-index:80;
+    padding:9px 12px; border-radius:10px; background:#111; border:1px solid var(--line);
+    color:#fff; z-index:90; display:none
   }
-  .toast.show{ display:block; }
+  .toast.show{ display:block }
 
-  /* =========================
-     LOGIN
-  ==========================*/
-  .login{ max-width:700px; width:100%; margin:4svh auto 0; display:flex; flex-direction:column; gap:8px; padding:0 12px; }
+  /* ---------- LOGIN ---------- */
+  .login{ max-width:720px; margin:6svh auto 0; display:flex; flex-direction:column; gap:10px }
 
-  /* =========================
-     GRID PRINCIPAL (ADMIN + CHAT)
-     - min-height:0 para que .messages haga overflow interno
-  ==========================*/
+  /* ---------- GRID (admin + chat) ---------- */
   .chatGrid{
     display:flex; gap:10px; align-items:flex-start;
-    flex:1 1 auto; min-height:0;   /* CRÍTICO: hijos con overflow */
-    padding:0;                      /* pegado a bordes */
+    flex:1 1 auto; min-height:0;          /* clave para permitir overflow interno */
   }
 
-  /* =========================
-     PANEL ADMIN (columna izquierda)
-  ==========================*/
+  /* ---------- Panel admin (izquierda) ---------- */
   .adminPane{
     display:none; flex:0 0 320px; gap:10px; flex-direction:column;
-    min-height:0; padding:10px 12px;
+    min-height:0;
   }
   .adminTabs{ display:flex; gap:6px }
-  .tab{ padding:6px 10px; border:1px solid var(--line); border-radius:9px; background:#0f0f0f; cursor:pointer }
+  .tab{ padding:6px 10px; border:1px solid var(--line); border-radius:10px; background:#0f0f0f; cursor:pointer }
   .tab.active{ outline:1px solid var(--gold) }
-  .tabPanel{ display:none; gap:8px; flex-direction:column; min-height:0 }
+  .tabPanel{ display:none; gap:10px; flex-direction:column; min-height:0 }
   .tabPanel.show{ display:flex }
-  .list{ border:1px dashed var(--line); border-radius:10px; padding:8px; max-height:260px; overflow:auto }
-  .tag{ display:inline-block; border:1px solid #3a3a3a; border-radius:999px; padding:2px 8px; font-size:11px }
-  .ok{ color:#00d38f; border-color:#00d38f }
-  .bad{ color:#ff6a6a; border-color:#ff6a6a }
-  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555; margin-left:6px }
-  .dot.green{ background:#00d38f; border-color:#00d38f }
-  .dot.orange{ background:#ffb020; border-color:#ffb020 }
-  .dot.red{ background:#ff5a5a; border-color:#ff5a5a }
+  .list{ border:1px dashed var(--line); border-radius:12px; padding:10px; max-height:260px; overflow:auto }
+  .tag{ display:inline-block; border:1px solid #3a3a3a; border-radius:999px; padding:2px 8px; font-size:12px }
+  .ok{ color:var(--ok); border-color:var(--ok) }
+  .bad{ color:var(--bad); border-color:var(--bad) }
 
-  /* =========================
-     CHAT (columna derecha)
-  ==========================*/
+  /* ---------- Chat (derecha) ---------- */
   .chatCard{
     flex:1 1 auto; display:flex; flex-direction:column; gap:8px;
-    min-height:0; padding:0; border-radius:0;   /* ✅ a ras de borde */
-    border: none;                                 /* borde lo pone .messages */
+    min-height:0;          /* permite que .messages scrollee */
   }
 
-  /* Contenedor de mensajes con scroll interno REAL */
+  /* Caja de mensajes con scroll interno REAL */
   .messages{
     flex:1 1 auto; min-height:0;
-    overflow-y:auto; overflow-x:hidden;
-    padding:10px 10px 12px;
-    border:1px solid var(--line); border-left:0; border-right:0; /* a full-bleed */
-    background:#0f0f0f;
-    display:flex; flex-direction:column; gap:8px;
-    scrollbar-width:thin; scrollbar-color:#555 #0f0f0f;
+    overflow-y:auto; overscroll-behavior:contain;
+    border:1px solid var(--line); border-radius:14px;
+    background:var(--panel);
+    padding:12px 12px 14px;
+    display:flex; flex-direction:column; gap:10px;
+
+    /* scrollbars */
+    scrollbar-width:thin; scrollbar-color:#555 var(--panel);
   }
   .messages::-webkit-scrollbar{ width:6px }
   .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px }
 
-  .msg{ max-width:92%; padding:8px 10px; border:1px solid #3a3a3a; border-radius:12px; background:#101010; white-space:pre-wrap; word-break:break-word }
+  .msg{ max-width:92%; padding:10px 12px; border:1px solid #333; border-radius:14px; background:#101010; white-space:pre-wrap; word-break:break-word }
   .msg.me{ margin-left:auto; background:#141414; border-color:#555 }
-  .msg .by{ font-size:11px; color:#9bd; opacity:.85; margin-bottom:3px }
-  .msg .meta{ margin-top:5px; font-size:10px; color:#9a9a9a }
+  .msg .by{ font-size:12px; color:#9bd; opacity:.9; margin-bottom:4px }
+  .msg .meta{ margin-top:6px; font-size:11px; color:#9a9a9a }
   .msg.sys{ opacity:.85; border-style:dashed }
 
-  /* Composer compacto, pegado abajo del chat, sin margen extra */
+  /* Composer compacto pegado al borde inferior del chat */
   .composer{
     display:flex; gap:8px; align-items:center;
-    border-top:1px solid var(--line); padding:8px 10px;
-    background:#080808; border-radius:0; margin-top:0;
+    background:#0a0a0a; border:1px solid var(--line);
+    padding:8px 10px;             /* compacto */
+    border-radius:12px;            /* compacto */
   }
-  .composer .field{ flex:1 }
+  .composer .field{ flex:1; padding:7px 10px }   /* compacto */
 
   @media (max-width:820px){
     .chatGrid{ flex-direction:column }
     .adminPane{ width:100% }
   }
 
-  /* =========================
-     MODAL PIN
-  ==========================*/
+  /* ---------- Modal PIN ---------- */
   .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:1000; padding:16px }
   .backdrop.show{ display:flex!important }
-  .modal{ background:#101010; border:1px solid var(--line); padding:18px 20px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35) }
+  .modal{ background:#101010; border:1px solid var(--line); padding:20px 22px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35) }
   .modal h3{ margin:0 0 8px 0; color:var(--gold) }
-  .modal p{ margin:0 0 10px 0; color:#ddd }
+  .modal p{ margin:0 0 12px 0; color:#ddd }
   .modal .actions{ display:flex; gap:8px; justify-content:center }
   kbd{ font-family:monospace; border:1px solid #333; border-radius:6px; padding:1px 6px; background:#0a0a0a }
   </style>
@@ -161,8 +172,10 @@
 
 <body>
   <div class="wrap">
-    <!-- ========== HEADER (compacto) ========== -->
-    <div class="card header">
+    <!-- =====================================================
+         HEADER (COMPACTO y FIJO EN EL LAYOUT)
+    ====================================================== -->
+    <div class="card header" id="appHeader">
       <div class="brand">
         <span class="logo" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -172,8 +185,10 @@
         </span>
         <div>
           <div class="ttl">X Code Chat — Official (DEV)</div>
-          <!-- ✅ Sala + Usuario compacto debajo -->
-          <div class="sub">Sala: <b id="roomHdr">Sala de Prueba</b> · Usuario <b id="userHdr">#?</b></div>
+          <div class="sub">
+            Sala: <b id="roomHdr">Sala de Prueba</b>
+            · <span id="whoAmI">Usuario #?</span>
+          </div>
         </div>
       </div>
       <div class="row">
@@ -182,31 +197,36 @@
       </div>
     </div>
 
-    <!-- ========== LOGIN ========== -->
+    <!-- =====================================================
+         LOGIN
+    ====================================================== -->
     <div id="loginCard" class="card login">
-      <div class="hint">
-        Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial, la primera vez se genera tu PIN y se muestra.
-        Usuario <b>0</b> es organizador.
+      <div class="sub">
+        Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial,
+        la primera vez se genera tu PIN y se muestra. Usuario <b>0</b> es organizador.
       </div>
       <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)"></div>
-      <div class="field"><input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN"><span id="togglePin" class="eye">👁️</span></div>
-      <div class="row"><button id="loginBtn" class="btn">Entrar</button><div id="loginMsg" class="hint"></div></div>
-      <div class="hint">Privado: escribe <kbd>@número</kbd> al inicio (ej. <kbd>@120 hola</kbd>).</div>
+      <div class="field"><input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN">
+        <button id="togglePin" class="btn sm ghost" aria-label="Mostrar/Ocultar PIN">👁</button>
+      </div>
+      <div class="row"><button id="loginBtn" class="btn">Entrar</button><div id="loginMsg" class="sub"></div></div>
+      <div class="sub">Privado: escribe <kbd>@número</kbd> al inicio (ej. <kbd>@120 hola</kbd>).</div>
     </div>
 
-    <!-- ========== GRID (ADMIN + CHAT) ========== -->
+    <!-- =====================================================
+         GRID PRINCIPAL (ADMIN + CHAT)
+    ====================================================== -->
     <div class="chatGrid" id="mainGrid" style="display:none">
-      <!-- ====== PANEL ADMIN (solo organizador) ====== -->
+      <!-- -------------- PANEL ADMIN -------------- -->
       <aside id="adminPane" class="card adminPane">
         <div class="sub" style="font-weight:600">Panel del organizador</div>
 
-        <!-- Tabs -->
         <div class="adminTabs">
           <div id="tabRooms" class="tab active">Salas</div>
           <div id="tabUsers" class="tab">Usuarios</div>
         </div>
 
-        <!-- Panel: Salas -->
+        <!-- Salas -->
         <div id="panelRooms" class="tabPanel show">
           <div class="row">
             <div class="field" style="flex:1"><input id="roomInput" placeholder="Sala actual…"/></div>
@@ -220,7 +240,7 @@
           <div id="roomsList" class="list"></div>
         </div>
 
-        <!-- Panel: Usuarios -->
+        <!-- Usuarios -->
         <div id="panelUsers" class="tabPanel">
           <div class="row">
             <div class="field" style="flex:1;max-width:220px"><input id="userNumber" type="number" placeholder="Número (ej. 8)"/></div>
@@ -234,17 +254,15 @@
         </div>
       </aside>
 
-      <!-- ====== CHAT (scroll interno en mensajes) ====== -->
+      <!-- -------------- CHAT -------------- -->
       <section id="chatCard" class="card chatCard">
         <div id="messages" class="messages"></div>
 
-        <!-- Composer compacto -->
+        <!-- Composer (compacto) -->
         <div class="composer">
           <div class="field"><input id="msgInput" type="text" placeholder="Mensaje…  ·  Privado con @número" autocomplete="off" maxlength="400"></div>
           <button id="sendBtn" class="btn">Enviar</button>
         </div>
-
-        <div class="hint">Remitente visible: <b>Usuario #<span id="meId">?</span></b></div>
       </section>
     </div>
   </div>
@@ -252,24 +270,24 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <!-- Modal PIN -->
+  <!-- Modal PIN (primera vez) -->
   <div id="pinBack" class="backdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true">
       <h3>🔐 Tu PIN</h3>
-      <p id="pinText" style="font-size:1.6em;font-weight:800;color:var(--accent)">0000</p>
+      <p id="pinText" style="font-size:1.6em;font-weight:800;color:var(--ok)">0000</p>
       <small style="opacity:.8">Se ha copiado al portapapeles</small>
       <div class="actions" style="margin-top:12px"><button id="pinOk" class="btn">Entendido</button></div>
     </div>
   </div>
 
-  <!-- =========================
-       APP SCRIPT (Firebase + lógica)
-  ==========================-->
+  <!-- =====================================================
+       APP (Firebase + lógica)
+  ====================================================== -->
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
   import { getDatabase, ref, get, set, update, onValue, off, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
-  /* ===== Firebase DEV ===== */
+  /* ---------- Firebase DEV (confirmado) ---------- */
   const firebaseConfig = {
     apiKey: "AIzaSyDtA7FlHCN6GaibDINRF6AF2uuLoPbgpK4",
     authDomain: "x-code-chat-dev.firebaseapp.com",
@@ -280,28 +298,34 @@
     appId: "1:464335717187:web:e39794c19e000c34dca5f6"
   };
 
-  /* ===== Config app ===== */
-  const ENTRY_WHITELIST_PATHS = ["entradas","tickets"]; // whitelist de números válidos
-  const DEFAULT_ROOM = "Sala de Prueba";
+  /* ---------- Parámetros de app ---------- */
   const ADMIN_PASS = "131215";
+  const DEFAULT_ROOM = "Sala de Prueba";
+  const ENTRY_WHITELIST_PATHS = ["entradas","tickets"];   // admite cualquiera de estos nodos
   const LS_LAST_ROOM = "xcode:lastRoom";
   const LS_SESSION   = "xcode:session";
 
-  /* ===== Init ===== */
+  /* ---------- Init ---------- */
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
 
-  /* ===== DOM ===== */
+  /* ---------- DOM util ---------- */
   const $ = (q)=>document.querySelector(q);
-  const roomHdr=$("#roomHdr"), statusDot=$("#statusDot"), userHdr=$("#userHdr");
-  const loginCard=$("#loginCard"), mainGrid=$("#mainGrid"), logoutBtn=$("#logoutBtn");
-  const numInput=$("#numInput"), pinInput=$("#pinInput"), loginBtn=$("#loginBtn"), togglePin=$("#togglePin");
-  const messages=$("#messages"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn"), meIdSpan=$("#meId");
   const toastEl=$("#toast");
-  const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
+  const toast=(t,ms=2400)=>{ toastEl.textContent=t; toastEl.classList.add("show"); clearTimeout(window.__t); window.__t=setTimeout(()=>toastEl.classList.remove("show"),ms); };
 
-  /* Admin DOM */
-  const adminPane=$("#adminPane");
+  /* Header / estado */
+  const roomHdr=$("#roomHdr"), whoAmI=$("#whoAmI"), statusDot=$("#statusDot");
+  const logoutBtn=$("#logoutBtn");
+
+  /* Login */
+  const loginCard=$("#loginCard"), loginBtn=$("#loginBtn"), numInput=$("#numInput"), pinInput=$("#pinInput"), togglePin=$("#togglePin");
+
+  /* Grid principal */
+  const mainGrid=$("#mainGrid"), adminPane=$("#adminPane");
+  const messages=$("#messages"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn");
+
+  /* Admin tabs */
   const tabRooms=$("#tabRooms"), tabUsers=$("#tabUsers");
   const panelRooms=$("#panelRooms"), panelUsers=$("#panelUsers");
   const roomInput=$("#roomInput"), roomUseBtn=$("#roomUseBtn"), btnReloadRooms=$("#btnReloadRooms");
@@ -310,8 +334,10 @@
         btnDeactivateUser=$("#btnDeactivateUser"), btnDeleteUser=$("#btnDeleteUser"),
         usersList=$("#usersList"), countConn=$("#countConn");
 
-  /* ===== Helpers ===== */
-  const toast=(t,ms=2400)=>{ toastEl.textContent=t; toastEl.classList.add("show"); clearTimeout(window.__t); window.__t=setTimeout(()=>toastEl.classList.remove("show"),ms); };
+  /* PIN modal */
+  const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
+
+  /* ---------- Helpers ---------- */
   togglePin.onclick=()=> pinInput.type = (pinInput.type==="password" ? "text" : "password");
   const hhmm=(ts)=>new Date(ts||Date.now()).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
   const newPIN=()=> String(Math.floor(1000+Math.random()*9000));
@@ -319,24 +345,20 @@
   const roomRef=(room,path)=> ref(db, `rooms/${room}/${path}`);
   const currentRoomRef=(path)=> roomRef(session.room, path);
 
-  /* Estado y suscripciones */
+  /* ---------- Estado en memoria ---------- */
   let session={ room: DEFAULT_ROOM, num:null, isAdmin:false };
   let detachMsgs=null, detachUsers=null, usersCache={}, usersTimer=null, statusTimer=null;
 
-  /* ===== Persistencia (localStorage) ===== */
+  /* ---------- Persistencia ---------- */
   const saveLastRoom=(name)=>{ try{ localStorage.setItem(LS_LAST_ROOM, name) }catch{} };
   const loadLastRoom=()=>{ try{ return localStorage.getItem(LS_LAST_ROOM) || DEFAULT_ROOM }catch{ return DEFAULT_ROOM } };
   function saveSession(){
-    try{
-      localStorage.setItem(LS_SESSION, JSON.stringify({
-        num:session.num, pin:pinInput.value||"", room:session.room, isAdmin:!!session.isAdmin
-      }));
-    }catch{}
+    try{ localStorage.setItem(LS_SESSION, JSON.stringify({ num:session.num, pin:pinInput.value||"", room:session.room, isAdmin:!!session.isAdmin })); }catch{}
   }
   function clearSession(){ try{ localStorage.removeItem(LS_SESSION) }catch{} }
   function loadSession(){ try{ const s=localStorage.getItem(LS_SESSION); return s?JSON.parse(s):null }catch{ return null } }
 
-  /* ===== Whitelist ===== */
+  /* ---------- Whitelist ---------- */
   async function isEntryAllowed(n){
     for(const base of ENTRY_WHITELIST_PATHS){
       const s=await get(ref(db, `${base}/${n}`));
@@ -348,7 +370,7 @@
     return false;
   }
 
-  /* Normaliza users/{n}/{n} -> users/{n} (compatibilidad antigua) */
+  /* Compat: users/{n}/{n} → users/{n} */
   async function normalizeUserNode(room,n){
     const base = `rooms/${room}/users/${n}`;
     const uRef = ref(db, base);
@@ -367,7 +389,7 @@
     return uSnap.exists()? uSnap.val() : null;
   }
 
-  /* ===== Tabs admin ===== */
+  /* ---------- Tabs admin ---------- */
   function setActiveTab(which){
     tabRooms.classList.remove("active"); tabUsers.classList.remove("active");
     panelRooms.classList.remove("show"); panelUsers.classList.remove("show");
@@ -377,7 +399,9 @@
   tabRooms.onclick=()=>setActiveTab("rooms");
   tabUsers.onclick=()=>setActiveTab("users");
 
-  /* ===== LOGIN ===== */
+  /* =====================================================
+     LOGIN
+  ====================================================== */
   async function doLogin(){
     const nStr=(numInput.value||"").trim();
     if(!/^\d+$/.test(nStr)){ toast("Introduce tu número"); return; }
@@ -385,7 +409,7 @@
 
     loginBtn.disabled=true;
 
-    // Cargar última sala persistida ANTES de autenticar
+    // Reflejar última sala elegida por el organizador
     session.room = loadLastRoom() || DEFAULT_ROOM;
     roomHdr.textContent=session.room; roomInput.value=session.room;
 
@@ -393,7 +417,7 @@
       if(n===0){
         const pass=prompt("Contraseña de organizador:");
         if(pass!==ADMIN_PASS) throw new Error("Contraseña incorrecta.");
-        session.num=0; session.isAdmin=true;
+        session.num=0; session.isAdmin=true; whoAmI.textContent="Organizador";
         enterChat(true); saveSession(); return;
       }
 
@@ -402,7 +426,7 @@
 
       let data = await normalizeUserNode(session.room, n);
       if(!data || !data.pin){
-        // Primera vez: generamos PIN y lo mostramos
+        // Primera vez: generamos PIN
         const pin=newPIN();
         await set(currentRoomRef(`users/${n}`), { pin, active:true, connected:false, created:Date.now(), updated:Date.now() });
         pinText.textContent=pin;
@@ -415,7 +439,8 @@
       if(String(data.pin)!==String(pTyped)) throw new Error("PIN incorrecto");
 
       await update(currentRoomRef(`users/${n}`), { connected:true, updated:Date.now() });
-      session.num=n; session.isAdmin=false; enterChat(false); saveSession();
+      session.num=n; session.isAdmin=false; whoAmI.textContent=`Usuario #${n}`;
+      enterChat(false); saveSession();
     }catch(err){ toast(err.message||"No se pudo iniciar sesión"); }
     finally{ loginBtn.disabled=false; }
   }
@@ -423,17 +448,17 @@
   numInput.onkeydown=(e)=>{ if(e.key==="Enter") doLogin(); };
   pinInput.onkeydown=(e)=>{ if(e.key==="Enter") doLogin(); };
 
-  /* ===== ENTER APP ===== */
+  /* =====================================================
+     ENTRAR / SALIR
+  ====================================================== */
   function enterChat(isAdmin){
-    // Cambios de UI
+    // UI
     loginCard.style.display="none";
-    mainGrid.style.display="flex";    // muestra grid (admin + chat)
+    mainGrid.style.display="flex";
     logoutBtn.style.display="inline-flex";
-    meIdSpan.textContent=session.num;
-    userHdr.textContent = session.num!=null ? ("#"+session.num) : "#?";
-
-    // Persistimos/mostramos sala
-    roomHdr.textContent=session.room; roomInput.value=session.room; saveLastRoom(session.room);
+    roomHdr.textContent=session.room;
+    whoAmI.textContent = session.num===0? "Organizador" : `Usuario #${session.num}`;
+    saveLastRoom(session.room);
 
     // Panel admin
     if(isAdmin || session.num===0 || session.isAdmin){
@@ -449,12 +474,9 @@
 
     // Mensajes
     attachMessages();
-
-    // Auto-scroll al final y foco en input
     setTimeout(()=>{ msgInput?.focus(); messages.scrollTop = messages.scrollHeight; }, 50);
   }
 
-  /* ===== LOGOUT ===== */
   async function doLogout(){
     try{ if(session.num>0){ await update(currentRoomRef(`users/${session.num}`), { connected:false, updated:Date.now() }); } }catch{}
 
@@ -463,30 +485,27 @@
     if(usersTimer){ clearInterval(usersTimer); usersTimer=null; }
     if(statusTimer){ clearInterval(statusTimer); statusTimer=null; }
 
-    clearSession(); // mantenemos la última sala en LS_LAST_ROOM
+    clearSession();   // mantenemos LS_LAST_ROOM
 
     mainGrid.style.display="none"; logoutBtn.style.display="none"; adminPane.style.display="none";
     loginCard.style.display="flex";
     messages.innerHTML=""; msgInput.value="";
     session={ room: loadLastRoom()||DEFAULT_ROOM, num:null, isAdmin:false };
-
-    // Reflejar sala al volver a login
-    roomHdr.textContent=session.room; roomInput.value=session.room;
-    userHdr.textContent = "#?";
+    roomHdr.textContent=session.room; roomInput.value=session.room; whoAmI.textContent="Usuario #?";
   }
   logoutBtn.onclick=doLogout;
 
-  /* ===== CHAT ===== */
+  /* =====================================================
+     MENSAJES
+  ====================================================== */
   function renderMsg(m){
-    // Oculta mensajes sys para usuarios normales
-    if(m.sys && session.num!==0) return;
-    // Privados: visibles solo para remitente, destinatario o admin
-    if(m.to && !(m.to===session.num || m.from===session.num || session.num===0)) return;
+    if(m.sys && session.num!==0) return;           // oculta mensajes del sistema a no-admin
+    if(m.to && !(m.to===session.num || m.from===session.num || session.num===0)) return; // privados
 
     const div=document.createElement("div");
     div.className="msg"+(m.from===session.num?" me":"")+(m.sys?" sys":"");
     div.innerHTML=`<div class="by">${m.from===0?"Organizador":"Usuario #"+m.from}${m.to? " → #"+m.to:""}</div>
-                   <div>${m.text||""}</div>
+                   <div>${(m.text||"").replace(/[<>&]/g, s=>({ '<':'&lt;','>':'&gt;','&':'&amp;' }[s]))}</div>
                    <div class="meta">${hhmm(m.ts)||""}</div>`;
     messages.appendChild(div);
   }
@@ -499,8 +518,7 @@
       const val=snap.val()||{};
       const arr=Object.values(val).sort((a,b)=>(a.ts||0)-(b.ts||0));
       arr.forEach(renderMsg);
-      // Auto-scroll al final SOLO del contenedor de mensajes
-      messages.scrollTop = messages.scrollHeight;
+      messages.scrollTop = messages.scrollHeight;     // solo el contenedor mensajes scrollea
     };
     onValue(r, handler);
     detachMsgs = ()=> off(r, "value", handler);
@@ -513,13 +531,12 @@
     const m = raw.match(/^@(\d+)\s+(.+)/);
     if(m){ payload.to = Number(m[1]); payload.text = m[2]; }
     await set(currentRoomRef(`messages/${id}`), payload);
-    msgInput.value="";
-    messages.scrollTop = messages.scrollHeight;
+    msgInput.value=""; messages.scrollTop = messages.scrollHeight;
   }
   sendBtn.onclick = sendMessage;
   msgInput.onkeydown = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); sendMessage(); } };
 
-  /* ===== Indicador de estado (solo admin) ===== */
+  /* ---------- Ping de estado (solo admin) ---------- */
   async function pingStatusOnce(){
     if(session.num!==0) return;
     const id="PING_"+Date.now()+"_"+Math.random().toString(36).slice(2,5);
@@ -542,7 +559,9 @@
     setTimeout(()=>{ if(!done){ off(r,"value",handler); statusDot.className="dot red"; remove(currentRoomRef(`messages/${id}`)).catch(()=>{}); } }, 3000);
   }
 
-  /* ===== Gestor de salas ===== */
+  /* =====================================================
+     SALAS
+  ====================================================== */
   const roomMetaRef=(n)=>ref(db,`roomsMeta/${n}`);
   const roomIndexRef=(n)=>ref(db,`rooms_index/${n}`);
 
@@ -606,7 +625,9 @@
   };
   btnReloadRooms.onclick=reloadRooms;
 
-  /* ===== Gestor de usuarios ===== */
+  /* =====================================================
+     USUARIOS (admin)
+  ====================================================== */
   function updateUsersAgo(){
     [...usersList.querySelectorAll("[data-uid]")].forEach(el=>{
       const uid=el.getAttribute("data-uid"); const u=usersCache[uid]; if(!u) return;
@@ -648,24 +669,27 @@
     await remove(ref(db,`entradas/${n}`)).catch(()=>{});
     toast("Usuario eliminado");
   }
-  btnCreateUser.onclick=async()=>{
-    try{
+  btnCreateUser.onclick=async()=>{ try{
       const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido");
       const pin=newPIN();
       await set(ref(db,`entradas/${n}`),{estado:"activa"});
       await set(currentRoomRef(`users/${n}`),{pin,active:true,connected:false,created:Date.now(),updated:Date.now()});
       toast(`Usuario #${n} creado · PIN ${pin}`);
-    }catch{ toast("No se pudo crear el usuario"); }
-  };
+    }catch{ toast("No se pudo crear el usuario"); } };
   btnActivateUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await setEntryState(n,true); };
   btnDeactivateUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await setEntryState(n,false); };
   btnDeleteUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await deleteUser(n); };
 
-  /* ===== Restaurar sesión al cargar (incluye sala) ===== */
+  /* =====================================================
+     INICIO: restaurar última sala y sesión
+  ====================================================== */
+  // Refleja última sala en el header al cargar
   (function initHeaderRoom(){
     const last=loadLastRoom();
     if(last){ session.room=last; roomHdr.textContent=last; roomInput.value=last; }
   })();
+
+  // Intenta restaurar sesión previa (número/pin válidos)
   async function tryRestoreSession(){
     const s=loadSession(); if(!s) return;
     try{
@@ -673,14 +697,14 @@
       roomHdr.textContent=session.room; roomInput.value=session.room;
 
       if(s.isAdmin && String(s.num)==="0"){
-        session.num=0; session.isAdmin=true; userHdr.textContent="#0"; enterChat(true); return;
+        session.num=0; session.isAdmin=true; whoAmI.textContent="Organizador"; enterChat(true); return;
       }
       if(!await isEntryAllowed(s.num)) return clearSession();
       const data=await normalizeUserNode(session.room, s.num);
       if(!data || String(data.pin)!==String(s.pin)) return clearSession();
       await update(roomRef(session.room,`users/${s.num}`),{connected:true,updated:Date.now()});
       session.num=Number(s.num); session.isAdmin=false; numInput.value=s.num; pinInput.value=s.pin;
-      userHdr.textContent = "#"+session.num;
+      whoAmI.textContent=`Usuario #${session.num}`;
       enterChat(false);
     }catch{ clearSession(); }
   }
