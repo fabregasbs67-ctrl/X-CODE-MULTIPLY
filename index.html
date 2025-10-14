@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <!-- Importante para móviles: usar visual viewport seguro en iOS -->
+  <!-- Importante para móviles: notch + zoom correcto -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <title>X Code Chat — Official (DEV)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -14,8 +14,6 @@
   :root{
     --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
     --accent:#00ffbb; --danger:#ff5a5a;
-    /* Altura dinámica util en iOS para teclado */
-    --vh: 1vh;
   }
 
   /* =========================
@@ -23,25 +21,33 @@
      (scroll solo dentro de .messages)
   ==========================*/
   *{ box-sizing:border-box; }
-  html,body{ height:100%; overscroll-behavior:none; } /* evita bounce global */
+  html,body{ height:100%; }
   body{
     margin:0; color:var(--fg); background:var(--bg);
     font-family:Inter,system-ui,Roboto,Arial,sans-serif;
 
-    /* Altura bloqueada al viewport (evita que la página “se mueva”) */
-    height:calc(var(--vh) * 100);     /* controlado por JS para iOS Safari */
-    min-height:calc(var(--vh) * 100);
-    overflow:hidden;                   /* evita scroll global */
-    overflow-x:hidden;
+    /* App-like height + evitar scroll global */
+    height:100dvh;                 /* iOS/Android modernos */
+    min-height:100svh;             /* fallback moderno */
+    overflow:hidden;               /* evita que se mueva toda la página */
+
     display:flex; flex-direction:column;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  /* Contenedor principal a alto completo */
+  /* Contenedor principal a alto completo
+     Safe-area: evita que se “corte” el header bajo el notch */
   .wrap{
     max-width:980px; width:100%;
-    margin:0 auto; padding:12px;
+    margin:0 auto;
+    padding:12px;
+
+    /* Safe area para iOS notch (evita header cortado) */
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+
     display:flex; flex-direction:column; gap:12px;
-    flex:1 1 auto; min-height:0;        /* clave para scroll interno */
+    flex:1 1 auto; min-height:0; /* clave para scroll interno */
   }
 
   /* =========================
@@ -116,13 +122,16 @@
   /* Mensajes con scroll interno REAL y sin espacio extra */
   .messages{
     flex:1 1 auto; min-height:0;
-    overflow-y:auto; overscroll-behavior:contain; /* que no propague scroll al body */
+    overflow-y:auto;
     padding:10px 10px 12px;            /* compacto */
     border:1px solid var(--line); border-radius:12px;
     background:#0f0f0f;
     display:flex; flex-direction:column; gap:8px;
-    scrollbar-width:thin; scrollbar-color:#555 #0f0f0f;
-    -webkit-overflow-scrolling: touch; /* scroll suave iOS */
+
+    /* iOS/Android: scroll fluido y sin rubber-band global */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
   .messages::-webkit-scrollbar{ width:6px }
   .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px }
@@ -270,25 +279,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
   import { getDatabase, ref, get, set, update, onValue, off, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
-  /* ===== Ajuste de altura real del viewport (iOS Safari/teclado) ===== */
-  (function setRealVh(){
-    const apply = () => {
-      const vv = window.visualViewport;
-      const h = vv ? vv.height : window.innerHeight;
-      document.documentElement.style.setProperty('--vh', (h/100) + 'px');
-    };
-    apply();
-    window.addEventListener('resize', apply);
-    if (window.visualViewport) window.visualViewport.addEventListener('resize', apply);
-  })();
-
-  /* ===== Bloqueo de scroll global en móviles (solo permitir en .messages) ===== */
-  document.addEventListener('touchmove', function(e){
-    if(!e.target.closest('.messages')) {
-      e.preventDefault(); /* evita que se mueva el body */
-    }
-  }, {passive:false});
-
   /* ===== Firebase DEV ===== */
   const firebaseConfig = {
     apiKey: "AIzaSyDtA7FlHCN6GaibDINRF6AF2uuLoPbgpK4",
@@ -337,7 +327,7 @@
   const newPIN=()=> String(Math.floor(1000+Math.random()*9000));
   const timeAgo=(ts)=>{ if(!ts) return "—"; const s=Math.floor((Date.now()-ts)/1000); if(s<60) return `${s}s`; const m=Math.floor(s/60); if(m<60) return `${m}m`; return `${Math.floor(m/60)}h`; };
   const roomRef=(room,path)=> ref(db, `rooms/${room}/${path}`);
-  const currentRoomRef=(path)=> roomRef(session.room, path);
+  const currentRoomRef=(path)=> ref(db, `rooms/${session.room}/${path}`);
 
   /* Estado y suscripciones */
   let session={ room: DEFAULT_ROOM, num:null, isAdmin:false };
@@ -373,14 +363,11 @@
         roomHdr.textContent = room;
         roomInput.value     = room;
         saveLastRoom(room);
-        // Si estamos dentro, reconectar listeners de mensajes a la nueva sala
-        if(mainGrid.style.display!=="none"){ attachMessages(); }
       }
     });
   }
   async function setGlobalRoom(roomName){
-    try{ await set(ref(db,'settings/currentRoom'), roomName); }
-    catch{}
+    try{ await set(ref(db,'settings/currentRoom'), roomName); } catch{}
   }
 
   /* ===== Tabs admin ===== */
@@ -619,7 +606,6 @@
         if(session.room===name){
           session.room=newName; roomHdr.textContent=newName; roomInput.value=newName; saveLastRoom(newName);
           attachMessages(); loadUsersRealtime(); saveSession();
-          // si el que renombra es admin y esa es la sala actual, actualizar global
           if(session.isAdmin || session.num===0) { await setGlobalRoom(newName); }
         }
         toast("Sala renombrada"); reloadRooms();
