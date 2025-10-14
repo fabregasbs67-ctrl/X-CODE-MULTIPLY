@@ -107,6 +107,7 @@
     @media (max-width:560px){ #chatCard{ min-height:70vh } }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <!-- === ENCABEZADO ÚNICO === -->
@@ -162,6 +163,51 @@
         <input id="roomInput" class="field" placeholder="Nombre de sala…"/>
         <button id="roomUseBtn" class="btn sm">Usar</button>
       </div>
+      <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)"></div>
+      <div class="field"><input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN"><span id="togglePin" class="eye">👁️</span></div>
+      <div class="row"><button id="loginBtn" class="btn">Entrar</button><div id="loginMsg" class="hint"></div></div>
+      <div class="hint">Privado: escribe <kbd>@número</kbd> al inicio (ej. <kbd>@120 hola</kbd>).</div>
+    </div>
+
+    <!-- ========== GRID PRINCIPAL (ADMIN + CHAT) ========== -->
+    <div class="chatGrid" id="mainGrid" style="display:none">
+      <!-- ====== PANEL ADMIN (solo organizador) ====== -->
+      <aside id="adminPane" class="card adminPane">
+        <div class="sub" style="font-weight:600">Panel del organizador</div>
+
+        <!-- Tabs -->
+        <div class="adminTabs">
+          <div id="tabRooms" class="tab active">Salas</div>
+          <div id="tabUsers" class="tab">Usuarios</div>
+        </div>
+
+        <!-- Panel: Salas -->
+        <div id="panelRooms" class="tabPanel show">
+          <div class="row">
+            <div class="field" style="flex:1"><input id="roomInput" placeholder="Sala actual…"/></div>
+            <button id="roomUseBtn" class="btn sm">Usar</button>
+            <button id="btnReloadRooms" class="btn sm ghost">Recargar</button>
+          </div>
+          <div class="row">
+            <div class="field" style="flex:1"><input id="newRoomName" placeholder="Nueva sala…"/></div>
+            <button id="btnCreateRoom" class="btn sm">Crear sala</button>
+          </div>
+          <div id="roomsList" class="list"></div>
+        </div>
+
+        <!-- Panel: Usuarios -->
+        <div id="panelUsers" class="tabPanel">
+          <div class="row">
+            <div class="field" style="flex:1;max-width:220px"><input id="userNumber" type="number" placeholder="Número (ej. 8)"/></div>
+            <button id="btnCreateUser" class="btn sm">Crear</button>
+            <button id="btnActivateUser" class="btn sm">Activar</button>
+            <button id="btnDeactivateUser" class="btn sm danger">Desactivar</button>
+            <button id="btnDeleteUser" class="btn sm danger">Eliminar</button>
+          </div>
+          <div class="sub">Conectados: <b id="countConn">0</b></div>
+          <div id="usersList" class="list"></div>
+        </div>
+      </aside>
 
       <!-- Gestor de salas -->
       <div class="row">
