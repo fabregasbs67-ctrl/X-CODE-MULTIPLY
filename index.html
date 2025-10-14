@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>X Code Chat — Official (DEV)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -13,8 +13,9 @@
   :root{
     --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
     --accent:#00ffbb; --danger:#ff5a5a;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --vh: 1vh;                 /* se recalcula con visualViewport */
+    --kb-pad: 0px;             /* padding inferior cuando teclado aparece */
+    --radius: 14px;
   }
 
   /* =========================
@@ -23,21 +24,21 @@
   ==========================*/
   *{ box-sizing:border-box; }
   html,body{ height:100%; }
-  html{ overflow:hidden; } /* evita scroll global */
+  html, body {
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior: none;        /* evita rebotes globales */
+    touch-action: manipulation;
+  }
   body{
     margin:0; color:var(--fg); background:var(--bg);
     font-family:Inter,system-ui,Roboto,Arial,sans-serif;
 
-    /* Layout tipo app estable en móviles */
-    height:100dvh;              /* iOS/Android moderno estable */
-    min-height:100svh;
-    overflow:hidden;            /* no desplazamientos del documento */
+    /* Estilo app nativa */
+    height:calc(var(--vh) * 100);
+    min-height:calc(var(--vh) * 100);
+    overflow:hidden;                   /* bloquea scroll global */
     display:flex; flex-direction:column;
-
-    /* seguridad para notch y barra home */
-    padding-top: calc(var(--safe-top));
-    padding-bottom: calc(var(--safe-bottom));
-    overflow-x:hidden;          /* quita espacio lateral derecho */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   /* Contenedor principal a alto completo */
@@ -46,19 +47,17 @@
     margin:0 auto; padding:12px;
     display:flex; flex-direction:column; gap:12px;
 
-    flex:1 1 auto; min-height:0;        /* clave para scroll interno */
+    /* CLAVE para permitir scroll interno en hijos */
+    flex:1 1 auto; min-height:0;
   }
 
   /* =========================
      COMPONENTES GENERALES
   ==========================*/
-  .card{ background:#0b0b0b; border:1px solid var(--line); border-radius:16px; padding:14px }
-  .header{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    flex:0 0 auto;        /* NO se encoge, evita que se “coma” */
-  }
+  .card{ background:#0b0b0b; border:1px solid var(--line); border-radius:16px; padding:12px }
+  .header{ display:flex; align-items:center; justify-content:space-between; gap:10px }
   .brand{ display:flex; align-items:center; gap:10px }
-  .logo{ width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:#111; border:1px solid var(--line) }
+  .logo{ width:26px; height:26px; border-radius:50%; display:grid; place-items:center; background:#111; border:1px solid var(--line) }
   .ttl{ font-weight:700; font-size:18px }            /* compacto */
   .sub{ font-size:12px; color:var(--muted) }         /* compacto */
   .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
@@ -67,14 +66,16 @@
   .btn.danger{ border-color:var(--danger); color:var(--danger); background:transparent }
   .btn.sm{ padding:6px 8px; font-size:12px; border-radius:8px }
   .field{ display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:10px; padding:8px; background:#0a0a0a }
-  .field input,.field select{ flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:15px }
+  .field input, .field select, .field textarea{
+    flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:15px; resize:none;
+  }
   .eye{ cursor:pointer; user-select:none }
   .hint{ color:var(--muted); font-size:12px }
 
   .toast{
     position:fixed; left:50%; transform:translateX(-50%); bottom:12px;
     background:#111; border:1px solid var(--line); color:#fff;
-    padding:8px 12px; border-radius:10px; display:none; z-index:9999; font-size:13px
+    padding:8px 12px; border-radius:10px; display:none; z-index:80; font-size:13px
   }
   .toast.show{ display:block }
 
@@ -124,15 +125,13 @@
   /* Mensajes con scroll interno REAL y sin espacio extra */
   .messages{
     flex:1 1 auto; min-height:0;
-    overflow-y:auto;
-    padding:10px 10px 12px;            /* compacto */
+    overflow-y:auto; -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;      /* evita desplazar el viewport */
+    padding:10px 10px 12px;
     border:1px solid var(--line); border-radius:12px;
     background:#0f0f0f;
     display:flex; flex-direction:column; gap:8px;
     scrollbar-width:thin; scrollbar-color:#555 #0f0f0f;
-
-    /* cuando aparece teclado en iOS, reservamos espacio para evitar “bote” */
-    padding-bottom: calc(12px + var(--kb-gap, 0px));
   }
   .messages::-webkit-scrollbar{ width:6px }
   .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px }
@@ -145,12 +144,18 @@
 
   /* Composer fijo dentro del chat (compacto y pegado) */
   .composer{
-    display:flex; gap:6px; align-items:center;
+    display:flex; gap:6px; align-items:flex-end;
     border-top:1px solid var(--line); padding:6px; background:#080808;
-    border-radius:12px;
-    flex:0 0 auto; /* no se encoge */
+    border-radius:12px 12px calc(var(--radius)) calc(var(--radius));
   }
-  .composer .field{ flex:1 }
+  .composer .field{
+    flex:1; display:flex; align-items:flex-end; gap:6px;
+    background:#0a0a0a; border:1px solid var(--line); border-radius:10px; padding:4px 8px;
+  }
+  #msgInput{
+    line-height:1.4; max-height: calc(1.4em * 6);  /* hasta ~6 líneas */
+    overflow:auto; -webkit-overflow-scrolling: touch;
+  }
 
   @media (max-width:820px){
     .chatGrid{ flex-direction:column }
@@ -172,7 +177,7 @@
 
 <body>
   <div class="wrap">
-    <!-- ========== HEADER (compacto) ========== -->
+    <!-- ========== HEADER (compacto y SIEMPRE VISIBLE) ========== -->
     <div class="card header">
       <div class="brand">
         <span class="logo" aria-hidden="true">
@@ -251,8 +256,10 @@
       <section id="chatCard" class="card chatCard">
         <div id="messages" class="messages"></div>
 
-        <div class="composer">
-          <div class="field"><input id="msgInput" type="text" placeholder="Mensaje…  ·  Privado con @número" autocomplete="off" maxlength="400"></div>
+        <div class="composer" id="composer">
+          <div class="field">
+            <textarea id="msgInput" rows="1" placeholder="Mensaje…  ·  Privado con @número" autocomplete="off" maxlength="400"></textarea>
+          </div>
           <button id="sendBtn" class="btn">Enviar</button>
         </div>
 
@@ -309,6 +316,7 @@
   const loginCard=$("#loginCard"), mainGrid=$("#mainGrid"), logoutBtn=$("#logoutBtn");
   const numInput=$("#numInput"), pinInput=$("#pinInput"), loginBtn=$("#loginBtn"), togglePin=$("#togglePin");
   const messages=$("#messages"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn"), meIdSpan=$("#meId");
+  const composer=$("#composer");
   const toastEl=$("#toast");
   const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
 
@@ -365,8 +373,9 @@
         roomHdr.textContent = room;
         roomInput.value     = room;
         saveLastRoom(room);
-        // Si estamos en chat, recargamos mensajes a la nueva sala global
-        if(mainGrid.style.display==="flex"){ attachMessages(); }
+        // Si cambia la sala global, reatach mensajes
+        if(detachMsgs){ detachMsgs(); detachMsgs=null; }
+        attachMessages(true);
       }
     });
   }
@@ -493,10 +502,10 @@
     }
 
     // Mensajes
-    attachMessages();
+    attachMessages(true);
 
-    // Autoscroll + foco
-    setTimeout(()=>{ msgInput?.focus(); messages.scrollTop = messages.scrollHeight; }, 30);
+    // Foco
+    setTimeout(()=>{ msgInput?.focus(); scrollToBottomSmooth(); }, 40);
   }
 
   /* ===== LOGOUT ===== */
@@ -531,18 +540,29 @@
     messages.appendChild(div);
   }
 
-  function attachMessages(){
+  function attachMessages(scrollBottom=false){
     if(detachMsgs){ detachMsgs(); detachMsgs=null; }
     const r = currentRoomRef("messages");
     const handler = (snap)=>{
+      const prevAtBottom = isNearBottom();
       messages.innerHTML="";
       const val=snap.val()||{};
       const arr=Object.values(val).sort((a,b)=>(a.ts||0)-(b.ts||0));
       arr.forEach(renderMsg);
-      messages.scrollTop = messages.scrollHeight;
+      if(scrollBottom || prevAtBottom) scrollToBottomInstant();
     };
     onValue(r, handler);
     detachMsgs = ()=> off(r, "value", handler);
+  }
+
+  function isNearBottom(){
+    return (messages.scrollHeight - messages.scrollTop - messages.clientHeight) < 60;
+  }
+  function scrollToBottomInstant(){
+    messages.scrollTop = messages.scrollHeight;
+  }
+  function scrollToBottomSmooth(){
+    messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
   }
 
   async function sendMessage(){
@@ -553,10 +573,16 @@
     if(m){ payload.to = Number(m[1]); payload.text = m[2]; }
     await set(currentRoomRef(`messages/${id}`), payload);
     msgInput.value="";
-    messages.scrollTop = messages.scrollHeight;
+    autosizeTextarea();    // re-ajusta altura tras limpiar
+    scrollToBottomSmooth();
   }
   sendBtn.onclick = sendMessage;
-  msgInput.onkeydown = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); sendMessage(); } };
+  msgInput.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendMessage();
+    }
+  });
 
   /* ===== Indicador de estado (solo admin) ===== */
   async function pingStatusOnce(){
@@ -610,7 +636,7 @@
         await remove(roomMetaRef(name)); await remove(roomIndexRef(name));
         if(session.room===name){
           session.room=newName; roomHdr.textContent=newName; roomInput.value=newName; saveLastRoom(newName);
-          attachMessages(); loadUsersRealtime(); saveSession();
+          attachMessages(true); loadUsersRealtime(); saveSession();
           // si el que renombra es admin y esa es la sala actual, actualizar global
           if(session.isAdmin || session.num===0) { await setGlobalRoom(newName); }
         }
@@ -623,7 +649,7 @@
         await remove(roomMetaRef(name)).catch(()=>{}); await remove(roomIndexRef(name)).catch(()=>{});
         if(session.room===name){
           session.room=DEFAULT_ROOM; roomHdr.textContent=session.room; roomInput.value=session.room; saveLastRoom(session.room);
-          attachMessages(); loadUsersRealtime(); saveSession();
+          attachMessages(true); loadUsersRealtime(); saveSession();
           if(session.isAdmin || session.num===0){ await setGlobalRoom(session.room); }
         }
         toast("Sala eliminada"); reloadRooms();
@@ -636,7 +662,7 @@
     const newRoom=(roomInput.value||"").trim(); if(!newRoom) return toast("Escribe un nombre de sala");
     if(newRoom===session.room) return;
     session.room=newRoom; roomHdr.textContent=newRoom; saveLastRoom(newRoom); saveSession();
-    attachMessages(); if(session.num===0) loadUsersRealtime();
+    attachMessages(true); if(session.num===0) loadUsersRealtime();
     toast(`Sala cambiada a "${newRoom}"`);
     // Solo organizador actualiza la sala global
     if(session.isAdmin || session.num===0){ await setGlobalRoom(newRoom); }
@@ -742,49 +768,45 @@
   }
   tryRestoreSession();
 
-  /* =========================
-     iOS/Safari: teclado y viewport estables
-     - Evita que toda la página “salte”
-     - Mantiene scroll SOLO en .messages
-  ==========================*/
-  (function mobileStability(){
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    const root = document.documentElement;
+  /* ====== UX: textarea tipo WhatsApp (auto-altura) ====== */
+  function autosizeTextarea(){
+    msgInput.style.height = 'auto';
+    const max = parseInt(getComputedStyle(msgInput).getPropertyValue('max-height'),10) || 180;
+    msgInput.style.height = Math.min(msgInput.scrollHeight, max) + 'px';
+    // si crece el input, mantenemos a la vista el final
+    scrollToBottomInstant();
+  }
+  msgInput.addEventListener('input', autosizeTextarea);
+  window.addEventListener('load', autosizeTextarea);
 
-    // bloquea scroll global por gesto, salvo dentro de .messages
-    document.addEventListener('touchmove', (e)=>{
-      const inMessages = e.target.closest('.messages');
-      const inInput = e.target.closest('input,textarea,button');
-      if(!inMessages && !inInput){
-        e.preventDefault();
-      }
-    }, { passive:false });
+  /* ====== UX: viewport dinámico (iOS/Android teclado) ====== */
+  function updateVH() {
+    const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight) * 0.01;
+    document.documentElement.style.setProperty('--vh', vh + 'px');
+  }
+  updateVH();
+  window.addEventListener('resize', updateVH);
+  if(window.visualViewport){
+    visualViewport.addEventListener('resize', ()=>{
+      updateVH();
+      // padding inferior mientras el teclado está visible
+      const delta = window.innerHeight - visualViewport.height;
+      document.documentElement.style.setProperty('--kb-pad', (delta>0? (delta + 8) : 0) + 'px');
+      composer.style.marginBottom = 'calc(var(--kb-pad))';
+      // mantener el final del chat visible
+      if(isNearBottom()) scrollToBottomInstant();
+    });
+  }
 
-    // Ajusta padding inferior de mensajes según teclado visible (visualViewport)
-    if(window.visualViewport){
-      const onVV = () => {
-        const vh = window.visualViewport.height || 0;
-        const kb = Math.max(0, window.innerHeight - vh);
-        // margen para que no tape el último mensaje
-        root.style.setProperty('--kb-gap', kb>0 ? (kb + 8) + 'px' : '0px');
-      };
-      window.visualViewport.addEventListener('resize', onVV);
-      window.visualViewport.addEventListener('scroll', onVV);
-      onVV();
+  /* ====== UX: evitar scroll global con táctil ====== */
+  document.addEventListener('touchmove', (e)=>{
+    const el = e.target.closest('.messages');
+    if(!el){
+      // si no es dentro de .messages, evitamos el desplazamiento
+      e.preventDefault();
     }
+  }, { passive:false });
 
-    // Al enfocar input, mantén scroll al final y evita saltos
-    const msgInputEl = document.getElementById('msgInput');
-    if(msgInputEl){
-      msgInputEl.addEventListener('focus', ()=>{
-        setTimeout(()=>{
-          window.scrollTo(0,0);
-          const messagesEl = document.getElementById('messages');
-          if(messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
-        }, 50);
-      });
-    }
-  })();
   </script>
 </body>
 </html>
