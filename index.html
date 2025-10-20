@@ -17,28 +17,24 @@
 
   /* =========================
      RESET + BASE LAYOUT APP
-     (scroll solo dentro de .messages, como en PROD)
+     (scroll solo dentro de .messages)
   ==========================*/
   *{ box-sizing:border-box; }
-  html,body{ height:100%; overscroll-behavior:none; }
+  html,body{ height:100%; }
   body{
     margin:0; color:var(--fg); background:var(--bg);
     font-family:Inter,system-ui,Roboto,Arial,sans-serif;
-    height:100dvh;                 /* más fiable que svh para iOS */
-    min-height:100dvh;
-    overflow:hidden;               /* evita scroll global */
+    height:100svh; min-height:100svh;
+    overflow:hidden;                    /* evita scroll global */
     display:flex; flex-direction:column;
   }
 
   /* Contenedor principal a alto completo */
   .wrap{
     max-width:980px; width:100%;
-    margin:0 auto;
-    padding:12px;
-    padding-top:calc(12px + env(safe-area-inset-top));     /* evita “corte” en notch */
-    padding-bottom:calc(12px + env(safe-area-inset-bottom));/* espacio seguro */
+    margin:0 auto; padding:12px;
     display:flex; flex-direction:column; gap:12px;
-    flex:1 1 auto; min-height:0;                            /* clave para scroll interno */
+    flex:1 1 auto; min-height:0;        /* clave para scroll interno */
   }
 
   /* =========================
@@ -47,31 +43,37 @@
   .card{ background:#0b0b0b; border:1px solid var(--line); border-radius:16px; padding:14px }
   .header{ display:flex; align-items:center; justify-content:space-between; gap:10px }
   .brand{ display:flex; align-items:center; gap:10px }
-  .logo{ width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:#111; border:1px solid var(--line) }
-  /* Tamaños como en PROD (no minimalista) */
-  .ttl{ font-weight:700; font-size:20px }
-  .sub{ font-size:13px; color:var(--muted) }
+  .logo{
+    width:28px; height:28px; border-radius:50%;
+    display:grid; place-items:center; background:#111; border:1px solid var(--line);
+    overflow:hidden;
+  }
+  /* Asegura que el SVG externo respete el tamaño y no deforme */
+  .logo img{ width:100%; height:100%; object-fit:contain; display:block }
+
+  .ttl{ font-weight:700; font-size:18px }            /* compacto */
+  .sub{ font-size:12px; color:var(--muted) }         /* compacto */
   .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
-  .btn{ appearance:none; border:1px solid #fff; background:#fff; color:#000; border-radius:12px; padding:10px 14px; font-weight:600; cursor:pointer; font-size:14px }
+  .btn{ appearance:none; border:1px solid #fff; background:#fff; color:#000; border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer; font-size:14px }
   .btn.ghost{ background:transparent; color:#fff }
   .btn.danger{ border-color:var(--danger); color:var(--danger); background:transparent }
-  .btn.sm{ padding:8px 10px; font-size:13px; border-radius:10px }
-  .field{ display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:12px; padding:10px; background:#0a0a0a }
-  .field input,.field select{ flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:16px }
+  .btn.sm{ padding:6px 8px; font-size:12px; border-radius:8px }
+  .field{ display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:10px; padding:8px; background:#0a0a0a }
+  .field input,.field select{ flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:15px }
   .eye{ cursor:pointer; user-select:none }
-  .hint{ color:var(--muted); font-size:13px }
+  .hint{ color:var(--muted); font-size:12px }
 
   .toast{
-    position:fixed; left:50%; transform:translateX(-50%); bottom:16px;
+    position:fixed; left:50%; transform:translateX(-50%); bottom:12px;
     background:#111; border:1px solid var(--line); color:#fff;
-    padding:10px 14px; border-radius:12px; display:none; z-index:80; font-size:13px
+    padding:8px 12px; border-radius:10px; display:none; z-index:80; font-size:13px
   }
   .toast.show{ display:block }
 
   /* =========================
      LOGIN
   ==========================*/
-  .login{ max-width:700px; margin:6svh auto 0; display:flex; flex-direction:column; gap:10px }
+  .login{ max-width:700px; margin:4svh auto 0; display:flex; flex-direction:column; gap:8px }
 
   /* =========================
      GRID PRINCIPAL (ADMIN + CHAT)
@@ -86,29 +88,28 @@
      PANEL ADMIN (izquierda)
   ==========================*/
   .adminPane{
-    display:none; flex:0 0 320px; gap:12px; flex-direction:column;
+    display:none; flex:0 0 320px; gap:10px; flex-direction:column;
     min-height:0;
   }
   .adminTabs{ display:flex; gap:6px }
-  .tab{ padding:6px 10px; border:1px solid var(--line); border-radius:10px; background:#0f0f0f; cursor:pointer }
+  .tab{ padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:#0f0f0f; cursor:pointer; font-size:13px }
   .tab.active{ outline:1px solid var(--gold) }
   .tabPanel{ display:none; gap:10px; flex-direction:column; min-height:0 }
   .tabPanel.show{ display:flex }
-  .list{ border:1px dashed var(--line); border-radius:12px; padding:10px; max-height:260px; overflow:auto }
+  .list{ border:1px dashed var(--line); border-radius:10px; padding:8px; max-height:260px; overflow:auto }
   .tag{ display:inline-block; border:1px solid #3a3a3a; border-radius:999px; padding:2px 8px; font-size:12px }
   .ok{ color:#00d38f; border-color:#00d38f }
   .bad{ color:#ff6a6a; border-color:#ff6a6a }
   .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555; margin-left:6px }
   .dot.green{ background:#00d38f; border-color:#00d38f }
   .dot.orange{ background:#ffb020; border-color:#ffb020 }
-  .dot.red{ background:#ff5a5a; border-color:#ff5a5a }
+  .dot.red{ background:#ff5a5a }
 
   /* =========================
      CHAT (derecha)
-     (como PROD: header/composer fijos dentro del card; scroll solo mensajes)
   ==========================*/
   .chatCard{
-    flex:1 1 auto; display:flex; flex-direction:column; gap:10px;
+    flex:1 1 auto; display:flex; flex-direction:column; gap:8px;
     min-height:0;
   }
 
@@ -116,27 +117,26 @@
   .messages{
     flex:1 1 auto; min-height:0;
     overflow-y:auto;
-    -webkit-overflow-scrolling: touch;   /* iOS suave */
-    padding:14px 14px 18px;
-    border:1px solid var(--line); border-radius:14px;
+    padding:10px 10px 12px;            /* compacto */
+    border:1px solid var(--line); border-radius:12px;
     background:#0f0f0f;
-    display:flex; flex-direction:column; gap:10px;
+    display:flex; flex-direction:column; gap:8px;
     scrollbar-width:thin; scrollbar-color:#555 #0f0f0f;
   }
   .messages::-webkit-scrollbar{ width:6px }
   .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px }
 
-  .msg{ max-width:92%; padding:10px 12px; border:1px solid #3a3a3a; border-radius:14px; background:#101010; white-space:pre-wrap; word-break:break-word }
+  .msg{ max-width:92%; padding:8px 10px; border:1px solid #3a3a3a; border-radius:12px; background:#101010; white-space:pre-wrap; word-break:break-word; font-size:15px }
   .msg.me{ margin-left:auto; background:#141414; border-color:#555 }
-  .msg .by{ font-size:12px; color:#9bd; opacity:.85; margin-bottom:4px }
-  .msg .meta{ margin-top:6px; font-size:11px; color:#9a9a9a }
+  .msg .by{ font-size:12px; color:#9bd; opacity:.85; margin-bottom:2px }
+  .msg .meta{ margin-top:4px; font-size:11px; color:#9a9a9a }
   .msg.sys{ opacity:.85; border-style:dashed }
 
-  /* Composer fijo dentro del chat (tamaños como PROD) */
+  /* Composer fijo dentro del chat (compacto y pegado) */
   .composer{
-    display:flex; gap:8px; align-items:center;
-    border-top:1px solid var(--line); padding:10px; background:#080808;
-    border-radius:14px
+    display:flex; gap:6px; align-items:center;
+    border-top:1px solid var(--line); padding:6px; background:#080808;
+    border-radius:12px
   }
   .composer .field{ flex:1 }
 
@@ -150,9 +150,9 @@
   ==========================*/
   .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:1000; padding:16px }
   .backdrop.show{ display:flex!important }
-  .modal{ background:#101010; border:1px solid var(--line); padding:20px 22px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35) }
-  .modal h3{ margin:0 0 8px 0; color:var(--gold) }
-  .modal p{ margin:0 0 12px 0; color:#ddd }
+  .modal{ background:#101010; border:1px solid var(--line); padding:18px 20px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35) }
+  .modal h3{ margin:0 0 8px 0; color:#D0A500 }
+  .modal p{ margin:0 0 10px 0; color:#ddd }
   .modal .actions{ display:flex; gap:8px; justify-content:center }
   kbd{ font-family:monospace; border:1px solid #333; border-radius:6px; padding:1px 6px; background:#0a0a0a }
   </style>
@@ -160,14 +160,12 @@
 
 <body>
   <div class="wrap">
-    <!-- ========== HEADER (como PROD) ========== -->
+    <!-- ========== HEADER (compacto) ========== -->
     <div class="card header">
       <div class="brand">
         <span class="logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" fill="none" stroke="#D0A500" stroke-width="2"/>
-            <path d="M8 8 L16 16 M16 8 L8 16" stroke="#D0A500" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+          <!-- Logo externo SVG, colores intactos -->
+          <img src="/assets/logo-chat-dev.svg" alt="X Code Chat Dev Logo" width="28" height="28" />
         </span>
         <div>
           <div class="ttl">X Code Chat — Official (DEV)</div>
@@ -256,9 +254,9 @@
   <div id="pinBack" class="backdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true">
       <h3>🔐 Tu PIN</h3>
-      <p id="pinText" style="font-size:1.6em;font-weight:800;color:var(--accent)">0000</p>
+      <p id="pinText" style="font-size:1.4em;font-weight:800;color:var(--accent)">0000</p>
       <small style="opacity:.8">Se ha copiado al portapapeles</small>
-      <div class="actions" style="margin-top:12px"><button id="pinOk" class="btn">Entendido</button></div>
+      <div class="actions" style="margin-top:10px"><button id="pinOk" class="btn">Entendido</button></div>
     </div>
   </div>
 
@@ -366,7 +364,7 @@
     tabRooms.classList.remove("active"); tabUsers.classList.remove("active");
     panelRooms.classList.remove("show"); panelUsers.classList.remove("show");
     if(which==="rooms"){ tabRooms.classList.add("active"); panelRooms.classList.add("show"); }
-    else { tabUsers.classList.add("active"); panelUsers.classList.add("show"); }
+    else { tabUsers.classList.add("active"); panelUsers.class.add("show"); }
   }
   tabRooms.onclick=()=>setActiveTab("rooms");
   tabUsers.onclick=()=>setActiveTab("users");
@@ -727,12 +725,6 @@
     }catch{ clearSession(); }
   }
   tryRestoreSession();
-
-  /* ===== Ajustes suaves iOS teclado (sin cambiar lógica) ===== */
-  // Al enfocar el input, mantener el scroll al final del contenedor de mensajes
-  const keepBottom = ()=>{ try{ messages.scrollTop = messages.scrollHeight; }catch{} };
-  msgInput.addEventListener('focus', keepBottom, {passive:true});
-  window.visualViewport && visualViewport.addEventListener('resize', keepBottom, {passive:true});
   </script>
 </body>
 </html>
