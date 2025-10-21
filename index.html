@@ -2,51 +2,63 @@
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <!-- Vista móvil correcta + iOS safe areas -->
+  <!-- soporte seguro para móviles + notch + teclado -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <title>X Code Chat — Official (DEV)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-  /* =======================================================
-     PALETA / TOKENS
-  ======================================================== */
+  /* =========================
+     PALETA Y TOKENS
+  ==========================*/
   :root{
     --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
     --accent:#00ffbb; --danger:#ff5a5a;
+    /* alto seguro de viewport (se actualiza vía JS para iOS teclado) */
+    --vh: 100svh;
   }
 
-  /* =======================================================
-     RESET + BASE LAYOUT (app-like)
-     - Bloquea scroll global (solo scrollea .messages)
-     - Altura pantalla con soporte iOS (svh + fill-available)
-  ======================================================== */
+  /* =========================
+     RESET + BASE LAYOUT APP
+     (scroll solo dentro de .messages)
+  ==========================*/
   *{ box-sizing:border-box; }
   html,body{ height:100%; }
-  html{ height:-webkit-fill-available; }
+  html{ background: var(--bg); }
   body{
     margin:0; color:var(--fg); background:var(--bg);
     font-family:Inter,system-ui,Roboto,Arial,sans-serif;
 
-    height:100svh;            /* móviles modernos */
-    min-height:100svh;
-    height:-webkit-fill-available;  /* iOS Safari compat */
-    overflow:hidden;          /* ¡clave!: no mover la página */
+    /* Alto tipo app: se controla con --vh para evitar "saltos" de iOS teclado */
+    height:var(--vh);
+    min-height:var(--vh);
+    overflow:hidden;                    /* evita scroll global de la página */
     display:flex; flex-direction:column;
   }
 
-  /* Contenedor principal a alto completo (flex) */
+  /* Contenedor principal a alto completo */
   .wrap{
     max-width:980px; width:100%;
     margin:0 auto; padding:12px;
     display:flex; flex-direction:column; gap:12px;
-    flex:1 1 auto; min-height:0;      /* permite scroll interno en hijos */
+    flex:1 1 auto; min-height:0;        /* clave para scroll interno */
   }
 
-  /* =======================================================
+  /* =========================
      COMPONENTES GENERALES
-  ======================================================== */
+  ==========================*/
   .card{ background:#0b0b0b; border:1px solid var(--line); border-radius:16px; padding:14px }
+  .header{ display:flex; align-items:center; justify-content:space-between; gap:10px }
+  .brand{ display:flex; align-items:center; gap:10px }
+  /* LOGO PNG (32px) - sin círculo, fondo transparente */
+  .logoBox{
+    width:32px; height:32px; border-radius:6px; overflow:hidden;
+    display:grid; place-items:center; background:transparent; border:0;
+  }
+  .logoBox img{ display:block; width:100%; height:100%; object-fit:contain }
+
+  .ttl{ font-weight:700; font-size:18px }            /* compacto */
+  .sub{ font-size:12px; color:var(--muted) }         /* compacto */
   .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
   .btn{ appearance:none; border:1px solid #fff; background:#fff; color:#000; border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer; font-size:14px }
   .btn.ghost{ background:transparent; color:#fff }
@@ -54,9 +66,8 @@
   .btn.sm{ padding:6px 8px; font-size:12px; border-radius:8px }
   .field{ display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:10px; padding:8px; background:#0a0a0a }
   .field input,.field select{ flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:15px }
-  .sub{ font-size:12px; color:var(--muted) }
-  .hint{ color:var(--muted); font-size:12px }
   .eye{ cursor:pointer; user-select:none }
+  .hint{ color:var(--muted); font-size:12px }
 
   .toast{
     position:fixed; left:50%; transform:translateX(-50%); bottom:12px;
@@ -65,42 +76,23 @@
   }
   .toast.show{ display:block }
 
-  /* =======================================================
-     HEADER COMPACTO (con logo PNG centrado)
-  ======================================================== */
-  .header{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px }
-  .brand{ display:flex; align-items:center; gap:10px }
-  .logo{
-    width:28px; height:28px; display:grid; place-items:center;
-    /* sin fondo ni borde, para respetar el PNG tal cual */
-    background:transparent; border:none; border-radius:0;
-  }
-  .logo img{
-    width:28px; height:28px; display:block; object-fit:contain; image-rendering:auto;
-  }
-  .ttl{ font-weight:700; font-size:18px }     /* compacto */
-  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555; margin-left:6px }
-  .dot.green{ background:#00d38f; border-color:#00d38f }
-  .dot.orange{ background:#ffb020; border-color:#ffb020 }
-  .dot.red{ background:#ff5a5a }
-
-  /* =======================================================
+  /* =========================
      LOGIN
-  ======================================================== */
+  ==========================*/
   .login{ max-width:700px; margin:4svh auto 0; display:flex; flex-direction:column; gap:8px }
 
-  /* =======================================================
+  /* =========================
      GRID PRINCIPAL (ADMIN + CHAT)
-     min-height:0 => habilita overflow interno en .messages
-  ======================================================== */
+     (min-height:0 => permite scroll interno de mensajes)
+  ==========================*/
   .chatGrid{
     display:flex; gap:12px; align-items:flex-start;
     flex:1 1 auto; min-height:0;
   }
 
-  /* =======================================================
-     PANEL ADMIN (col. izquierda)
-  ======================================================== */
+  /* =========================
+     PANEL ADMIN (izquierda)
+  ==========================*/
   .adminPane{
     display:none; flex:0 0 320px; gap:10px; flex-direction:column;
     min-height:0;
@@ -114,29 +106,29 @@
   .tag{ display:inline-block; border:1px solid #3a3a3a; border-radius:999px; padding:2px 8px; font-size:12px }
   .ok{ color:#00d38f; border-color:#00d38f }
   .bad{ color:#ff6a6a; border-color:#ff6a6a }
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555; margin-left:6px }
+  .dot.green{ background:#00d38f; border-color:#00d38f }
+  .dot.orange{ background:#ffb020; border-color:#ffb020 }
+  .dot.red{ background:#ff5a5a }
 
-  /* =======================================================
-     CHAT (col. derecha)
-     - flex column
-     - min-height:0
-     - .messages con overflow interno
-  ======================================================== */
+  /* =========================
+     CHAT (derecha)
+  ==========================*/
   .chatCard{
     flex:1 1 auto; display:flex; flex-direction:column; gap:8px;
     min-height:0;
   }
 
-  /* Área de mensajes: scroll interno REAL, pegada a header/composer */
+  /* Mensajes con scroll interno REAL y sin espacio extra */
   .messages{
     flex:1 1 auto; min-height:0;
     overflow-y:auto;
-    padding:10px 10px 12px;
+    padding:10px 10px 12px;            /* compacto */
     border:1px solid var(--line); border-radius:12px;
     background:#0f0f0f;
     display:flex; flex-direction:column; gap:8px;
-
-    /* barras sutiles */
     scrollbar-width:thin; scrollbar-color:#555 #0f0f0f;
+    overscroll-behavior: contain;       /* no arrastre la página */
   }
   .messages::-webkit-scrollbar{ width:6px }
   .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px }
@@ -147,7 +139,7 @@
   .msg .meta{ margin-top:4px; font-size:11px; color:#9a9a9a }
   .msg.sys{ opacity:.85; border-style:dashed }
 
-  /* Composer (fijo dentro del chat, compacto) */
+  /* Composer fijo dentro del chat (compacto y pegado) */
   .composer{
     display:flex; gap:6px; align-items:center;
     border-top:1px solid var(--line); padding:6px; background:#080808;
@@ -160,13 +152,13 @@
     .adminPane{ width:100% }
   }
 
-  /* =======================================================
+  /* =========================
      MODAL PIN
-  ======================================================== */
+  ==========================*/
   .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:1000; padding:16px }
   .backdrop.show{ display:flex!important }
   .modal{ background:#101010; border:1px solid var(--line); padding:18px 20px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35) }
-  .modal h3{ margin:0 0 8px 0; color:var(--gold) }
+  .modal h3{ margin:0 0 8px 0; color:#D0A500 }
   .modal p{ margin:0 0 10px 0; color:#ddd }
   .modal .actions{ display:flex; gap:8px; justify-content:center }
   kbd{ font-family:monospace; border:1px solid #333; border-radius:6px; padding:1px 6px; background:#0a0a0a }
@@ -175,14 +167,12 @@
 
 <body>
   <div class="wrap">
-    <!-- =====================================================
-         HEADER (compacto con logo PNG centrado)
-    ====================================================== -->
+    <!-- ========== HEADER (compacto) ========== -->
     <div class="card header">
       <div class="brand">
-        <span class="logo" aria-hidden="true">
-          <!-- LOGO PNG (misma carpeta que este HTML) -->
-          <img src="logo_dev.png" alt="X Code Dev Logo">
+        <!-- LOGO PNG 32px (logo_dev.png en la raíz) -->
+        <span class="logoBox" aria-hidden="true">
+          <img src="logo_dev.png" alt="Logo X Code Dev">
         </span>
         <div>
           <div class="ttl">X Code Chat — Official (DEV)</div>
@@ -198,9 +188,7 @@
       </div>
     </div>
 
-    <!-- =====================================================
-         LOGIN
-    ====================================================== -->
+    <!-- ========== LOGIN ========== -->
     <div id="loginCard" class="card login">
       <div class="hint">
         Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial,
@@ -212,11 +200,9 @@
       <div class="hint">Privado: escribe <kbd>@número</kbd> al inicio (ej. <kbd>@120 hola</kbd>).</div>
     </div>
 
-    <!-- =====================================================
-         GRID PRINCIPAL (ADMIN + CHAT)
-    ====================================================== -->
+    <!-- ========== GRID PRINCIPAL (ADMIN + CHAT) ========== -->
     <div class="chatGrid" id="mainGrid" style="display:none">
-      <!-- ============ PANEL ADMIN (solo organizador) ============ -->
+      <!-- ====== PANEL ADMIN (solo organizador) ====== -->
       <aside id="adminPane" class="card adminPane">
         <div class="sub" style="font-weight:600">Panel del organizador</div>
 
@@ -254,7 +240,7 @@
         </div>
       </aside>
 
-      <!-- ============ CHAT (scroll interno en mensajes) ============ -->
+      <!-- ====== CHAT (scroll interno en mensajes) ====== -->
       <section id="chatCard" class="card chatCard">
         <div id="messages" class="messages"></div>
 
@@ -281,12 +267,28 @@
     </div>
   </div>
 
-  <!-- =====================================================
+  <!-- =========================
        APP SCRIPT (Firebase + lógica)
-  ====================================================== -->
+  ==========================-->
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
   import { getDatabase, ref, get, set, update, onValue, off, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
+  /* ===== iOS/Android teclado: fijar --vh para evitar "saltos" ===== */
+  (function fixViewportHeight(){
+    const apply = ()=>{
+      const v = (window.visualViewport && window.visualViewport.height)
+        ? window.visualViewport.height
+        : window.innerHeight;
+      document.documentElement.style.setProperty('--vh', v + 'px');
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    if (window.visualViewport){
+      visualViewport.addEventListener('resize', apply);
+      visualViewport.addEventListener('scroll', apply);
+    }
+  })();
 
   /* ===== Firebase DEV ===== */
   const firebaseConfig = {
@@ -366,7 +368,7 @@
     onValue(r,(snap)=>{
       const room = snap.exists() ? (snap.val()||DEFAULT_ROOM) : DEFAULT_ROOM;
       currentRoomCache = room;
-      // Usuarios normales siguen la sala global
+      // Solo usuarios normales obedecen el valor global (admin puede estar cambiando)
       if(!session.isAdmin && session.num!==0){
         session.room = room;
         roomHdr.textContent = room;
@@ -429,7 +431,7 @@
 
     loginBtn.disabled=true;
 
-    // Cabecera siempre refleja la sala global
+    // Aseguramos que la cabecera refleje la sala global
     try{
       const globalRoom = currentRoomCache || await getCurrentRoomOnce();
       session.room = globalRoom || loadLastRoom() || DEFAULT_ROOM;
@@ -518,6 +520,7 @@
     mainGrid.style.display="none"; logoutBtn.style.display="none"; adminPane.style.display="none";
     loginCard.style.display="flex";
     messages.innerHTML=""; msgInput.value="";
+    // al volver a login, reflejamos la sala global si se conoce
     session={ room: currentRoomCache || loadLastRoom() || DEFAULT_ROOM, num:null, isAdmin:false };
     roomHdr.textContent=session.room; roomInput.value=session.room; meIdHdr.textContent='—';
   }
@@ -615,6 +618,7 @@
         if(session.room===name){
           session.room=newName; roomHdr.textContent=newName; roomInput.value=newName; saveLastRoom(newName);
           attachMessages(); loadUsersRealtime(); saveSession();
+          // si el que renombra es admin y esa es la sala actual, actualizar global
           if(session.isAdmin || session.num===0) { await setGlobalRoom(newName); }
         }
         toast("Sala renombrada"); reloadRooms();
@@ -641,6 +645,7 @@
     session.room=newRoom; roomHdr.textContent=newRoom; saveLastRoom(newRoom); saveSession();
     attachMessages(); if(session.num===0) loadUsersRealtime();
     toast(`Sala cambiada a "${newRoom}"`);
+    // Solo organizador actualiza la sala global
     if(session.isAdmin || session.num===0){ await setGlobalRoom(newRoom); }
   };
   btnCreateRoom.onclick=async()=>{
@@ -708,7 +713,8 @@
   btnDeleteUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await deleteUser(n); };
 
   /* ===== Restaurar sesión y escuchar sala global ===== */
-  listenGlobalRoom(); // reflejar sala global incluso antes de login
+  // Reflejar la sala global en el header incluso antes de login
+  listenGlobalRoom();
 
   (async function initHeaderRoom(){
     try{
@@ -725,6 +731,7 @@
   async function tryRestoreSession(){
     const s=loadSession(); if(!s) return;
     try{
+      // La sala predeterminada para todos es la global si existe
       const remoteRoom = currentRoomCache || await getCurrentRoomOnce();
       session.room = remoteRoom || s.room || loadLastRoom() || DEFAULT_ROOM;
       roomHdr.textContent=session.room; roomInput.value=session.room;
@@ -741,20 +748,6 @@
     }catch{ clearSession(); }
   }
   tryRestoreSession();
-
-  /* ===== Fix iOS visualViewport (opcional seguro) =====
-     Evita "saltos" cuando aparece el teclado en iOS.
-     No afecta a navegadores de escritorio/Android modernos.
-  */
-  try{
-    if (window.visualViewport) {
-      const onResize = () => {
-        document.body.style.height = window.visualViewport.height + 'px';
-      };
-      window.visualViewport.addEventListener('resize', onResize);
-      window.visualViewport.addEventListener('scroll', onResize);
-    }
-  }catch{}
   </script>
 </body>
 </html>
