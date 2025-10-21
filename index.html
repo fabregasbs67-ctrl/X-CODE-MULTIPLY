@@ -44,11 +44,13 @@
   .header{ display:flex; align-items:center; justify-content:space-between; gap:10px }
   .brand{ display:flex; align-items:center; gap:10px }
   .logo{
-    width:28px; height:28px; border-radius:6px;
-    display:flex; align-items:center; justify-content:center;
-    background:#111; border:1px solid var(--line); overflow:hidden;
+    width:28px; height:28px; border-radius:50%;
+    display:grid; place-items:center; background:#111; border:1px solid var(--line);
+    overflow:hidden;
   }
-  .logo img{ width:100%; height:100%; object-fit:contain; display:block; }
+  /* Asegura que el SVG externo respete el tamaño y no deforme */
+  .logo img{ width:100%; height:100%; object-fit:contain; display:block }
+
   .ttl{ font-weight:700; font-size:18px }            /* compacto */
   .sub{ font-size:12px; color:var(--muted) }         /* compacto */
   .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
@@ -101,7 +103,7 @@
   .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555; margin-left:6px }
   .dot.green{ background:#00d38f; border-color:#00d38f }
   .dot.orange{ background:#ffb020; border-color:#ffb020 }
-  .dot.red{ background:#ff5a5a; border-color:#ff5a5a }
+  .dot.red{ background:#ff5a5a }
 
   /* =========================
      CHAT (derecha)
@@ -149,7 +151,7 @@
   .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:1000; padding:16px }
   .backdrop.show{ display:flex!important }
   .modal{ background:#101010; border:1px solid var(--line); padding:18px 20px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35) }
-  .modal h3{ margin:0 0 8px 0; color:var(--gold) }
+  .modal h3{ margin:0 0 8px 0; color:#D0A500 }
   .modal p{ margin:0 0 10px 0; color:#ddd }
   .modal .actions{ display:flex; gap:8px; justify-content:center }
   kbd{ font-family:monospace; border:1px solid #333; border-radius:6px; padding:1px 6px; background:#0a0a0a }
@@ -162,15 +164,8 @@
     <div class="card header">
       <div class="brand">
         <span class="logo" aria-hidden="true">
-          <!-- PNG en Data-URI, fondo transparente, sin tocar nada más -->
-          <img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAawAAALACAYAAADPFkYQAAAAhGVYSWZNTQAqAAAACAAFARIAAwAAAAEA
-          AAABAAABAAAAVfRDkAAAACB0RVh0U29mdHdhcmUAZ29vZ2xlLmNvbS9waG90b3MvMmcgZKltAAAADUlE
-          QVR4nO3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-          AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-          AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-          AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-          AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-          AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPwG2gABp8TqbwAAAABJRU5ErkJggg==" />
+          <!-- Logo externo SVG, colores intactos -->
+          <img src="/assets/logo-chat-dev.svg" alt="X Code Chat Dev Logo" width="28" height="28" />
         </span>
         <div>
           <div class="ttl">X Code Chat — Official (DEV)</div>
@@ -369,7 +364,7 @@
     tabRooms.classList.remove("active"); tabUsers.classList.remove("active");
     panelRooms.classList.remove("show"); panelUsers.classList.remove("show");
     if(which==="rooms"){ tabRooms.classList.add("active"); panelRooms.classList.add("show"); }
-    else { tabUsers.classList.add("active"); panelUsers.classList.add("show"); }
+    else { tabUsers.classList.add("active"); panelUsers.class.add("show"); }
   }
   tabRooms.onclick=()=>setActiveTab("rooms");
   tabUsers.onclick=()=>setActiveTab("users");
@@ -690,9 +685,9 @@
       toast(`Usuario #${n} creado · PIN ${pin}`);
     }catch{ toast("No se pudo crear el usuario"); }
   };
-  btnActivateUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n y n!==0) return toast("Número inválido"); await setEntryState(n,true); };
-  btnDeactivateUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n y n!==0) return toast("Número inválido"); await setEntryState(n,false); };
-  btnDeleteUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n y n!==0) return toast("Número inválido"); await deleteUser(n); };
+  btnActivateUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await setEntryState(n,true); };
+  btnDeactivateUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await setEntryState(n,false); };
+  btnDeleteUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await deleteUser(n); };
 
   /* ===== Restaurar sesión y escuchar sala global ===== */
   // Reflejar la sala global en el header incluso antes de login
@@ -733,4 +728,3 @@
   </script>
 </body>
 </html>
-
