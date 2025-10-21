@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <!-- Importante para móviles + notch -->
+  <!-- Importante para móviles y notch (iOS) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <title>X Code Chat — Official (DEV)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -14,9 +14,6 @@
   :root{
     --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
     --accent:#00ffbb; --danger:#ff5a5a;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --app-vh: 100dvh; /* fallback; JS la actualizará con visualViewport */
   }
 
   /* =========================
@@ -29,20 +26,20 @@
     margin:0; color:var(--fg); background:var(--bg);
     font-family:Inter,system-ui,Roboto,Arial,sans-serif;
 
-    /* App-like y anti-jumps en iOS/Android */
-    height:var(--app-vh);
-    min-height:var(--app-vh);
-    overflow:hidden;                    /* evita scroll global */
+    /* Alto tipo app (corrige iOS 100vh) */
+    height:100dvh;              /* navegadores modernos */
+    min-height:100dvh;
+    /* fallbacks */
+    height:100svh; min-height:100svh;
+
+    overflow:hidden;            /* evita scroll global */
     display:flex; flex-direction:column;
-    padding-top: var(--safe-top);
-    padding-bottom: 0;
   }
 
   /* Contenedor principal a alto completo */
   .wrap{
     max-width:980px; width:100%;
     margin:0 auto; padding:12px;
-    padding-top: 8px;                   /* compacto */
     display:flex; flex-direction:column; gap:12px;
     flex:1 1 auto; min-height:0;        /* clave para scroll interno */
   }
@@ -53,30 +50,23 @@
   .card{ background:#0b0b0b; border:1px solid var(--line); border-radius:16px; padding:14px }
   .header{ display:flex; align-items:center; justify-content:space-between; gap:10px }
   .brand{ display:flex; align-items:center; gap:10px }
-
-  /* LOGO (PNG transparente) */
+  /* === LOGO: SIN círculo, PNG a 32px, proporcional === */
   .logo{
-    width:28px; height:28px; display:grid; place-items:center;
-    background:transparent; border:none; border-radius:0; padding:0; overflow:hidden;
+    width:32px; height:32px;        /* solicitado 32px */
+    display:grid; place-items:center;
+    background:transparent; border:0; border-radius:0; overflow:hidden;
   }
-  .logo img.logoImg{
-    display:block; width:26px; height:26px; object-fit:contain; image-rendering:auto;
-  }
-  @media (min-width:420px){
-    .logo{ width:32px; height:32px }
-    .logo img.logoImg{ width:30px; height:30px }
-  }
+  .logo img{ width:100%; height:100%; object-fit:contain; display:block }
 
-  .ttl{ font-weight:700; font-size:18px }            /* compacto */
-  .sub{ font-size:12px; color:var(--muted) }         /* compacto */
+  .ttl{ font-weight:700; font-size:18px }
+  .sub{ font-size:12px; color:var(--muted) }
   .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
   .btn{ appearance:none; border:1px solid #fff; background:#fff; color:#000; border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer; font-size:14px }
   .btn.ghost{ background:transparent; color:#fff }
   .btn.danger{ border-color:var(--danger); color:var(--danger); background:transparent }
   .btn.sm{ padding:6px 8px; font-size:12px; border-radius:8px }
   .field{ display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:10px; padding:8px; background:#0a0a0a }
-  /* iOS evita zoom al enfocar si font-size >= 16px */
-  .field input,.field select{ flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:16px }
+  .field input,.field select{ flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:15px }
   .eye{ cursor:pointer; user-select:none }
   .hint{ color:var(--muted); font-size:12px }
 
@@ -94,11 +84,10 @@
 
   /* =========================
      GRID PRINCIPAL (ADMIN + CHAT)
-     (min-height:0 => permite scroll interno de mensajes)
   ==========================*/
   .chatGrid{
     display:flex; gap:12px; align-items:flex-start;
-    flex:1 1 auto; min-height:0;
+    flex:1 1 auto; min-height:0; /* permite scroll interno */
   }
 
   /* =========================
@@ -127,7 +116,7 @@
   ==========================*/
   .chatCard{
     flex:1 1 auto; display:flex; flex-direction:column; gap:8px;
-    min-height:0; /* CRÍTICO para que .messages pueda overflow */
+    min-height:0;
   }
 
   /* Mensajes con scroll interno REAL y sin espacio extra */
@@ -139,7 +128,7 @@
     background:#0f0f0f;
     display:flex; flex-direction:column; gap:8px;
     scrollbar-width:thin; scrollbar-color:#555 #0f0f0f;
-    will-change: height; /* ayuda en iOS con teclado */
+    -webkit-overflow-scrolling: touch;  /* suaviza en iOS */
   }
   .messages::-webkit-scrollbar{ width:6px }
   .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px }
@@ -150,12 +139,12 @@
   .msg .meta{ margin-top:4px; font-size:11px; color:#9a9a9a }
   .msg.sys{ opacity:.85; border-style:dashed }
 
-  /* Composer fijo dentro del chat (compacto y pegado) */
+  /* Composer: fijo dentro del chat, compacto y con safe-area */
   .composer{
     display:flex; gap:6px; align-items:center;
     border-top:1px solid var(--line); padding:6px; background:#080808;
     border-radius:12px;
-    padding-bottom: calc(6px + var(--safe-bottom)); /* evita solaparse con home bar */
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
   }
   .composer .field{ flex:1 }
 
@@ -180,11 +169,11 @@
 <body>
   <div class="wrap">
     <!-- ========== HEADER (compacto) ========== -->
-    <div class="card header" id="appHeader">
+    <div class="card header">
       <div class="brand">
+        <!-- Logo PNG (32px, sin borde, sin círculo) -->
         <span class="logo" aria-hidden="true">
-          <!-- Logo PNG, fondo transparente -->
-          <img src="logo_dev.png" alt="Logo X Code" class="logoImg" decoding="async" />
+          <img id="brandLogo" src="logo_dev.png" alt="X Code Logo" width="32" height="32" decoding="async" />
         </span>
         <div>
           <div class="ttl">X Code Chat — Official (DEV)</div>
@@ -206,8 +195,8 @@
         Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial,
         la primera vez se genera tu PIN y se muestra. Usuario <b>0</b> es organizador.
       </div>
-      <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)" autocomplete="one-time-code"></div>
-      <div class="field"><input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN" autocomplete="one-time-code"><span id="togglePin" class="eye">👁️</span></div>
+      <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)"></div>
+      <div class="field"><input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN"><span id="togglePin" class="eye">👁️</span></div>
       <div class="row"><button id="loginBtn" class="btn">Entrar</button><div id="loginMsg" class="hint"></div></div>
       <div class="hint">Privado: escribe <kbd>@número</kbd> al inicio (ej. <kbd>@120 hola</kbd>).</div>
     </div>
@@ -256,7 +245,7 @@
       <section id="chatCard" class="card chatCard">
         <div id="messages" class="messages"></div>
 
-        <div class="composer" id="composerBox">
+        <div class="composer">
           <div class="field"><input id="msgInput" type="text" placeholder="Mensaje…  ·  Privado con @número" autocomplete="off" maxlength="400"></div>
           <button id="sendBtn" class="btn">Enviar</button>
         </div>
@@ -316,7 +305,6 @@
   const messages=$("#messages"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn"), meIdSpan=$("#meId");
   const toastEl=$("#toast");
   const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
-  const appHeader=$("#appHeader"), composerBox=$("#composerBox");
 
   /* Admin DOM */
   const adminPane=$("#adminPane");
@@ -499,9 +487,11 @@
     // Mensajes
     attachMessages();
 
-    // Ajuste de layout (altura mensajes) + foco
-    requestAnimationFrame(()=>{ recalcMessagesHeight(); });
-    setTimeout(()=>{ msgInput?.focus(); scrollMessagesToEnd(); }, 40);
+    // Autoscroll + foco
+    setTimeout(()=>{ msgInput?.focus(); messages.scrollTop = messages.scrollHeight; }, 30);
+
+    // —— iOS keyboard visualViewport fix dentro del chat ——
+    setupVisualViewportPadding();
   }
 
   /* ===== LOGOUT ===== */
@@ -521,6 +511,9 @@
     // al volver a login, reflejamos la sala global si se conoce
     session={ room: currentRoomCache || loadLastRoom() || DEFAULT_ROOM, num:null, isAdmin:false };
     roomHdr.textContent=session.room; roomInput.value=session.room; meIdHdr.textContent='—';
+
+    // limpiar hack visualViewport
+    teardownVisualViewportPadding();
   }
   logoutBtn.onclick=doLogout;
 
@@ -544,7 +537,7 @@
       const val=snap.val()||{};
       const arr=Object.values(val).sort((a,b)=>(a.ts||0)-(b.ts||0));
       arr.forEach(renderMsg);
-      scrollMessagesToEnd();
+      messages.scrollTop = messages.scrollHeight;
     };
     onValue(r, handler);
     detachMsgs = ()=> off(r, "value", handler);
@@ -558,14 +551,10 @@
     if(m){ payload.to = Number(m[1]); payload.text = m[2]; }
     await set(currentRoomRef(`messages/${id}`), payload);
     msgInput.value="";
-    scrollMessagesToEnd();
+    messages.scrollTop = messages.scrollHeight;
   }
   sendBtn.onclick = sendMessage;
   msgInput.onkeydown = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); sendMessage(); } };
-
-  function scrollMessagesToEnd(){
-    messages.scrollTop = messages.scrollHeight;
-  }
 
   /* ===== Indicador de estado (solo admin) ===== */
   async function pingStatusOnce(){
@@ -620,6 +609,7 @@
         if(session.room===name){
           session.room=newName; roomHdr.textContent=newName; roomInput.value=newName; saveLastRoom(newName);
           attachMessages(); loadUsersRealtime(); saveSession();
+          // si el que renombra es admin y esa es la sala actual, actualizar global
           if(session.isAdmin || session.num===0) { await setGlobalRoom(newName); }
         }
         toast("Sala renombrada"); reloadRooms();
@@ -713,45 +703,6 @@
   btnDeactivateUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await setEntryState(n,false); };
   btnDeleteUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await deleteUser(n); };
 
-  /* ===== Layout robusto con teclado (iOS/Android) ===== */
-  function setAppVHFromViewport(){
-    const vv = window.visualViewport;
-    const h = vv ? vv.height : window.innerHeight;
-    document.documentElement.style.setProperty('--app-vh', h + 'px');
-  }
-  function recalcMessagesHeight(){
-    try{
-      const wrap = document.querySelector('.wrap');
-      const headerH = appHeader?.getBoundingClientRect()?.height || 0;
-      const composerH = composerBox?.getBoundingClientRect()?.height || 0;
-      const wrapH = wrap?.getBoundingClientRect()?.height || window.innerHeight;
-      const otherGaps = 12; // pequeños gaps internos del grid
-      const maxH = Math.max(120, wrapH - headerH - composerH - otherGaps);
-      messages.style.maxHeight = maxH + 'px';
-    }catch{}
-  }
-  function onViewportChange(){
-    setAppVHFromViewport();
-    recalcMessagesHeight();
-  }
-  function onFocusAdjust(){
-    setTimeout(()=>{ onViewportChange(); scrollMessagesToEnd(); }, 30);
-  }
-
-  // Listeners de viewport/teclado
-  if(window.visualViewport){
-    visualViewport.addEventListener('resize', onViewportChange);
-    visualViewport.addEventListener('scroll', onViewportChange);
-  }
-  window.addEventListener('resize', onViewportChange);
-  window.addEventListener('orientationchange', onViewportChange);
-  window.addEventListener('focusin', onFocusAdjust);
-  window.addEventListener('focusout', onViewportChange);
-
-  // Inicial
-  setAppVHFromViewport();
-  recalcMessagesHeight();
-
   /* ===== Restaurar sesión y escuchar sala global ===== */
   // Reflejar la sala global en el header incluso antes de login
   listenGlobalRoom();
@@ -788,8 +739,44 @@
     }catch{ clearSession(); }
   }
   tryRestoreSession();
-  </script>
 
-  <!-- Versión DEV estable 2025-10-21 -->
+  /* =========================
+     FIX iOS: evita hueco al abrir teclado (visualViewport)
+  ==========================*/
+  let __vvListenersBound = false;
+  function setupVisualViewportPadding(){
+    if (typeof window.visualViewport === 'undefined') return;
+    const vv = window.visualViewport;
+
+    const apply = ()=>{
+      // offset cuando el teclado reduce visualViewport
+      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      // Ajusta padding-bottom de mensajes para que el contenido no “salte”
+      const base = 12; // padding-bottom base de .messages
+      messages.style.paddingBottom = (base + offset) + 'px';
+    };
+
+    if (!__vvListenersBound){
+      vv.addEventListener('resize', apply);
+      vv.addEventListener('scroll', apply);
+      window.addEventListener('orientationchange', ()=> setTimeout(apply, 300), { passive:true });
+      // Foco / blur del input (por si algunos navegadores no disparan resize)
+      msgInput.addEventListener('focus', ()=> setTimeout(apply, 50), { passive:true });
+      msgInput.addEventListener('blur',  ()=> setTimeout(apply, 50), { passive:true });
+      __vvListenersBound = true;
+    }
+    apply();
+  }
+  function teardownVisualViewportPadding(){
+    if (typeof window.visualViewport === 'undefined') return;
+    const vv = window.visualViewport;
+    try{
+      vv.onresize = null; vv.onscroll = null; // redundante
+    }catch{}
+    // No quitamos listeners explícitamente para no romper otros focos;
+    // restablecemos padding base:
+    if(messages) messages.style.paddingBottom = '12px';
+  }
+  </script>
 </body>
 </html>
