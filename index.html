@@ -2,83 +2,81 @@
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <!-- Soporte completo móviles + notch + evitar zoom involuntario en iOS -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"/>
+  <!-- Importante para móviles + notch -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <title>X Code Chat — Official (DEV)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-  /* ==========================================================
+  /* =========================
      PALETA Y TOKENS
-  ==========================================================*/
+  ==========================*/
   :root{
     --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
     --accent:#00ffbb; --danger:#ff5a5a;
-    /* Altura controlada por visualViewport (anti “chat que se mueve”) */
-    --app-height: 100svh;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --app-vh: 100dvh; /* fallback; JS la actualizará con visualViewport */
   }
 
-  /* ==========================================================
+  /* =========================
      RESET + BASE LAYOUT APP
-     Regla de oro: NUNCA scrollea el body. El scroll es SOLO en .messages
-  ==========================================================*/
+     (scroll solo dentro de .messages)
+  ==========================*/
   *{ box-sizing:border-box; }
-  html, body{
-    height:100%;
-    overscroll-behavior:none;          /* sin “rubber-band” */
-    -webkit-overflow-scrolling:auto;
-    touch-action:manipulation;
-  }
+  html,body{ height:100%; }
   body{
     margin:0; color:var(--fg); background:var(--bg);
     font-family:Inter,system-ui,Roboto,Arial,sans-serif;
 
-    /* Altura fija al viewport visible (corrige iOS keyboard y zoom) */
-    height:var(--app-height);
-    min-height:var(--app-height);
-
-    overflow:hidden;                   /* CLAVE: desactivar scroll global */
+    /* App-like y anti-jumps en iOS/Android */
+    height:var(--app-vh);
+    min-height:var(--app-vh);
+    overflow:hidden;                    /* evita scroll global */
     display:flex; flex-direction:column;
-    /* Asegura uso del área segura (iPhone con notch) */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right)
-             env(safe-area-inset-bottom) env(safe-area-inset-left);
+    padding-top: var(--safe-top);
+    padding-bottom: 0;
   }
 
   /* Contenedor principal a alto completo */
   .wrap{
     max-width:980px; width:100%;
     margin:0 auto; padding:12px;
+    padding-top: 8px;                   /* compacto */
     display:flex; flex-direction:column; gap:12px;
-
-    /* Para que los hijos manejen overflow (especialmente .messages) */
-    flex:1 1 auto; min-height:0;
+    flex:1 1 auto; min-height:0;        /* clave para scroll interno */
   }
 
-  /* ==========================================================
+  /* =========================
      COMPONENTES GENERALES
-  ==========================================================*/
+  ==========================*/
   .card{ background:#0b0b0b; border:1px solid var(--line); border-radius:16px; padding:14px }
   .header{ display:flex; align-items:center; justify-content:space-between; gap:10px }
   .brand{ display:flex; align-items:center; gap:10px }
-  .logo{
-    width:28px; height:28px; border-radius:8px;
-    display:grid; place-items:center; background:transparent;
-    border:0; overflow:hidden; flex:0 0 auto;
-  }
-  /* LOGO IMG (usamos tu archivo actual, sin cambiar ruta) */
-  .logo img{ width:24px; height:24px; object-fit:contain; display:block }
 
-  .ttl{ font-weight:700; font-size:18px }
-  .sub{ font-size:12px; color:var(--muted) }
+  /* LOGO (PNG transparente) */
+  .logo{
+    width:28px; height:28px; display:grid; place-items:center;
+    background:transparent; border:none; border-radius:0; padding:0; overflow:hidden;
+  }
+  .logo img.logoImg{
+    display:block; width:26px; height:26px; object-fit:contain; image-rendering:auto;
+  }
+  @media (min-width:420px){
+    .logo{ width:32px; height:32px }
+    .logo img.logoImg{ width:30px; height:30px }
+  }
+
+  .ttl{ font-weight:700; font-size:18px }            /* compacto */
+  .sub{ font-size:12px; color:var(--muted) }         /* compacto */
   .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
-  .btn{ appearance:none; border:1px solid #fff; background:#fff; color:#000;
-        border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer; font-size:14px }
+  .btn{ appearance:none; border:1px solid #fff; background:#fff; color:#000; border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer; font-size:14px }
   .btn.ghost{ background:transparent; color:#fff }
   .btn.danger{ border-color:var(--danger); color:var(--danger); background:transparent }
   .btn.sm{ padding:6px 8px; font-size:12px; border-radius:8px }
   .field{ display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:10px; padding:8px; background:#0a0a0a }
-  /* IMPORTANTE: 16px para evitar zoom en iOS al enfocar inputs */
-  .field input,.field select{ flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:16px; line-height:1.2 }
+  /* iOS evita zoom al enfocar si font-size >= 16px */
+  .field input,.field select{ flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:16px }
   .eye{ cursor:pointer; user-select:none }
   .hint{ color:var(--muted); font-size:12px }
 
@@ -89,23 +87,23 @@
   }
   .toast.show{ display:block }
 
-  /* ==========================================================
+  /* =========================
      LOGIN
-  ==========================================================*/
+  ==========================*/
   .login{ max-width:700px; margin:4svh auto 0; display:flex; flex-direction:column; gap:8px }
 
-  /* ==========================================================
+  /* =========================
      GRID PRINCIPAL (ADMIN + CHAT)
-     min-height:0 => permite scroll interno de mensajes
-  ==========================================================*/
+     (min-height:0 => permite scroll interno de mensajes)
+  ==========================*/
   .chatGrid{
     display:flex; gap:12px; align-items:flex-start;
     flex:1 1 auto; min-height:0;
   }
 
-  /* ==========================================================
+  /* =========================
      PANEL ADMIN (izquierda)
-  ==========================================================*/
+  ==========================*/
   .adminPane{
     display:none; flex:0 0 320px; gap:10px; flex-direction:column;
     min-height:0;
@@ -124,26 +122,24 @@
   .dot.orange{ background:#ffb020; border-color:#ffb020 }
   .dot.red{ background:#ff5a5a; border-color:#ff5a5a }
 
-  /* ==========================================================
+  /* =========================
      CHAT (derecha)
-     Regla: flex column + min-height:0 + overflow en .messages
-  ==========================================================*/
+  ==========================*/
   .chatCard{
     flex:1 1 auto; display:flex; flex-direction:column; gap:8px;
-    min-height:0;
+    min-height:0; /* CRÍTICO para que .messages pueda overflow */
   }
 
   /* Mensajes con scroll interno REAL y sin espacio extra */
   .messages{
     flex:1 1 auto; min-height:0;
     overflow-y:auto;
-    padding:10px 10px 12px;
+    padding:10px 10px 12px;            /* compacto */
     border:1px solid var(--line); border-radius:12px;
     background:#0f0f0f;
     display:flex; flex-direction:column; gap:8px;
-
-    /* scrollbars sutiles */
     scrollbar-width:thin; scrollbar-color:#555 #0f0f0f;
+    will-change: height; /* ayuda en iOS con teclado */
   }
   .messages::-webkit-scrollbar{ width:6px }
   .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px }
@@ -154,11 +150,12 @@
   .msg .meta{ margin-top:4px; font-size:11px; color:#9a9a9a }
   .msg.sys{ opacity:.85; border-style:dashed }
 
-  /* Composer fijo dentro del chat */
+  /* Composer fijo dentro del chat (compacto y pegado) */
   .composer{
     display:flex; gap:6px; align-items:center;
     border-top:1px solid var(--line); padding:6px; background:#080808;
-    border-radius:12px
+    border-radius:12px;
+    padding-bottom: calc(6px + var(--safe-bottom)); /* evita solaparse con home bar */
   }
   .composer .field{ flex:1 }
 
@@ -167,13 +164,13 @@
     .adminPane{ width:100% }
   }
 
-  /* ==========================================================
+  /* =========================
      MODAL PIN
-  ==========================================================*/
+  ==========================*/
   .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:1000; padding:16px }
   .backdrop.show{ display:flex!important }
   .modal{ background:#101010; border:1px solid var(--line); padding:18px 20px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35) }
-  .modal h3{ margin:0 0 8px 0; color:var(--gold) }
+  .modal h3{ margin:0 0 8px 0; color:#D0A500 }
   .modal p{ margin:0 0 10px 0; color:#ddd }
   .modal .actions{ display:flex; gap:8px; justify-content:center }
   kbd{ font-family:monospace; border:1px solid #333; border-radius:6px; padding:1px 6px; background:#0a0a0a }
@@ -182,12 +179,12 @@
 
 <body>
   <div class="wrap">
-    <!-- ========== HEADER (compacto, SIN cambiar título) ========== -->
-    <div class="card header">
+    <!-- ========== HEADER (compacto) ========== -->
+    <div class="card header" id="appHeader">
       <div class="brand">
         <span class="logo" aria-hidden="true">
-          <!-- Mantenemos tu logo actual por IMG. Ruta tal cual la tienes en DEV -->
-          <img id="brandLogo" src="logo-dev.png" alt="X Code Dev Logo" decoding="async" loading="eager">
+          <!-- Logo PNG, fondo transparente -->
+          <img src="logo_dev.png" alt="Logo X Code" class="logoImg" decoding="async" />
         </span>
         <div>
           <div class="ttl">X Code Chat — Official (DEV)</div>
@@ -209,8 +206,8 @@
         Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial,
         la primera vez se genera tu PIN y se muestra. Usuario <b>0</b> es organizador.
       </div>
-      <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)"></div>
-      <div class="field"><input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN"><span id="togglePin" class="eye">👁️</span></div>
+      <div class="field"><input id="numInput" type="number" inputmode="numeric" placeholder="Tu número (ej. 70)" autocomplete="one-time-code"></div>
+      <div class="field"><input id="pinInput" type="password" inputmode="numeric" placeholder="Tu PIN" autocomplete="one-time-code"><span id="togglePin" class="eye">👁️</span></div>
       <div class="row"><button id="loginBtn" class="btn">Entrar</button><div id="loginMsg" class="hint"></div></div>
       <div class="hint">Privado: escribe <kbd>@número</kbd> al inicio (ej. <kbd>@120 hola</kbd>).</div>
     </div>
@@ -259,7 +256,7 @@
       <section id="chatCard" class="card chatCard">
         <div id="messages" class="messages"></div>
 
-        <div class="composer">
+        <div class="composer" id="composerBox">
           <div class="field"><input id="msgInput" type="text" placeholder="Mensaje…  ·  Privado con @número" autocomplete="off" maxlength="400"></div>
           <button id="sendBtn" class="btn">Enviar</button>
         </div>
@@ -282,9 +279,9 @@
     </div>
   </div>
 
-  <!-- ==========================================================
+  <!-- =========================
        APP SCRIPT (Firebase + lógica)
-  ===========================================================-->
+  ==========================-->
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
   import { getDatabase, ref, get, set, update, onValue, off, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
@@ -319,6 +316,7 @@
   const messages=$("#messages"), msgInput=$("#msgInput"), sendBtn=$("#sendBtn"), meIdSpan=$("#meId");
   const toastEl=$("#toast");
   const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
+  const appHeader=$("#appHeader"), composerBox=$("#composerBox");
 
   /* Admin DOM */
   const adminPane=$("#adminPane");
@@ -344,61 +342,7 @@
   let detachMsgs=null, detachUsers=null, usersCache={}, usersTimer=null, statusTimer=null;
   let currentRoomCache = null; // cache de la sala global
 
-  /* ==========================================================
-     ANTI “CHAT QUE SE MUEVE” (iOS/Android/Escritorio)
-     - Fija --app-height al alto visible real (visualViewport)
-     - Bloquea scroll global permanentemente
-     - Ajusta altura disponible de mensajes y autoscroll
-  ==========================================================*/
-  const VV = window.visualViewport;
-  function setAppHeight(){
-    const vh = VV ? VV.height : window.innerHeight;
-    document.documentElement.style.setProperty('--app-height', vh + 'px');
-  }
-  function lockBodyScroll(){
-    document.documentElement.style.overflow='hidden';
-    document.body.style.overflow='hidden';
-  }
-  function fitMessagesHeight(){
-    try{
-      const header = document.querySelector('.header');
-      const composer = document.querySelector('.composer');
-      if(!messages || !header || !composer) return;
-      const hH = header.offsetHeight || 0;
-      const cH = composer.offsetHeight || 0;
-      const pad = 12 + 12; // padding wrap/card
-      messages.style.maxHeight = `calc(var(--app-height) - ${hH + cH + pad}px)`;
-    }catch{}
-  }
-  function refreshLayout(){
-    setAppHeight();
-    lockBodyScroll();
-    fitMessagesHeight();
-    // Mantener el scroll al final si ya estábamos al final
-    requestAnimationFrame(()=>{ messages.scrollTop = messages.scrollHeight; });
-  }
-
-  // Inicial
-  setAppHeight(); lockBodyScroll();
-  window.addEventListener('resize', refreshLayout, {passive:true});
-  window.addEventListener('orientationchange', ()=>setTimeout(refreshLayout, 50), {passive:true});
-  if(VV){
-    VV.addEventListener('resize', refreshLayout);
-    VV.addEventListener('scroll', refreshLayout);
-  }
-  // También al enfocar/desenfocar inputs (teclado)
-  ['focus','blur'].forEach(ev=>{
-    document.addEventListener(ev, (e)=>{
-      const t = e.target;
-      if(t && (t.tagName==='INPUT' || t.tagName==='TEXTAREA')){
-        setTimeout(refreshLayout, 30);
-      }
-    }, true);
-  });
-
-  /* ==========================================================
-     Persistencia (localStorage)
-  ==========================================================*/
+  /* ===== Persistencia (localStorage) ===== */
   const saveLastRoom=(name)=>{ try{ localStorage.setItem(LS_LAST_ROOM, name) }catch{} };
   const loadLastRoom=()=>{ try{ return localStorage.getItem(LS_LAST_ROOM) || DEFAULT_ROOM }catch{ return DEFAULT_ROOM } };
   function saveSession(){
@@ -411,9 +355,7 @@
   function clearSession(){ try{ localStorage.removeItem(LS_SESSION) }catch{} }
   function loadSession(){ try{ const s=localStorage.getItem(LS_SESSION); return s?JSON.parse(s):null }catch{ return null } }
 
-  /* ==========================================================
-     Sala global (settings/currentRoom)
-  ==========================================================*/
+  /* ===== Sala global (settings/currentRoom) ===== */
   async function getCurrentRoomOnce(){
     const snap = await get(ref(db,'settings/currentRoom'));
     return snap.exists() ? (snap.val()||DEFAULT_ROOM) : DEFAULT_ROOM;
@@ -429,9 +371,6 @@
         roomHdr.textContent = room;
         roomInput.value     = room;
         saveLastRoom(room);
-        // Reajustar listeners y layout
-        attachMessages();
-        refreshLayout();
       }
     });
   }
@@ -440,22 +379,17 @@
     catch{}
   }
 
-  /* ==========================================================
-     Tabs admin
-  ==========================================================*/
+  /* ===== Tabs admin ===== */
   function setActiveTab(which){
     tabRooms.classList.remove("active"); tabUsers.classList.remove("active");
     panelRooms.classList.remove("show"); panelUsers.classList.remove("show");
     if(which==="rooms"){ tabRooms.classList.add("active"); panelRooms.classList.add("show"); }
-    else { tabUsers.classList.add("show"); tabUsers.classList.add("active"); }
-    refreshLayout();
+    else { tabUsers.classList.add("active"); panelUsers.classList.add("show"); }
   }
   tabRooms.onclick=()=>setActiveTab("rooms");
   tabUsers.onclick=()=>setActiveTab("users");
 
-  /* ==========================================================
-     Whitelist
-  ==========================================================*/
+  /* ===== Whitelist ===== */
   async function isEntryAllowed(n){
     for(const base of ENTRY_WHITELIST_PATHS){
       const s=await get(ref(db, `${base}/${n}`));
@@ -467,7 +401,7 @@
     return false;
   }
 
-  /* Normaliza users/{n}/{n} -> users/{n} (compatibilidad) */
+  /* Normaliza users/{n}/{n} -> users/{n} (por compatibilidad) */
   async function normalizeUserNode(room,n){
     const base = `rooms/${room}/users/${n}`;
     const uRef = ref(db, base);
@@ -486,9 +420,7 @@
     return uSnap.exists()? uSnap.val() : null;
   }
 
-  /* ==========================================================
-     LOGIN
-  ==========================================================*/
+  /* ===== LOGIN ===== */
   async function doLogin(){
     const nStr=(numInput.value||"").trim();
     if(!/^\d+$/.test(nStr)){ toast("Introduce tu número"); return; }
@@ -540,9 +472,7 @@
   numInput.onkeydown=(e)=>{ if(e.key==="Enter") doLogin(); };
   pinInput.onkeydown=(e)=>{ if(e.key==="Enter") doLogin(); };
 
-  /* ==========================================================
-     ENTER APP
-  ==========================================================*/
+  /* ===== ENTER APP ===== */
   function enterChat(isAdmin){
     // UI
     loginCard.style.display="none";
@@ -569,13 +499,12 @@
     // Mensajes
     attachMessages();
 
-    // Autoscroll + ajuste layout
-    setTimeout(()=>{ msgInput?.focus(); messages.scrollTop = messages.scrollHeight; refreshLayout(); }, 30);
+    // Ajuste de layout (altura mensajes) + foco
+    requestAnimationFrame(()=>{ recalcMessagesHeight(); });
+    setTimeout(()=>{ msgInput?.focus(); scrollMessagesToEnd(); }, 40);
   }
 
-  /* ==========================================================
-     LOGOUT
-  ==========================================================*/
+  /* ===== LOGOUT ===== */
   async function doLogout(){
     try{ if(session.num>0){ await update(currentRoomRef(`users/${session.num}`), { connected:false, updated:Date.now() }); } }catch{}
 
@@ -592,14 +521,10 @@
     // al volver a login, reflejamos la sala global si se conoce
     session={ room: currentRoomCache || loadLastRoom() || DEFAULT_ROOM, num:null, isAdmin:false };
     roomHdr.textContent=session.room; roomInput.value=session.room; meIdHdr.textContent='—';
-
-    refreshLayout();
   }
   logoutBtn.onclick=doLogout;
 
-  /* ==========================================================
-     CHAT
-  ==========================================================*/
+  /* ===== CHAT ===== */
   function renderMsg(m){
     if(m.sys && session.num!==0) return;
     if(m.to && !(m.to===session.num || m.from===session.num || session.num===0)) return;
@@ -619,8 +544,7 @@
       const val=snap.val()||{};
       const arr=Object.values(val).sort((a,b)=>(a.ts||0)-(b.ts||0));
       arr.forEach(renderMsg);
-      messages.scrollTop = messages.scrollHeight;
-      refreshLayout();
+      scrollMessagesToEnd();
     };
     onValue(r, handler);
     detachMsgs = ()=> off(r, "value", handler);
@@ -634,15 +558,16 @@
     if(m){ payload.to = Number(m[1]); payload.text = m[2]; }
     await set(currentRoomRef(`messages/${id}`), payload);
     msgInput.value="";
-    messages.scrollTop = messages.scrollHeight;
-    refreshLayout();
+    scrollMessagesToEnd();
   }
   sendBtn.onclick = sendMessage;
   msgInput.onkeydown = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); sendMessage(); } };
 
-  /* ==========================================================
-     Indicador de estado (solo admin)
-  ==========================================================*/
+  function scrollMessagesToEnd(){
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  /* ===== Indicador de estado (solo admin) ===== */
   async function pingStatusOnce(){
     if(session.num!==0) return;
     const id="PING_"+Date.now()+"_"+Math.random().toString(36).slice(2,5);
@@ -665,9 +590,7 @@
     setTimeout(()=>{ if(!done){ off(r,"value",handler); statusDot.className="dot red"; remove(currentRoomRef(`messages/${id}`)).catch(()=>{}); } }, 2800);
   }
 
-  /* ==========================================================
-     Gestor de salas
-  ==========================================================*/
+  /* ===== Gestor de salas ===== */
   const roomMetaRef=(n)=>ref(db,`roomsMeta/${n}`);
   const roomIndexRef=(n)=>ref(db,`rooms_index/${n}`);
 
@@ -725,7 +648,6 @@
     toast(`Sala cambiada a "${newRoom}"`);
     // Solo organizador actualiza la sala global
     if(session.isAdmin || session.num===0){ await setGlobalRoom(newRoom); }
-    refreshLayout();
   };
   btnCreateRoom.onclick=async()=>{
     const name=(newRoomName.value||"").trim(); if(!name) return toast("Escribe un nombre para la sala");
@@ -736,9 +658,7 @@
   };
   btnReloadRooms.onclick=reloadRooms;
 
-  /* ==========================================================
-     Gestor de usuarios
-  ==========================================================*/
+  /* ===== Gestor de usuarios ===== */
   function updateUsersAgo(){
     [...usersList.querySelectorAll("[data-uid]")].forEach(el=>{
       const uid=el.getAttribute("data-uid"); const u=usersCache[uid]; if(!u) return;
@@ -766,7 +686,6 @@
         usersList.appendChild(row);
       });
       countConn.textContent=connected;
-      refreshLayout();
     };
     onValue(r, handler); detachUsers=()=>off(r,"value",handler);
   }
@@ -794,9 +713,46 @@
   btnDeactivateUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await setEntryState(n,false); };
   btnDeleteUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await deleteUser(n); };
 
-  /* ==========================================================
-     Restaurar sesión y escuchar sala global
-  ==========================================================*/
+  /* ===== Layout robusto con teclado (iOS/Android) ===== */
+  function setAppVHFromViewport(){
+    const vv = window.visualViewport;
+    const h = vv ? vv.height : window.innerHeight;
+    document.documentElement.style.setProperty('--app-vh', h + 'px');
+  }
+  function recalcMessagesHeight(){
+    try{
+      const wrap = document.querySelector('.wrap');
+      const headerH = appHeader?.getBoundingClientRect()?.height || 0;
+      const composerH = composerBox?.getBoundingClientRect()?.height || 0;
+      const wrapH = wrap?.getBoundingClientRect()?.height || window.innerHeight;
+      const otherGaps = 12; // pequeños gaps internos del grid
+      const maxH = Math.max(120, wrapH - headerH - composerH - otherGaps);
+      messages.style.maxHeight = maxH + 'px';
+    }catch{}
+  }
+  function onViewportChange(){
+    setAppVHFromViewport();
+    recalcMessagesHeight();
+  }
+  function onFocusAdjust(){
+    setTimeout(()=>{ onViewportChange(); scrollMessagesToEnd(); }, 30);
+  }
+
+  // Listeners de viewport/teclado
+  if(window.visualViewport){
+    visualViewport.addEventListener('resize', onViewportChange);
+    visualViewport.addEventListener('scroll', onViewportChange);
+  }
+  window.addEventListener('resize', onViewportChange);
+  window.addEventListener('orientationchange', onViewportChange);
+  window.addEventListener('focusin', onFocusAdjust);
+  window.addEventListener('focusout', onViewportChange);
+
+  // Inicial
+  setAppVHFromViewport();
+  recalcMessagesHeight();
+
+  /* ===== Restaurar sesión y escuchar sala global ===== */
   // Reflejar la sala global en el header incluso antes de login
   listenGlobalRoom();
 
@@ -810,7 +766,6 @@
       const last=loadLastRoom();
       session.room=last; roomHdr.textContent=last; roomInput.value=last;
     }
-    refreshLayout();
   })();
 
   async function tryRestoreSession(){
@@ -833,9 +788,8 @@
     }catch{ clearSession(); }
   }
   tryRestoreSession();
-
-  // Último toque: ajustar al cargar todo
-  window.addEventListener('load', ()=> setTimeout(refreshLayout, 30), {once:true});
   </script>
+
+  <!-- Versión DEV estable 2025-10-21 -->
 </body>
 </html>
