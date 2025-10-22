@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <!-- Importante para móviles y notch (iOS) -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <!-- Vista móvil: bloqueamos zoom para evitar reflow en iOS al enfocar inputs -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
   <title>X Code Chat — Official (DEV)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -14,6 +14,9 @@
   :root{
     --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
     --accent:#00ffbb; --danger:#ff5a5a;
+
+    /* altura dinámica del teclado (JS actualizará este valor) */
+    --kb: 0px;
   }
 
   /* =========================
@@ -26,14 +29,14 @@
     margin:0; color:var(--fg); background:var(--bg);
     font-family:Inter,system-ui,Roboto,Arial,sans-serif;
 
-    /* Alto tipo app (corrige iOS 100vh) */
-    height:100dvh;              /* navegadores modernos */
-    min-height:100dvh;
-    /* fallbacks */
+    /* App-like layout: sin scroll global */
     height:100svh; min-height:100svh;
-
-    overflow:hidden;            /* evita scroll global */
+    overflow:hidden;
     display:flex; flex-direction:column;
+
+    /* Evita “rubber band” y rebotes del viewport */
+    overscroll-behavior-y: none;
+    touch-action: manipulation;
   }
 
   /* Contenedor principal a alto completo */
@@ -50,16 +53,14 @@
   .card{ background:#0b0b0b; border:1px solid var(--line); border-radius:16px; padding:14px }
   .header{ display:flex; align-items:center; justify-content:space-between; gap:10px }
   .brand{ display:flex; align-items:center; gap:10px }
-  /* === LOGO: SIN círculo, PNG a 32px, proporcional === */
+  /* Logo: usamos la imagen externa (ya existente) y NO tocamos la ruta */
   .logo{
-    width:32px; height:32px;        /* solicitado 32px */
-    display:grid; place-items:center;
-    background:transparent; border:0; border-radius:0; overflow:hidden;
+    width:32px; height:32px;              /* tamaño solicitado previamente y confirmado */
+    display:block; border-radius:6px;      /* sin anillo/círculo alrededor */
+    object-fit:contain; background:transparent;
   }
-  .logo img{ width:100%; height:100%; object-fit:contain; display:block }
-
-  .ttl{ font-weight:700; font-size:18px }
-  .sub{ font-size:12px; color:var(--muted) }
+  .ttl{ font-weight:700; font-size:18px }  /* compacto */
+  .sub{ font-size:12px; color:var(--muted) }/* compacto */
   .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
   .btn{ appearance:none; border:1px solid #fff; background:#fff; color:#000; border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer; font-size:14px }
   .btn.ghost{ background:transparent; color:#fff }
@@ -84,10 +85,11 @@
 
   /* =========================
      GRID PRINCIPAL (ADMIN + CHAT)
+     (min-height:0 => permite scroll interno de mensajes)
   ==========================*/
   .chatGrid{
     display:flex; gap:12px; align-items:flex-start;
-    flex:1 1 auto; min-height:0; /* permite scroll interno */
+    flex:1 1 auto; min-height:0;
   }
 
   /* =========================
@@ -109,7 +111,7 @@
   .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555; margin-left:6px }
   .dot.green{ background:#00d38f; border-color:#00d38f }
   .dot.orange{ background:#ffb020; border-color:#ffb020 }
-  .dot.red{ background:#ff5a5a; border-color:#ff5a5a }
+  .dot.red{ background:#ff5a5a }
 
   /* =========================
      CHAT (derecha)
@@ -119,16 +121,22 @@
     min-height:0;
   }
 
-  /* Mensajes con scroll interno REAL y sin espacio extra */
+  /* Mensajes con scroll interno real.
+     IMPORTANTE: añadimos padding-bottom dinámico con --kb para que
+     cuando suba el teclado no tape los últimos mensajes. */
   .messages{
     flex:1 1 auto; min-height:0;
     overflow-y:auto;
-    padding:10px 10px 12px;            /* compacto */
+    padding:10px 10px calc(12px + var(--kb)); /* margen inferior extra si hay teclado */
     border:1px solid var(--line); border-radius:12px;
     background:#0f0f0f;
     display:flex; flex-direction:column; gap:8px;
+
+    /* scrollbars sutiles */
     scrollbar-width:thin; scrollbar-color:#555 #0f0f0f;
-    -webkit-overflow-scrolling: touch;  /* suaviza en iOS */
+
+    /* Evita arrastrar la página cuando haces scroll dentro del chat */
+    overscroll-behavior: contain;
   }
   .messages::-webkit-scrollbar{ width:6px }
   .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px }
@@ -139,12 +147,15 @@
   .msg .meta{ margin-top:4px; font-size:11px; color:#9a9a9a }
   .msg.sys{ opacity:.85; border-style:dashed }
 
-  /* Composer: fijo dentro del chat, compacto y con safe-area */
+  /* Composer fijo dentro del chat (compacto).
+     Lo “subimos” visualmente con la misma --kb para que nunca lo tape el teclado. */
   .composer{
     display:flex; gap:6px; align-items:center;
     border-top:1px solid var(--line); padding:6px; background:#080808;
     border-radius:12px;
-    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+
+    /* eleva el composer por encima del teclado virtual */
+    margin-bottom: var(--kb);
   }
   .composer .field{ flex:1 }
 
@@ -159,7 +170,7 @@
   .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:1000; padding:16px }
   .backdrop.show{ display:flex!important }
   .modal{ background:#101010; border:1px solid var(--line); padding:18px 20px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35) }
-  .modal h3{ margin:0 0 8px 0; color:#D0A500 }
+  .modal h3{ margin:0 0 8px 0; color:var(--gold) }
   .modal p{ margin:0 0 10px 0; color:#ddd }
   .modal .actions{ display:flex; gap:8px; justify-content:center }
   kbd{ font-family:monospace; border:1px solid #333; border-radius:6px; padding:1px 6px; background:#0a0a0a }
@@ -171,10 +182,8 @@
     <!-- ========== HEADER (compacto) ========== -->
     <div class="card header">
       <div class="brand">
-        <!-- Logo PNG (32px, sin borde, sin círculo) -->
-        <span class="logo" aria-hidden="true">
-          <img id="brandLogo" src="logo_dev.png" alt="X Code Logo" width="32" height="32" decoding="async" />
-        </span>
+        <!-- Mantenemos imagen (ruta igual que antes) y sin contenedor circular -->
+        <img src="logo_dev.png" alt="Logo X Code" class="logo" />
         <div>
           <div class="ttl">X Code Chat — Official (DEV)</div>
           <div class="sub">
@@ -489,9 +498,6 @@
 
     // Autoscroll + foco
     setTimeout(()=>{ msgInput?.focus(); messages.scrollTop = messages.scrollHeight; }, 30);
-
-    // —— iOS keyboard visualViewport fix dentro del chat ——
-    setupVisualViewportPadding();
   }
 
   /* ===== LOGOUT ===== */
@@ -511,9 +517,6 @@
     // al volver a login, reflejamos la sala global si se conoce
     session={ room: currentRoomCache || loadLastRoom() || DEFAULT_ROOM, num:null, isAdmin:false };
     roomHdr.textContent=session.room; roomInput.value=session.room; meIdHdr.textContent='—';
-
-    // limpiar hack visualViewport
-    teardownVisualViewportPadding();
   }
   logoutBtn.onclick=doLogout;
 
@@ -740,43 +743,66 @@
   }
   tryRestoreSession();
 
-  /* =========================
-     FIX iOS: evita hueco al abrir teclado (visualViewport)
-  ==========================*/
-  let __vvListenersBound = false;
-  function setupVisualViewportPadding(){
-    if (typeof window.visualViewport === 'undefined') return;
-    const vv = window.visualViewport;
+  /* =====================================================
+     FIX UNIVERSAL TECLADO (Safari iOS + Android)
+     - Usa Visual Viewport cuando está disponible
+     - Ajusta --kb (altura de teclado) en tiempo real
+     - Asegura que .messages autoscrollea al final
+     - Bloquea el “salto” del layout
+  ====================================================== */
+  (function keyboardBridge(){
+    const vvp = window.visualViewport;
+    const root = document.documentElement;
 
-    const apply = ()=>{
-      // offset cuando el teclado reduce visualViewport
-      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      // Ajusta padding-bottom de mensajes para que el contenido no “salte”
-      const base = 12; // padding-bottom base de .messages
-      messages.style.paddingBottom = (base + offset) + 'px';
-    };
-
-    if (!__vvListenersBound){
-      vv.addEventListener('resize', apply);
-      vv.addEventListener('scroll', apply);
-      window.addEventListener('orientationchange', ()=> setTimeout(apply, 300), { passive:true });
-      // Foco / blur del input (por si algunos navegadores no disparan resize)
-      msgInput.addEventListener('focus', ()=> setTimeout(apply, 50), { passive:true });
-      msgInput.addEventListener('blur',  ()=> setTimeout(apply, 50), { passive:true });
-      __vvListenersBound = true;
+    function setKb(px){
+      // Clamp en [0, 60% alto] para evitar valores locos
+      const max = Math.round((window.innerHeight||0)*0.6);
+      const val = Math.max(0, Math.min(px|0, max));
+      root.style.setProperty('--kb', val + 'px');
     }
-    apply();
-  }
-  function teardownVisualViewportPadding(){
-    if (typeof window.visualViewport === 'undefined') return;
-    const vv = window.visualViewport;
-    try{
-      vv.onresize = null; vv.onscroll = null; // redundante
-    }catch{}
-    // No quitamos listeners explícitamente para no romper otros focos;
-    // restablecemos padding base:
-    if(messages) messages.style.paddingBottom = '12px';
-  }
+
+    function recomputeKb(){
+      if(!vvp){
+        // Fallback: si no hay visualViewport, no tocamos nada
+        setKb(0);
+        return;
+      }
+      // Altura del teclado ~ cuanto se reduce el viewport visual
+      const kb = Math.max(0, (window.innerHeight || vvp.height) - vvp.height);
+      setKb(kb);
+
+      // Cuando cambia, nos aseguramos de bajar el scroll de los mensajes
+      try{
+        const $messages = document.getElementById('messages');
+        if($messages) $messages.scrollTop = $messages.scrollHeight;
+      }catch{}
+    }
+
+    // Enfocar/cerrar teclado en inputs del chat: reforzamos scroll
+    const msg = document.getElementById('msgInput');
+    if(msg){
+      msg.addEventListener('focus', ()=>{
+        setTimeout(recomputeKb, 50);
+        setTimeout(recomputeKb, 250);
+      });
+      msg.addEventListener('blur', ()=>{
+        // al salir, reseteamos con un pequeño delay (iOS tarda en reportar)
+        setTimeout(()=>setKb(0), 150);
+      });
+    }
+
+    // Eventos de la API visualViewport
+    if(vvp){
+      vvp.addEventListener('resize', recomputeKb);
+      vvp.addEventListener('scroll', recomputeKb); // iOS a veces reporta scroll de viewport al abrir teclado
+    }
+    window.addEventListener('orientationchange', ()=>{
+      setTimeout(()=>{ setKb(0); recomputeKb(); }, 150);
+    });
+
+    // Primer cálculo
+    setTimeout(recomputeKb, 60);
+  })();
   </script>
 </body>
 </html>
