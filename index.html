@@ -2,239 +2,189 @@
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <!-- Viewport universal. Importante para iOS: evita zooms raros y habilita el viewport “seguro”. -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <title>X Code Chat — Official</title>
+  <!-- Importante para móviles: ancho correcto y zoom -->
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>X Code Chat — Official (PRO)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-  /* ============================================================
-     PALETA Y TOKENS (negro/dorado + acentos)
-     ============================================================ */
+  /* =========================================================================
+     PALETA Y TOKENS
+     =========================================================================*/
   :root{
     --bg:#000; --fg:#fff; --muted:#cfcfcf; --line:#2a2a2a; --gold:#D0A500;
     --accent:#00ffbb; --danger:#ff5a5a;
   }
 
-  /* ============================================================
-     RESET + BASE APP-LIKE
-     - Bloqueamos scroll global (overflow:hidden).
-     - Todo el scroll ocurre SOLO en .messages.
-     - Altura con 100svh/100dvh para móviles.
-     ============================================================ */
+  /* =========================================================================
+     RESET + BASE LAYOUT APP
+     Clave: bloquear scroll global y dar 100% de alto al layout
+     =========================================================================*/
   *{ box-sizing:border-box; }
   html,body{ height:100%; }
-  html{ background:var(--bg); }
   body{
     margin:0; color:var(--fg); background:var(--bg);
     font-family:Inter,system-ui,Roboto,Arial,sans-serif;
 
-    /* App-like fullscreen */
-    height:100svh;        /* soporta iOS/Android modernos */
+    /* App-like: bloquea el scroll global.
+       Todo el scroll ocurrirá dentro de .messages */
+    height:100svh;         /* soporta iOS/Android modern */
     min-height:100svh;
-    overflow:hidden;      /* clave: el viewport no se mueve */
+    overflow:hidden;       /* evita que se mueva toda la página */
     display:flex; flex-direction:column;
-
-    /* iOS notch safe-areas (si existen) */
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
   }
 
-  /* Wrapper central a ancho máx., usa flex para ocupar toda la altura */
+  /* Contenedor principal que ocupa el alto completo */
   .wrap{
     max-width:980px; width:100%;
     margin:0 auto; padding:12px;
     display:flex; flex-direction:column; gap:12px;
-    flex:1 1 auto; min-height:0;       /* permite overflow en hijos */
+
+    /* Importante para permitir scroll interno en hijos */
+    flex:1 1 auto; min-height:0;
   }
 
-  /* ============================================================
+  /* =========================================================================
      COMPONENTES GENERALES
-     ============================================================ */
-  .card{
-    background:#0b0b0b; border:1px solid var(--line);
-    border-radius:16px; padding:14px;
-  }
-  .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+     =========================================================================*/
+  .card{ background:#0b0b0b; border:1px solid var(--line); border-radius:16px; padding:14px; }
+  .header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+
+  /* LOGO PNG (reemplaza al icono anterior). Mantiene proporción y es minimalista */
+  .brand-logo{ width:32px; height:auto; display:block; object-fit:contain }
+
+  .ttl{ font-weight:700; font-size:18px; }          /* compacto */
+  .sub{ font-size:12px; color:var(--muted); }       /* compacto */
+  .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 
   .btn{
     appearance:none; border:1px solid #fff; background:#fff; color:#000;
-    border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer; font-size:14px
+    border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer; font-size:14px;
   }
-  .btn.ghost{ background:transparent; color:#fff }
-  .btn.danger{ border-color:var(--danger); color:var(--danger); background:transparent }
-  .btn.sm{ padding:6px 8px; font-size:12px; border-radius:8px }
+  .btn.ghost{ background:transparent; color:#fff; }
+  .btn.danger{ border-color:var(--danger); color:var(--danger); background:transparent; }
+  .btn.sm{ padding:6px 8px; font-size:12px; border-radius:8px; }
 
   .field{
     display:flex; align-items:center; gap:8px;
-    border:1px solid var(--line); border-radius:10px; padding:8px; background:#0a0a0a
+    border:1px solid var(--line); border-radius:10px; padding:8px; background:#0a0a0a;
   }
   .field input,.field select{
-    flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:15px
+    flex:1; background:transparent; border:none; outline:none; color:var(--fg); font-size:15px;
   }
-  .eye{ cursor:pointer; user-select:none }
-  .hint{ color:var(--muted); font-size:12px }
-
-  .tag{ display:inline-block; border:1px solid #3a3a3a; border-radius:999px; padding:2px 8px; font-size:12px }
-  .ok{ color:#00d38f; border-color:#00d38f }
-  .bad{ color:#ff6a6a; border-color:#ff6a6a }
-
-  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555; margin-left:6px }
-  .dot.green{ background:#00d38f; border-color:#00d38f }
-  .dot.orange{ background:#ffb020; border-color:#ffb020 }
-  .dot.red{ background:#ff5a5a; border-color:#ff5a5a }
+  .eye{ cursor:pointer; user-select:none; }
+  .hint{ color:var(--muted); font-size:12px; }
 
   .toast{
     position:fixed; left:50%; transform:translateX(-50%); bottom:12px;
     background:#111; border:1px solid var(--line); color:#fff;
-    padding:8px 12px; border-radius:10px; display:none; z-index:2000; font-size:13px
+    padding:8px 12px; border-radius:10px; display:none; z-index:80; font-size:13px;
   }
-  .toast.show{ display:block }
+  .toast.show{ display:block; }
 
-  /* ============================================================
-     HEADER (compacto, con logo PNG centrado y sin círculo)
-     ============================================================ */
-  .header{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    /* Evita “cortes” por teclado iOS: el header nunca se sale */
-    position:relative; z-index:10;
-  }
-  .brand{ display:flex; align-items:center; gap:10px }
-
-  /* El logo es un PNG proporcionado; SIN contenedor circular. */
-  .logo{
-    width:32px; height:32px; display:block; flex:0 0 auto;
-  }
-
-  .ttl{ font-weight:700; font-size:18px }   /* compacto y legible */
-  .sub{ font-size:12px; color:var(--muted) }
-
-  /* ============================================================
+  /* =========================================================================
      LOGIN
-     ============================================================ */
-  .login{
-    max-width:700px; margin:4svh auto 0;
-    display:flex; flex-direction:column; gap:8px
-  }
+     =========================================================================*/
+  .login{ max-width:700px; margin:4svh auto 0; display:flex; flex-direction:column; gap:8px; }
 
-  /* ============================================================
+  /* =========================================================================
      GRID PRINCIPAL (ADMIN + CHAT)
-     - min-height:0 para permitir overflow interno de .messages
-     ============================================================ */
+     Clave: min-height:0 para scroll interno en .messages
+     =========================================================================*/
   .chatGrid{
     display:flex; gap:12px; align-items:flex-start;
-    flex:1 1 auto; min-height:0;
+    flex:1 1 auto; min-height:0; /* CRÍTICO: permite que hijos manejen overflow */
   }
 
-  /* ============================================================
-     PANEL ADMIN (columna izquierda, oculto a usuarios)
-     ============================================================ */
+  /* =========================================================================
+     PANEL ADMIN (columna izquierda)
+     También preparado para scroll interno si se alarga.
+     =========================================================================*/
   .adminPane{
-    display:none; flex:0 0 320px; gap:10px; flex-direction:column;
-    min-height:0; /* por si se activa overflow */
+    display:none; flex:0 0 320px; gap:12px; flex-direction:column;
+    min-height:0; /* por si se quiere hacer overflow:auto */
   }
-  .adminTabs{ display:flex; gap:6px }
-  .tab{
-    padding:6px 10px; border:1px solid var(--line); border-radius:8px;
-    background:#0f0f0f; cursor:pointer; font-size:13px
-  }
-  .tab.active{ outline:1px solid var(--gold) }
-  .tabPanel{ display:none; gap:10px; flex-direction:column; min-height:0 }
-  .tabPanel.show{ display:flex }
-  .list{ border:1px dashed var(--line); border-radius:10px; padding:8px; max-height:260px; overflow:auto }
+  .adminTabs{ display:flex; gap:6px; }
+  .tab{ padding:6px 10px; border:1px solid var(--line); border-radius:10px; background:#0f0f0f; cursor:pointer; font-size:13px; }
+  .tab.active{ outline:1px solid var(--gold); }
+  .tabPanel{ display:none; gap:10px; flex-direction:column; min-height:0; }
+  .tabPanel.show{ display:flex; }
+  .list{ border:1px dashed var(--line); border-radius:12px; padding:10px; max-height:260px; overflow:auto; }
+  .tag{ display:inline-block; border:1px solid #3a3a3a; border-radius:999px; padding:2px 8px; font-size:12px; }
+  .ok{ color:#00d38f; border-color:#00d38f; }
+  .bad{ color:#ff6a6a; border-color:#ff6a6a; }
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555; margin-left:6px; }
+  .dot.green{ background:#00d38f; border-color:#00d38f; }
+  .dot.orange{ background:#ffb020; border-color:#ffb020; }
+  .dot.red{ background:#ff5a5a; border-color:#ff5a5a; }
 
-  /* ============================================================
+  /* =========================================================================
      CHAT (columna derecha)
-     - Estructura: header global arriba (fuera), chatCard=columna
-       con mensajes (scroll interno) + composer fijo.
-     ============================================================ */
+     Clave: flex column + min-height:0 + mensajes con overflow auto
+     =========================================================================*/
   .chatCard{
-    flex:1 1 auto; display:flex; flex-direction:column; gap:8px;
-    min-height:0; /* clave para que .messages pueda overflow */
+    flex:1 1 auto; display:flex; flex-direction:column; gap:10px;
+    min-height:0; /* CRÍTICO: .messages podrá hacer overflow */
   }
 
-  /* Mensajes con scroll interno REAL, sin mover la página */
+  /* Contenedor de mensajes con scroll interno REAL */
   .messages{
-    flex:1 1 auto; min-height:0;
-    overflow-y:auto;
-    padding:10px 10px 12px;
+    flex:1 1 auto; min-height:0;       /* permite overflow dentro de flex */
+    overflow-y:auto;                    /* solo esta parte scrollea */
+    padding:10px 10px 12px;             /* compacto y pegado al composer */
     border:1px solid var(--line); border-radius:12px;
     background:#0f0f0f;
     display:flex; flex-direction:column; gap:8px;
-
-    /* Scrollbars sutiles */
+    /* scrollbars sutiles */
     scrollbar-width:thin; scrollbar-color:#555 #0f0f0f;
   }
-  .messages::-webkit-scrollbar{ width:6px }
-  .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px }
+  .messages::-webkit-scrollbar{ width:6px; }
+  .messages::-webkit-scrollbar-thumb{ background:#555; border-radius:6px; }
 
   .msg{
-    max-width:92%; padding:8px 10px; border:1px solid #3a3a3a;
-    border-radius:12px; background:#101010; white-space:pre-wrap;
-    word-break:break-word; font-size:15px
+    max-width:92%; padding:8px 10px; border:1px solid #3a3a3a; border-radius:12px;
+    background:#101010; white-space:pre-wrap; word-break:break-word; font-size:15px;
   }
-  .msg.me{ margin-left:auto; background:#141414; border-color:#555 }
-  .msg .by{ font-size:12px; color:#9bd; opacity:.85; margin-bottom:2px }
-  .msg .meta{ margin-top:4px; font-size:11px; color:#9a9a9a }
-  .msg.sys{ opacity:.85; border-style:dashed }
+  .msg.me{ margin-left:auto; background:#141414; border-color:#555; }
+  .msg .by{ font-size:12px; color:#9bd; opacity:.85; margin-bottom:2px; }
+  .msg .meta{ margin-top:4px; font-size:11px; color:#9a9a9a; }
+  .msg.sys{ opacity:.85; border-style:dashed; }
 
-  /* Composer fijo dentro del contenedor chat */
+  /* Composer fijo al fondo DENTRO del chat (no fixed al viewport), compacto */
   .composer{
     display:flex; gap:6px; align-items:center;
-    border-top:1px solid var(--line); padding:6px; background:#080808;
-    border-radius:12px
+    border-top:1px solid var(--line); padding:6px; background:#080808; border-radius:12px;
   }
-  .composer .field{ flex:1 }
+  .composer .field{ flex:1; }
 
-  /* ============================================================
-     MODAL PIN
-     ============================================================ */
-  .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:3000; padding:16px }
-  .backdrop.show{ display:flex!important }
-  .modal{ background:#101010; border:1px solid var(--line); padding:18px 20px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35) }
-  .modal h3{ margin:0 0 8px 0; color:var(--gold) }
-  .modal p{ margin:0 0 10px 0; color:#ddd }
-  .modal .actions{ display:flex; gap:8px; justify-content:center }
-  kbd{ font-family:monospace; border:1px solid #333; border-radius:6px; padding:1px 6px; background:#0a0a0a }
-
-  /* ============================================================
-     RESPONSIVE
-     ============================================================ */
   @media (max-width:820px){
-    .chatGrid{ flex-direction:column }
-    .adminPane{ width:100% }
+    .chatGrid{ flex-direction:column; }
+    .adminPane{ width:100%; }
   }
 
-  /* ============================================================
-     PARCHE iOS / TECLADO
-     - Evita que aparezca “espacio vacío” entre el teclado y el chat.
-     - Usamos env(safe-area-inset-bottom) + CSS var --kb (ajustada por JS).
-     ============================================================ */
-  :root{ --kb: 0px; } /* altura estimada de teclado */
-  .composer{ margin-bottom: calc(env(safe-area-inset-bottom, 0px)); }
-  .messages{
-    /* Cuando el teclado abre, reducimos área útil pero sin mover todo el viewport */
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  }
-
-  /* Evitar rebotes en iOS al abrir teclado */
-  input, textarea { -webkit-user-select:text; }
+  /* =========================================================================
+     MODAL PIN
+     =========================================================================*/
+  .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:1000; padding:16px; }
+  .backdrop.show{ display:flex!important; }
+  .modal{ background:#101010; border:1px solid var(--line); padding:18px 20px; border-radius:14px; width:min(420px,92vw); text-align:center; box-shadow:0 10px 28px rgba(0,0,0,.35); }
+  .modal h3{ margin:0 0 8px 0; color:var(--gold); }
+  .modal p{ margin:0 0 10px 0; color:#ddd; }
+  .modal .actions{ display:flex; gap:8px; justify-content:center; }
+  kbd{ font-family:monospace; border:1px solid #333; border-radius:6px; padding:1px 6px; background:#0a0a0a; }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <!-- ========================================================
-         HEADER
-         - Logo PNG (32px), sin círculo, centrado en línea.
-         - Título de producción (sin "DEV").
-         ======================================================== -->
+    <!-- ================== HEADER (compacto, con logo) ================== -->
     <div class="card header">
       <div class="brand">
-        <!-- IMPORTANTE: no tocamos ruta; el archivo ya existe como logo_dev.png -->
-        <img src="logo_dev.png" alt="X Code" class="logo" width="32" height="32" />
+        <!-- Logo PNG minimalista 32px, fondo transparente -->
+        <img src="/img/logo_dev.png" alt="Logo" class="brand-logo" />
         <div>
-          <div class="ttl">X Code Chat — Official</div>
+          <div class="ttl">X Code Chat — Official (PRO)</div>
           <div class="sub">
             Sala: <b id="roomHdr">Sala de Prueba</b>
             · <span class="sub">Usuario #<b id="meIdHdr">—</b></span>
@@ -247,9 +197,7 @@
       </div>
     </div>
 
-    <!-- ========================================================
-         LOGIN
-         ======================================================== -->
+    <!-- ================== LOGIN ================== -->
     <div id="loginCard" class="card login">
       <div class="hint">
         Acceso con <b>número</b> y <b>PIN</b>. Si tu entrada está en la lista oficial,
@@ -261,20 +209,19 @@
       <div class="hint">Privado: escribe <kbd>@número</kbd> al inicio (ej. <kbd>@120 hola</kbd>).</div>
     </div>
 
-    <!-- ========================================================
-         GRID PRINCIPAL (ADMIN + CHAT)
-         ======================================================== -->
+    <!-- ================== GRID PRINCIPAL (ADMIN + CHAT) ================== -->
     <div class="chatGrid" id="mainGrid" style="display:none">
-      <!-- ==================== PANEL ORGANIZADOR ==================== -->
+      <!-- ====== PANEL ADMIN (solo organizador) ====== -->
       <aside id="adminPane" class="card adminPane">
         <div class="sub" style="font-weight:600">Panel del organizador</div>
 
+        <!-- Tabs -->
         <div class="adminTabs">
           <div id="tabRooms" class="tab active">Salas</div>
           <div id="tabUsers" class="tab">Usuarios</div>
         </div>
 
-        <!-- Salas -->
+        <!-- Panel: Salas -->
         <div id="panelRooms" class="tabPanel show">
           <div class="row">
             <div class="field" style="flex:1"><input id="roomInput" placeholder="Sala actual…"/></div>
@@ -288,7 +235,7 @@
           <div id="roomsList" class="list"></div>
         </div>
 
-        <!-- Usuarios -->
+        <!-- Panel: Usuarios -->
         <div id="panelUsers" class="tabPanel">
           <div class="row">
             <div class="field" style="flex:1;max-width:220px"><input id="userNumber" type="number" placeholder="Número (ej. 8)"/></div>
@@ -302,10 +249,11 @@
         </div>
       </aside>
 
-      <!-- ==================== CHAT (scroll interno) ==================== -->
+      <!-- ====== CHAT (con scroll interno en mensajes) ====== -->
       <section id="chatCard" class="card chatCard">
         <div id="messages" class="messages"></div>
 
+        <!-- Composer fijo abajo del contenedor chat -->
         <div class="composer">
           <div class="field"><input id="msgInput" type="text" placeholder="Mensaje…  ·  Privado con @número" autocomplete="off" maxlength="400"></div>
           <button id="sendBtn" class="btn">Enviar</button>
@@ -329,25 +277,16 @@
     </div>
   </div>
 
-  <!-- ================================================================
+  <!-- =========================================================================
        APP SCRIPT (Firebase + lógica)
-       ================================================================= -->
+       =========================================================================-->
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
   import { getDatabase, ref, get, set, update, onValue, off, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
-  /* ------------------------------------------------------------------
-     CONFIGURACIONES DE FIREBASE
-     - Autodetección por hostname:
-       * chat.x-code.es => PRODUCCIÓN
-       * resto => DEV
-     - Mantengo la DEV EXACTA (probada).
-     - La PROD la cargo si estamos en chat.x-code.es.
-       >>> Revisa que las claves PROD aquí sean las correctas. <<<
-     ------------------------------------------------------------------ */
-
-  /* === DEV (confirmada) === */
-  const FB_DEV = {
+  /* ===== Firebase (se mantiene la config que ya funcionaba en DEV). 
+         Si tu PROD usa otra RTDB, aquí iría la config de PROD. ===== */
+  const firebaseConfig = {
     apiKey: "AIzaSyDtA7FlHCN6GaibDINRF6AF2uuLoPbgpK4",
     authDomain: "x-code-chat-dev.firebaseapp.com",
     databaseURL: "https://x-code-chat-dev-default-rtdb.europe-west1.firebasedatabase.app",
@@ -357,45 +296,18 @@
     appId: "1:464335717187:web:e39794c19e000c34dca5f6"
   };
 
-  /* === PROD (AJUSTA AQUÍ SOLO SI HICIERA FALTA) ===
-     Si ya lo teníais bien, NO toques nada. Si ves placeholders,
-     pega aquí las claves reales del proyecto x-code-chat-prod. */
-  const FB_PROD = {
-    /* EJEMPLO:
-    apiKey: "TU_API_KEY",
-    authDomain: "x-code-chat-prod.firebaseapp.com",
-    databaseURL: "https://x-code-chat-prod-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "x-code-chat-prod",
-    storageBucket: "x-code-chat-prod.appspot.com",
-    messagingSenderId: "XXXXXXXXXXXX",
-    appId: "1:XXXXXXXXXXXX:web:YYYYYYYYYYYYYYYY"
-    */
-    ...FB_DEV  // ← Por seguridad, si no has pegado PROD aún, funcionará con DEV.
-  };
-
-  const IS_PROD_HOST = (location.hostname === "chat.x-code.es");
-  const firebaseConfig = IS_PROD_HOST ? FB_PROD : FB_DEV;
-
-  /* ------------------------------------------------------------------
-     CONFIG BÁSICA DE APP
-     ------------------------------------------------------------------ */
+  /* ===== Config app ===== */
   const ENTRY_WHITELIST_PATHS = ["entradas","tickets"]; // whitelist de números válidos
   const DEFAULT_ROOM = "Sala de Prueba";
   const ADMIN_PASS = "131215";
-
-  // Persistencia local
   const LS_LAST_ROOM = "xcode:lastRoom";
   const LS_SESSION   = "xcode:session";
 
-  /* ------------------------------------------------------------------
-     INIT FIREBASE
-     ------------------------------------------------------------------ */
+  /* ===== Init ===== */
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
 
-  /* ------------------------------------------------------------------
-     DOM
-     ------------------------------------------------------------------ */
+  /* ===== DOM ===== */
   const $ = (q)=>document.querySelector(q);
   const roomHdr=$("#roomHdr"), statusDot=$("#statusDot"), meIdHdr=$("#meIdHdr");
   const loginCard=$("#loginCard"), mainGrid=$("#mainGrid"), logoutBtn=$("#logoutBtn");
@@ -404,7 +316,7 @@
   const toastEl=$("#toast");
   const pinBack=$("#pinBack"), pinText=$("#pinText"), pinOk=$("#pinOk");
 
-  /* Admin */
+  /* Admin DOM */
   const adminPane=$("#adminPane");
   const tabRooms=$("#tabRooms"), tabUsers=$("#tabUsers");
   const panelRooms=$("#panelRooms"), panelUsers=$("#panelUsers");
@@ -414,9 +326,7 @@
         btnDeactivateUser=$("#btnDeactivateUser"), btnDeleteUser=$("#btnDeleteUser"),
         usersList=$("#usersList"), countConn=$("#countConn");
 
-  /* ------------------------------------------------------------------
-     HELPERS
-     ------------------------------------------------------------------ */
+  /* ===== Helpers ===== */
   const toast=(t,ms=2400)=>{ toastEl.textContent=t; toastEl.classList.add("show"); clearTimeout(window.__t); window.__t=setTimeout(()=>toastEl.classList.remove("show"),ms); };
   togglePin.onclick=()=> pinInput.type = (pinInput.type==="password" ? "text" : "password");
   const hhmm=(ts)=>new Date(ts||Date.now()).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
@@ -425,12 +335,12 @@
   const roomRef=(room,path)=> ref(db, `rooms/${room}/${path}`);
   const currentRoomRef=(path)=> roomRef(session.room, path);
 
-  // Estado
+  /* Estado y suscripciones */
   let session={ room: DEFAULT_ROOM, num:null, isAdmin:false };
   let detachMsgs=null, detachUsers=null, usersCache={}, usersTimer=null, statusTimer=null;
-  let currentRoomCache = null; // valor remoto "settings/currentRoom"
+  let currentRoomCache = null; // cache de la sala global
 
-  // Persistencia
+  /* ===== Persistencia (localStorage) ===== */
   const saveLastRoom=(name)=>{ try{ localStorage.setItem(LS_LAST_ROOM, name) }catch{} };
   const loadLastRoom=()=>{ try{ return localStorage.getItem(LS_LAST_ROOM) || DEFAULT_ROOM }catch{ return DEFAULT_ROOM } };
   function saveSession(){
@@ -443,9 +353,7 @@
   function clearSession(){ try{ localStorage.removeItem(LS_SESSION) }catch{} }
   function loadSession(){ try{ const s=localStorage.getItem(LS_SESSION); return s?JSON.parse(s):null }catch{ return null } }
 
-  /* ------------------------------------------------------------------
-     SALA GLOBAL (settings/currentRoom)
-     ------------------------------------------------------------------ */
+  /* ===== Sala global (settings/currentRoom) ===== */
   async function getCurrentRoomOnce(){
     const snap = await get(ref(db,'settings/currentRoom'));
     return snap.exists() ? (snap.val()||DEFAULT_ROOM) : DEFAULT_ROOM;
@@ -455,7 +363,7 @@
     onValue(r,(snap)=>{
       const room = snap.exists() ? (snap.val()||DEFAULT_ROOM) : DEFAULT_ROOM;
       currentRoomCache = room;
-      // Usuarios normales obedecen la sala global (admin puede estar cambiando)
+      // Solo usuarios normales obedecen el valor global (admin puede estar cambiando)
       if(!session.isAdmin && session.num!==0){
         session.room = room;
         roomHdr.textContent = room;
@@ -469,9 +377,7 @@
     catch{}
   }
 
-  /* ------------------------------------------------------------------
-     TABS ADMIN
-     ------------------------------------------------------------------ */
+  /* ===== Tabs admin ===== */
   function setActiveTab(which){
     tabRooms.classList.remove("active"); tabUsers.classList.remove("active");
     panelRooms.classList.remove("show"); panelUsers.classList.remove("show");
@@ -481,9 +387,7 @@
   tabRooms.onclick=()=>setActiveTab("rooms");
   tabUsers.onclick=()=>setActiveTab("users");
 
-  /* ------------------------------------------------------------------
-     WHITELIST DE ENTRADAS
-     ------------------------------------------------------------------ */
+  /* ===== Whitelist ===== */
   async function isEntryAllowed(n){
     for(const base of ENTRY_WHITELIST_PATHS){
       const s=await get(ref(db, `${base}/${n}`));
@@ -495,9 +399,7 @@
     return false;
   }
 
-  /* ------------------------------------------------------------------
-     COMPAT: users/{n}/{n} -> users/{n}
-     ------------------------------------------------------------------ */
+  /* Normaliza users/{n}/{n} -> users/{n} (por compatibilidad) */
   async function normalizeUserNode(room,n){
     const base = `rooms/${room}/users/${n}`;
     const uRef = ref(db, base);
@@ -516,9 +418,7 @@
     return uSnap.exists()? uSnap.val() : null;
   }
 
-  /* ------------------------------------------------------------------
-     LOGIN
-     ------------------------------------------------------------------ */
+  /* ===== LOGIN ===== */
   async function doLogin(){
     const nStr=(numInput.value||"").trim();
     if(!/^\d+$/.test(nStr)){ toast("Introduce tu número"); return; }
@@ -526,7 +426,7 @@
 
     loginBtn.disabled=true;
 
-    // Reflejamos sala global si existe
+    // Antes de autenticar, cargamos última sala global y la reflejamos
     try{
       const globalRoom = currentRoomCache || await getCurrentRoomOnce();
       session.room = globalRoom || loadLastRoom() || DEFAULT_ROOM;
@@ -570,17 +470,16 @@
   numInput.onkeydown=(e)=>{ if(e.key==="Enter") doLogin(); };
   pinInput.onkeydown=(e)=>{ if(e.key==="Enter") doLogin(); };
 
-  /* ------------------------------------------------------------------
-     ENTRAR A LA APP
-     ------------------------------------------------------------------ */
+  /* ===== ENTER APP ===== */
   function enterChat(isAdmin){
+    // Cambios de UI
     loginCard.style.display="none";
-    mainGrid.style.display="flex";
+    mainGrid.style.display="flex";    // muestra grid (admin + chat)
     logoutBtn.style.display="inline-flex";
     meIdSpan.textContent=session.num;
     meIdHdr.textContent = session.num ?? '—';
 
-    // Sala visible
+    // Persistimos/mostramos sala
     roomHdr.textContent=session.room; roomInput.value=session.room; saveLastRoom(session.room);
 
     // Panel admin
@@ -598,13 +497,11 @@
     // Mensajes
     attachMessages();
 
-    // Autoscroll + foco
+    // Auto-scroll al final y foco en input
     setTimeout(()=>{ msgInput?.focus(); messages.scrollTop = messages.scrollHeight; }, 30);
   }
 
-  /* ------------------------------------------------------------------
-     LOGOUT
-     ------------------------------------------------------------------ */
+  /* ===== LOGOUT ===== */
   async function doLogout(){
     try{ if(session.num>0){ await update(currentRoomRef(`users/${session.num}`), { connected:false, updated:Date.now() }); } }catch{}
 
@@ -613,22 +510,25 @@
     if(usersTimer){ clearInterval(usersTimer); usersTimer=null; }
     if(statusTimer){ clearInterval(statusTimer); statusTimer=null; }
 
-    clearSession(); // conservamos LS_LAST_ROOM
+    clearSession(); // mantenemos la última sala en LS_LAST_ROOM
 
     mainGrid.style.display="none"; logoutBtn.style.display="none"; adminPane.style.display="none";
     loginCard.style.display="flex";
     messages.innerHTML=""; msgInput.value="";
     session={ room: currentRoomCache || loadLastRoom() || DEFAULT_ROOM, num:null, isAdmin:false };
+
+    // Reflejar sala al volver a login
     roomHdr.textContent=session.room; roomInput.value=session.room; meIdHdr.textContent='—';
   }
   logoutBtn.onclick=doLogout;
 
-  /* ------------------------------------------------------------------
-     CHAT
-     ------------------------------------------------------------------ */
+  /* ===== CHAT ===== */
   function renderMsg(m){
-    if(m.sys && session.num!==0) return; // sys solo admin
-    if(m.to && !(m.to===session.num || m.from===session.num || session.num===0)) return; // privados
+    // Oculta mensajes sys para usuarios normales
+    if(m.sys && session.num!==0) return;
+    // Mensajes privados: visibles solo para remitente, destinatario o admin
+    if(m.to && !(m.to===session.num || m.from===session.num || session.num===0)) return;
+
     const div=document.createElement("div");
     div.className="msg"+(m.from===session.num?" me":"")+(m.sys?" sys":"");
     div.innerHTML=`<div class="by">${m.from===0?"Organizador":"Usuario #"+m.from}${m.to? " → #"+m.to:""}</div>
@@ -645,6 +545,7 @@
       const val=snap.val()||{};
       const arr=Object.values(val).sort((a,b)=>(a.ts||0)-(b.ts||0));
       arr.forEach(renderMsg);
+      // Auto-scroll al final SOLO del contenedor de mensajes
       messages.scrollTop = messages.scrollHeight;
     };
     onValue(r, handler);
@@ -664,9 +565,7 @@
   sendBtn.onclick = sendMessage;
   msgInput.onkeydown = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); sendMessage(); } };
 
-  /* ------------------------------------------------------------------
-     INDICADOR ESTADO (solo admin)
-     ------------------------------------------------------------------ */
+  /* ===== Indicador de estado (solo admin) ===== */
   async function pingStatusOnce(){
     if(session.num!==0) return;
     const id="PING_"+Date.now()+"_"+Math.random().toString(36).slice(2,5);
@@ -689,9 +588,7 @@
     setTimeout(()=>{ if(!done){ off(r,"value",handler); statusDot.className="dot red"; remove(currentRoomRef(`messages/${id}`)).catch(()=>{}); } }, 2800);
   }
 
-  /* ------------------------------------------------------------------
-     GESTOR DE SALAS
-     ------------------------------------------------------------------ */
+  /* ===== Gestor de salas ===== */
   const roomMetaRef=(n)=>ref(db,`roomsMeta/${n}`);
   const roomIndexRef=(n)=>ref(db,`rooms_index/${n}`);
 
@@ -721,6 +618,7 @@
         if(session.room===name){
           session.room=newName; roomHdr.textContent=newName; roomInput.value=newName; saveLastRoom(newName);
           attachMessages(); loadUsersRealtime(); saveSession();
+          // si el que renombra es admin y esa es la sala actual, actualizar global
           if(session.isAdmin || session.num===0) { await setGlobalRoom(newName); }
         }
         toast("Sala renombrada"); reloadRooms();
@@ -747,6 +645,7 @@
     session.room=newRoom; roomHdr.textContent=newRoom; saveLastRoom(newRoom); saveSession();
     attachMessages(); if(session.num===0) loadUsersRealtime();
     toast(`Sala cambiada a "${newRoom}"`);
+    // Solo organizador actualiza la sala global
     if(session.isAdmin || session.num===0){ await setGlobalRoom(newRoom); }
   };
   btnCreateRoom.onclick=async()=>{
@@ -758,9 +657,7 @@
   };
   btnReloadRooms.onclick=reloadRooms;
 
-  /* ------------------------------------------------------------------
-     GESTOR DE USUARIOS
-     ------------------------------------------------------------------ */
+  /* ===== Gestor de usuarios ===== */
   function updateUsersAgo(){
     [...usersList.querySelectorAll("[data-uid]")].forEach(el=>{
       const uid=el.getAttribute("data-uid"); const u=usersCache[uid]; if(!u) return;
@@ -813,12 +710,12 @@
   };
   btnActivateUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await setEntryState(n,true); };
   btnDeactivateUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await setEntryState(n,false); };
-  btnDeleteUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n && n!==0) return toast("Número inválido"); await deleteUser(n); };
+  btnDeleteUser.onclick=async()=>{ const n=Number((userNumber.value||"").trim()); if(!n y n!==0) return toast("Número inválido"); await deleteUser(n); };
 
-  /* ------------------------------------------------------------------
-     RESTAURAR SESIÓN + ESCUCHAR SALA GLOBAL
-     ------------------------------------------------------------------ */
+  /* ===== Restaurar sesión y escuchar sala global ===== */
+  // Reflejar la sala global en el header incluso antes de login
   listenGlobalRoom();
+
   (async function initHeaderRoom(){
     try{
       const lastRemote = await getCurrentRoomOnce();
@@ -834,11 +731,12 @@
   async function tryRestoreSession(){
     const s=loadSession(); if(!s) return;
     try{
+      // La sala predeterminada para todos es la global si existe
       const remoteRoom = currentRoomCache || await getCurrentRoomOnce();
       session.room = remoteRoom || s.room || loadLastRoom() || DEFAULT_ROOM;
       roomHdr.textContent=session.room; roomInput.value=session.room;
 
-      if(s.isAdmin && String(s.num)==="0"){
+      if(s.isAdmin y String(s.num)==="0"){
         session.num=0; session.isAdmin=true; meIdHdr.textContent='0'; enterChat(true); return;
       }
       if(!await isEntryAllowed(s.num)) return clearSession();
@@ -851,34 +749,32 @@
   }
   tryRestoreSession();
 
-  /* ------------------------------------------------------------------
-     PARCHE TECLADO MÓVIL (iOS/Android)
-     - El viewport queda fijo; solo .messages scrollea.
-     - Ajustamos “gap” inferior visual cuando el teclado aparece,
-       sin crear espacios blancos.
-     ------------------------------------------------------------------ */
-  (function mobileKeyboardFix(){
-    const root = document.documentElement;
-    let lastH = window.innerHeight;
+  /* =========================================================================
+     FIX TECLADO MÓVIL: evita hueco bajo el chat y mantener composer visible
+     =========================================================================*/
+  function applyKeyboardSafePadding(){
+    const cc = document.querySelector('.composer');
+    const msgs = document.getElementById('messages');
+    if(!cc || !msgs) return;
 
-    function onResize(){
-      // Si la altura disminuye notablemente, asumimos teclado abierto
-      const h = window.innerHeight;
-      const delta = lastH - h;
-      lastH = h;
-
-      // Ajuste visual opcional (no mueve el layout global)
-      const kb = (delta > 50) ? `${delta}px` : "0px";
-      root.style.setProperty('--kb', kb);
-
-      // Empujar scroll al final cuando teclado aparece
-      try{ messages.scrollTop = messages.scrollHeight; }catch{}
+    let keyboardGap = 0;
+    if(window.visualViewport){
+      const vv = window.visualViewport;
+      keyboardGap = Math.max(0, (window.innerHeight - vv.height - vv.offsetTop));
     }
+    // padding bajo mensajes para que el último no quede oculto
+    msgs.style.paddingBottom = (12 + cc.offsetHeight + keyboardGap) + 'px';
+    // mantener el composer visible (no fixed; ajustamos margen inferior del contenedor)
+    cc.style.marginBottom = keyboardGap + 'px';
+  }
 
-    // iOS scroll “estático”: prevenir rebotes
-    window.addEventListener('resize', onResize);
-    window.addEventListener('orientationchange', onResize);
-  })();
+  if(window.visualViewport){
+    visualViewport.addEventListener('resize', applyKeyboardSafePadding);
+    visualViewport.addEventListener('scroll', applyKeyboardSafePadding);
+  }
+  window.addEventListener('orientationchange', ()=> setTimeout(applyKeyboardSafePadding, 300));
+  window.addEventListener('focusin', applyKeyboardSafePadding);
+  window.addEventListener('load', ()=> setTimeout(applyKeyboardSafePadding, 120));
   </script>
 </body>
 </html>
